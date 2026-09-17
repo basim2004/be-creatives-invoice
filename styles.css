@@ -2615,3 +2615,434 @@ a {
   line-height: 1.4;
   word-break: break-word;
 }
+
+.btn-create-inv-tx {
+  transition: all 0.2s ease;
+}
+
+.btn-create-inv-tx:hover {
+  background: var(--brand-maroon, #641A1D) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-maroon, #641A1D) !important;
+}
+/* ==========================================================================
+   AGENCY DASHBOARD & MULTI-VIEW STYLES
+   ========================================================================== */
+
+/* 8-Metric Master Financial Grid */
+.dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Monthly Client Collection Module */
+.client-collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.client-collection-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.client-collection-item:hover {
+  background: #ffffff;
+  border-color: var(--slate-300);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.collection-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 2;
+}
+
+.collection-rank-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: var(--slate-200);
+  color: var(--slate-700);
+  flex-shrink: 0;
+}
+
+.collection-rank-badge.rank-1 {
+  background: linear-gradient(135deg, #fef3c7, #f59e0b);
+  color: #78350f;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+}
+
+.collection-rank-badge.rank-2 {
+  background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+  color: #334155;
+}
+
+.collection-rank-badge.rank-3 {
+  background: linear-gradient(135deg, #ffedd5, #ea580c);
+  color: #7c2d12;
+}
+
+.collection-client-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--slate-900);
+  cursor: pointer;
+}
+
+.collection-client-name:hover {
+  color: var(--brand-maroon);
+}
+
+.collection-client-meta {
+  font-size: 0.78rem;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+
+.collection-item-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: right;
+  z-index: 2;
+}
+
+.collection-amount {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #059669;
+  font-family: var(--font-brand);
+}
+
+.collection-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(16, 185, 129, 0.08);
+  z-index: 1;
+  pointer-events: none;
+  transition: width 0.4s ease;
+}
+
+/* Dashboard Hub Action Cards */
+.hub-action-card {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.hub-action-card:hover {
+  border-color: var(--brand-maroon);
+  box-shadow: 0 8px 24px rgba(86, 19, 24, 0.1);
+  transform: translateY(-2px);
+}
+
+.hub-card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.hub-card-content {
+  flex: 1;
+}
+
+.hub-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--slate-900);
+}
+
+.hub-card-desc {
+  font-size: 0.8rem;
+  color: var(--slate-500);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.hub-card-arrow {
+  color: var(--slate-400);
+  font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+
+.hub-action-card:hover .hub-card-arrow {
+  color: var(--brand-maroon);
+  transform: translateX(4px);
+}
+
+/* Clients Grid & Profile Cards */
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.client-profile-card {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.client-profile-card:hover {
+  border-color: var(--slate-300);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.client-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.client-avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--brand-maroon), #7a1c23);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(86, 19, 24, 0.25);
+}
+
+.client-card-header-info {
+  flex: 1;
+}
+
+.client-name-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  line-height: 1.25;
+}
+
+.client-contact-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.client-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.74rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-weight: 600;
+}
+
+.client-contact-pill.whatsapp {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.client-financial-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--slate-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-100);
+}
+
+.client-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.client-stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--slate-500);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.client-stat-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-family: var(--font-brand);
+  color: var(--slate-900);
+  margin-top: 2px;
+}
+
+.client-stat-val.credit {
+  color: #059669;
+}
+
+.client-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  border-top: 1px solid var(--slate-100);
+}
+
+/* Expense Type Badges */
+.badge-expense-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.badge-expense-type.business {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-expense-type.personal {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+/* Monthly Reports View */
+.monthly-reports-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.monthly-report-card {
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.monthly-report-header {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.monthly-report-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.monthly-report-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--slate-200);
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.monthly-report-metric-box {
+  background: #ffffff;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.monthly-report-metric-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--slate-500);
+  letter-spacing: 0.5px;
+}
+
+.monthly-report-metric-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: var(--font-brand);
+  margin-top: 4px;
+}
+
+.monthly-collection-table-wrap {
+  padding: 18px 22px;
+  background: var(--slate-50);
+}
+
+/* WhatsApp Share Button Accent */
+.btn-whatsapp {
+  background: #25D366 !important;
+  color: #ffffff !important;
+  border: 1px solid #22c55e !important;
+}
+
+.btn-whatsapp:hover {
+  background: #1eb855 !important;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35) !important;
+}

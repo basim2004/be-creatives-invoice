@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Master Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2026091705">
+  <link rel="stylesheet" href="style.css?v=2026091706">
   
   <script>
     // Automatic Self-Healing: If stylesheet fails to load due to stale browser cache, force clear and reload
@@ -47,7 +47,7 @@
   </script>
   
   <!-- Standalone Libraries & Data -->
-  <script src="assets/khatabook-data.js"></script>
+  <script src="assets/historical-ledger-data.js"></script>
   <script src="assets/qrcode.js"></script>
   <script src="assets/html2canvas.min.js"></script>
   <script src="assets/jspdf.umd.min.js"></script>
@@ -86,12 +86,24 @@
         </button>
 
         <button type="button" class="nav-btn active" id="navDashboardBtn">
-          <i class="fa-solid fa-table-columns"></i>
+          <i class="fa-solid fa-chart-pie"></i>
           <span>Dashboard</span>
         </button>
-        <button type="button" class="nav-btn" id="navFinanceBtn">
-          <i class="fa-solid fa-wallet"></i>
-          <span>Finance</span>
+        <button type="button" class="nav-btn" id="navInvoicesBtn">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Invoices</span>
+        </button>
+        <button type="button" class="nav-btn" id="navClientsBtn">
+          <i class="fa-solid fa-users"></i>
+          <span>Clients</span>
+        </button>
+        <button type="button" class="nav-btn" id="navExpensesBtn">
+          <i class="fa-solid fa-receipt"></i>
+          <span>Expenses</span>
+        </button>
+        <button type="button" class="nav-btn" id="navReportsBtn">
+          <i class="fa-solid fa-chart-column"></i>
+          <span>Monthly Reports</span>
         </button>
         <button type="button" class="nav-btn primary-btn" id="navNewInvoiceBtn">
           <i class="fa-solid fa-plus"></i>
@@ -113,8 +125,11 @@
               <i class="fa-solid fa-cloud-arrow-up"></i> Import JSON Backup
               <input type="file" id="importBackupInput" accept=".json" style="display:none;">
             </label>
+            <button type="button" class="dropdown-item" id="btnRestoreHistoricalData" title="Restore all 488 historical records">
+              <i class="fa-solid fa-book-bookmark"></i> Restore Historical Ledger (488 Records)
+            </button>
             <button type="button" class="dropdown-item danger" id="resetSampleDataBtn">
-              <i class="fa-solid fa-rotate-left"></i> Reset to Reference (BC-78)
+              <i class="fa-solid fa-rotate-left"></i> Reset to Reference (BC-489)
             </button>
           </div>
         </div>
@@ -125,62 +140,250 @@
   <!-- Application Body -->
   <main class="app-main">
 
-    <!-- VIEW 1: INVOICE DASHBOARD -->
+    <!-- VIEW 1: FINANCIAL OVERVIEW DASHBOARD -->
     <section id="viewDashboard" class="view-section active no-print">
       <div class="dashboard-hero">
         <div class="hero-content">
           <div class="hero-tag">
             <span class="pulse-dot"></span>
-            <span>Agency Billing Hub</span>
+            <span>BE CREATIVES Financial Command Center</span>
           </div>
-          <h1 class="hero-title">INVOICE MANAGEMENT</h1>
-          <p class="hero-description">Manage, create, duplicate, and export client-ready invoices matching the exact BE CREATIVES master design reference.</p>
+          <h1 class="hero-title">FINANCIAL OVERVIEW</h1>
+          <p class="hero-description">Executive financial intelligence, real-time cash flow, client collections, and net balance from 2025 to present.</p>
         </div>
         <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-secondary" id="btnDashboardGoFinance" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
-            <i class="fa-solid fa-wallet"></i>
-            <span>Cashbook & Finance</span>
+          <button type="button" class="btn btn-hero-cta" id="btnDashHeroNewInvoice">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ New Invoice</span>
           </button>
-          <button type="button" class="btn btn-hero-cta" id="btnDashboardNewInvoice">
+          <button type="button" class="btn btn-secondary" id="btnDashHeroAddClient" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>+ Add Client</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnDashHeroAddExpense" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
+            <i class="fa-solid fa-receipt"></i>
+            <span>+ Add Expense</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnDashHeroReports" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
+            <i class="fa-solid fa-chart-column"></i>
+            <span>Monthly Reports</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Financial Overview Master KPI Grid (8 Key Metrics) -->
+      <div class="dashboard-metrics-grid">
+        <!-- 1. Overall Total (2025 to present) -->
+        <div class="metric-card">
+          <div class="metric-icon blue"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Overall Total</span>
+            <span class="metric-value" id="dashOverallTotal">₹3,05,179</span>
+            <span class="metric-sub">Total financial volume (2025 – Present)</span>
+          </div>
+        </div>
+
+        <!-- 2. Total Income / വരവ് -->
+        <div class="metric-card">
+          <div class="metric-icon emerald"><i class="fa-solid fa-arrow-down-left"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Income / വരവ്</span>
+            <span class="metric-value" id="dashTotalIncome" style="color: #059669;">₹1,89,244</span>
+            <span class="metric-sub" id="dashTotalIncomeSub">Total money received</span>
+          </div>
+        </div>
+
+        <!-- 3. Total Expense / ചെലവ് -->
+        <div class="metric-card">
+          <div class="metric-icon amber" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-arrow-up-right"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Expense / ചെലവ്</span>
+            <span class="metric-value" id="dashTotalExpense" style="color: #dc2626;">₹1,15,935</span>
+            <span class="metric-sub" id="dashTotalExpenseSub">Total business & personal outflow</span>
+          </div>
+        </div>
+
+        <!-- 4. Net Balance -->
+        <div class="metric-card" style="border-left: 4px solid var(--brand-maroon);">
+          <div class="metric-icon maroon"><i class="fa-solid fa-vault"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Net Balance</span>
+            <span class="metric-value" id="dashNetBalance" style="color: var(--brand-maroon);">₹73,309 Cr</span>
+            <span class="metric-sub" id="dashNetBalanceSub">Income minus expenses</span>
+          </div>
+        </div>
+
+        <!-- 5. Total Unique Clients -->
+        <div class="metric-card">
+          <div class="metric-icon blue" style="background: #eff6ff; color: #2563eb;"><i class="fa-solid fa-users"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Clients</span>
+            <span class="metric-value" id="dashTotalClients">77</span>
+            <span class="metric-sub">Unique verified client accounts</span>
+          </div>
+        </div>
+
+        <!-- 6. Personal Expense -->
+        <div class="metric-card">
+          <div class="metric-icon" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-user-tag"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Personal Expense</span>
+            <span class="metric-value" id="dashPersonalExpense" style="color: #ea580c;">₹84,342</span>
+            <span class="metric-sub">Separately tracked personal drawings</span>
+          </div>
+        </div>
+
+        <!-- 7. Current Month Summary -->
+        <div class="metric-card">
+          <div class="metric-icon emerald" style="background: #ecfdf5; color: #059669;"><i class="fa-solid fa-calendar-check"></i></div>
+          <div class="metric-details">
+            <span class="metric-label" id="dashCurrentMonthLabel">Current Month (Sep 2026)</span>
+            <span class="metric-value" id="dashCurrentMonthIncome">₹600</span>
+            <span class="metric-sub" id="dashCurrentMonthMeta">Exp: ₹17,707 | Net: -₹17,107 Dr</span>
+          </div>
+        </div>
+
+        <!-- 8. Current Year Summary -->
+        <div class="metric-card">
+          <div class="metric-icon maroon" style="background: var(--brand-maroon-subtle); color: var(--brand-maroon);"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="metric-details">
+            <span class="metric-label" id="dashCurrentYearLabel">Current Year (2026)</span>
+            <span class="metric-value" id="dashCurrentYearIncome">₹1,13,638</span>
+            <span class="metric-sub" id="dashCurrentYearMeta">Exp: ₹74,383 | Net: ₹39,255 Cr</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD: MONTHLY CLIENT COLLECTION WIDGET -->
+      <div class="dashboard-card" style="margin-top: 24px;">
+        <div class="dashboard-card-header" style="flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 class="card-title"><i class="fa-solid fa-trophy" style="color:#f59e0b; margin-right:6px;"></i> Monthly Client Collection</h2>
+              <span class="badge-neutral" id="dashCollectionCountBadge">Clients</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--slate-500); margin-top: 4px;">Shows which clients paid/received the highest amount during the selected month.</p>
+          </div>
+
+          <!-- Month Selector -->
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label for="dashCollectionMonthSelect" style="font-size:0.86rem; font-weight:700; color:var(--slate-700);">MONTH:</label>
+            <select id="dashCollectionMonthSelect" class="form-select" style="padding: 8px 14px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-weight: 700; color: var(--slate-800); background: #fff; cursor: pointer; min-width: 180px;">
+              <!-- Dynamically populated from latest 2026 to earliest 2025 -->
+            </select>
+          </div>
+        </div>
+
+        <div id="dashClientCollectionList" class="client-collection-list">
+          <!-- Dynamically populated ranked client collection items -->
+        </div>
+      </div>
+
+      <!-- Quick Navigation Hub -->
+      <div class="dashboard-hub-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 24px;">
+        <div class="hub-action-card" id="cardGoInvoices" role="button" tabindex="0">
+          <div class="hub-card-icon" style="background: var(--brand-maroon-subtle); color: var(--brand-maroon);">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <div class="hub-card-content">
+            <h3 class="hub-card-title">Invoices Directory</h3>
+            <p class="hub-card-desc">All official invoices (BC-489 to BC-01) sorted latest to oldest with PDF and WhatsApp.</p>
+          </div>
+          <i class="fa-solid fa-arrow-right hub-card-arrow"></i>
+        </div>
+
+        <div class="hub-action-card" id="cardGoClients" role="button" tabindex="0">
+          <div class="hub-card-icon" style="background: #eff6ff; color: #2563eb;">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="hub-card-content">
+            <h3 class="hub-card-title">Client Database &amp; Ledgers</h3>
+            <p class="hub-card-desc">Manage profiles, contact details, and complete statements for all 77+ clients.</p>
+          </div>
+          <i class="fa-solid fa-arrow-right hub-card-arrow"></i>
+        </div>
+
+        <div class="hub-action-card" id="cardGoExpenses" role="button" tabindex="0">
+          <div class="hub-card-icon" style="background: #fef2f2; color: #dc2626;">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div class="hub-card-content">
+            <h3 class="hub-card-title">Expenses Manager</h3>
+            <p class="hub-card-desc">Business vs personal expense separation, categories, and real-time ledger.</p>
+          </div>
+          <i class="fa-solid fa-arrow-right hub-card-arrow"></i>
+        </div>
+
+        <div class="hub-action-card" id="cardGoReports" role="button" tabindex="0">
+          <div class="hub-card-icon" style="background: #ecfdf5; color: #059669;">
+            <i class="fa-solid fa-chart-column"></i>
+          </div>
+          <div class="hub-card-content">
+            <h3 class="hub-card-title">Monthly Reports</h3>
+            <p class="hub-card-desc">Month-by-month financial statements from 2026 down to 2025 with client breakdowns.</p>
+          </div>
+          <i class="fa-solid fa-arrow-right hub-card-arrow"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: SEPARATE INVOICES PAGE (SORTED LATEST -> OLDEST) -->
+    <section id="viewInvoices" class="view-section no-print">
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="pulse-dot"></span>
+            <span>BE CREATIVES Billing &amp; Invoices</span>
+          </div>
+          <h1 class="hero-title">INVOICE MANAGEMENT</h1>
+          <p class="hero-description">Manage, create, duplicate, and export client-ready invoices matching the approved BE CREATIVES master design.</p>
+        </div>
+        <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" id="btnExportInvoicesCsv" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);" title="Export invoices list to CSV">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Export CSV</span>
+          </button>
+          <button type="button" class="btn btn-hero-cta" id="btnInvoicesNew">
             <i class="fa-solid fa-plus"></i>
             <span>+ NEW INVOICE</span>
           </button>
         </div>
       </div>
 
-      <!-- Quick Metrics Strip -->
+      <!-- Quick Invoices Metrics Strip -->
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-icon maroon"><i class="fa-solid fa-file-invoice"></i></div>
           <div class="metric-details">
             <span class="metric-label">Total Invoices</span>
-            <span class="metric-value" id="metricTotalInvoices">1</span>
+            <span class="metric-value" id="invMetricTotal">489</span>
+            <span class="metric-sub">BC-489 to BC-01</span>
           </div>
         </div>
 
         <div class="metric-card">
           <div class="metric-icon emerald"><i class="fa-solid fa-circle-check"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Paid Revenue</span>
-            <span class="metric-value" id="metricPaidRevenue">₹3,500</span>
-            <span class="metric-sub" id="metricPaidCount">1 invoice paid</span>
+            <span class="metric-label">Paid Invoices</span>
+            <span class="metric-value" id="invMetricPaid">₹1,89,244</span>
+            <span class="metric-sub" id="invMetricPaidCount">208 paid</span>
           </div>
         </div>
 
         <div class="metric-card">
           <div class="metric-icon amber"><i class="fa-solid fa-clock"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Pending Receivables</span>
-            <span class="metric-value" id="metricPendingRevenue">₹0</span>
-            <span class="metric-sub" id="metricPendingCount">0 pending</span>
+            <span class="metric-label">Pending Invoices</span>
+            <span class="metric-value" id="invMetricPending">₹3,500</span>
+            <span class="metric-sub" id="invMetricPendingCount">1 pending</span>
           </div>
         </div>
 
         <div class="metric-card">
-          <div class="metric-icon blue"><i class="fa-solid fa-chart-pie"></i></div>
+          <div class="metric-icon blue"><i class="fa-solid fa-money-bill-wave"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Overall Total</span>
-            <span class="metric-value" id="metricOverallTotal">₹3,500</span>
+            <span class="metric-label">Total Invoiced Volume</span>
+            <span class="metric-value" id="invMetricVolume">₹1,92,744</span>
             <span class="metric-sub">Across all clients</span>
           </div>
         </div>
@@ -190,22 +393,39 @@
       <div class="dashboard-card">
         <div class="dashboard-card-header">
           <div class="header-title-group" style="display:flex; align-items:center; gap:10px;">
-            <h2 class="card-title">Saved Invoices</h2>
-            <span class="badge-neutral" id="invoicesCountBadge">1 records</span>
+            <h2 class="card-title">All Invoices</h2>
+            <span class="badge-neutral" id="invoicesCountBadge">489 records</span>
           </div>
 
-          <div class="filter-controls-group">
+          <div class="filter-controls-group" style="flex-wrap: wrap; gap: 8px;">
             <!-- Search Invoices -->
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="invoiceSearchInput" placeholder="Search invoices by number or client..." autocomplete="off">
+              <input type="text" id="invoiceSearchInput" placeholder="Search by number, client, details..." autocomplete="off">
               <button type="button" class="search-clear-btn" id="searchClearBtn" style="display:none;">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
 
+            <!-- Client filter -->
+            <select id="invoiceClientFilterSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff; max-width: 180px;">
+              <option value="ALL">All Clients</option>
+            </select>
+
+            <!-- Month filter -->
+            <select id="invoiceMonthFilterSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff;">
+              <option value="ALL">All Months</option>
+            </select>
+
+            <!-- Year filter -->
+            <select id="invoiceYearFilterSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff;">
+              <option value="ALL">All Years</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+
             <!-- Status Filters -->
-            <div class="status-filter-pills" role="tablist">
+            <div class="status-filter-pills" id="invoiceStatusPills" role="tablist">
               <button type="button" class="filter-pill active" data-filter="ALL">All</button>
               <button type="button" class="filter-pill" data-filter="PAID">Paid</button>
               <button type="button" class="filter-pill" data-filter="PENDING">Pending</button>
@@ -217,20 +437,21 @@
           <table class="data-table" id="invoicesTable">
             <thead>
               <tr>
-                <th style="width: 130px;">Invoice No</th>
-                <th>Client</th>
-                <th style="width: 130px;">Date</th>
-                <th style="width: 140px; text-align: right;">Amount</th>
-                <th style="width: 130px; text-align: center;">Status</th>
-                <th style="width: 240px; text-align: right;">Actions</th>
+                <th style="width: 120px;">INVOICE NO</th>
+                <th style="min-width: 200px;">CLIENT</th>
+                <th style="min-width: 220px;">DETAILS / SERVICE</th>
+                <th style="width: 120px;">DATE</th>
+                <th style="width: 130px; text-align: right;">AMOUNT</th>
+                <th style="width: 110px; text-align: center;">STATUS</th>
+                <th style="width: 220px; text-align: center;">ACTIONS</th>
               </tr>
             </thead>
             <tbody id="invoicesTableBody">
-              <!-- Dynamically populated rows -->
+              <!-- Dynamically populated rows sorted LATEST -> OLDEST (BC-489 to BC-01) -->
             </tbody>
           </table>
 
-          <!-- Mobile Invoices Card List (Shown on Mobile Viewports) -->
+          <!-- Mobile Invoices Card List -->
           <div class="mobile-invoices-cards" id="mobileInvoicesCards">
             <!-- Dynamically populated cards on mobile -->
           </div>
@@ -243,156 +464,340 @@
             <p class="empty-text">No invoices match your current search or filter.</p>
             <button type="button" class="btn btn-primary" id="btnEmptyCreateInvoice">
               <i class="fa-solid fa-plus"></i>
-              <span>+ Create First Invoice</span>
+              <span>+ Create New Invoice</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Invoices Pagination -->
+        <div class="finance-pagination-bar" id="invoicesPaginationBar">
+          <div class="pagination-info" id="invoicesPaginationInfo">
+            Showing 1–25 of 489 invoices
+          </div>
+          <div class="pagination-controls">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnInvPrev" disabled>
+              <i class="fa-solid fa-chevron-left"></i> Prev
+            </button>
+            <span class="pagination-page-indicator" id="invoicesPageIndicator">Page 1 of 20</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnInvNext">
+              Next <i class="fa-solid fa-chevron-right"></i>
             </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- VIEW 3: CASHBOOK & FINANCE MANAGER (KHATABOOK HISTORICAL & REAL-TIME) -->
-    <section id="viewFinance" class="view-section no-print">
-      <div class="dashboard-hero finance-hero">
+    <!-- VIEW 3: SEPARATE CLIENT DATABASE PAGE -->
+    <section id="viewClients" class="view-section no-print">
+      <div class="dashboard-hero">
         <div class="hero-content">
           <div class="hero-tag">
             <span class="pulse-dot"></span>
-            <span>Khatabook & Cash Flow Ledger</span>
+            <span>BE CREATIVES Client Relationship Hub</span>
           </div>
-          <h1 class="hero-title">FINANCE & CASHBOOK</h1>
-          <p class="hero-description">Historical Khatabook records (11 May 2025 – 16 Sep 2026) and real-time cash flow management with zero data loss.</p>
+          <h1 class="hero-title">CLIENT DATABASE</h1>
+          <p class="hero-description">Manage client profiles, WhatsApp contacts, individual ledgers, and complete invoice histories for all agency clients.</p>
         </div>
         <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-secondary" id="btnExportFinanceCsv" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);" title="Export all filtered transactions to CSV">
-            <i class="fa-solid fa-file-arrow-down"></i>
-            <span>Export CSV</span>
-          </button>
-          <button type="button" class="btn btn-hero-cta" id="btnOpenAddTransaction">
-            <i class="fa-solid fa-plus"></i>
-            <span>+ Add Transaction</span>
+          <button type="button" class="btn btn-hero-cta" id="btnOpenAddClientModal">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>+ ADD CLIENT</span>
           </button>
         </div>
       </div>
 
-      <!-- Quick Metrics Strip -->
+      <!-- Clients Metrics Strip -->
       <div class="metrics-grid">
         <div class="metric-card">
-          <div class="metric-icon emerald"><i class="fa-solid fa-arrow-down-left"></i></div>
+          <div class="metric-icon blue"><i class="fa-solid fa-users"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Total Inflow (Credit)</span>
-            <span class="metric-value" id="financeMetricCredit">₹1,89,244.00</span>
-            <span class="metric-sub" id="financeMetricCreditCount">Money Received</span>
+            <span class="metric-label">Total Clients</span>
+            <span class="metric-value" id="clientsMetricTotal">77</span>
+            <span class="metric-sub">Registered client accounts</span>
           </div>
         </div>
 
         <div class="metric-card">
-          <div class="metric-icon amber" style="background:#fef2f2; color:#dc2626;"><i class="fa-solid fa-arrow-up-right"></i></div>
+          <div class="metric-icon emerald"><i class="fa-solid fa-hand-holding-dollar"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Total Outflow (Debit)</span>
-            <span class="metric-value" id="financeMetricDebit">₹1,15,935.00</span>
-            <span class="metric-sub" id="financeMetricDebitCount">Money Given / Spent</span>
-          </div>
-        </div>
-
-        <div class="metric-card" style="border-left: 4px solid var(--brand-maroon);">
-          <div class="metric-icon maroon"><i class="fa-solid fa-scale-balanced"></i></div>
-          <div class="metric-details">
-            <span class="metric-label">Net Balance</span>
-            <span class="metric-value" id="financeMetricBalance">₹73,309.00 Cr</span>
-            <span class="metric-sub" id="financeMetricBalanceSub">Positive Net Balance</span>
+            <span class="metric-label">Total Revenue Collected</span>
+            <span class="metric-value" id="clientsMetricRevenue">₹1,89,244</span>
+            <span class="metric-sub">Across all client payments</span>
           </div>
         </div>
 
         <div class="metric-card">
-          <div class="metric-icon blue"><i class="fa-solid fa-receipt"></i></div>
+          <div class="metric-icon maroon"><i class="fa-solid fa-file-invoice"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Total Records</span>
-            <span class="metric-value" id="financeMetricEntries">488</span>
-            <span class="metric-sub">11 May 2025 – 16 Sep 2026</span>
+            <span class="metric-label">Total Invoices Linked</span>
+            <span class="metric-value" id="clientsMetricInvoices">489</span>
+            <span class="metric-sub">Historical &amp; live invoices</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon amber" style="background:#fef3c7; color:#b45309;"><i class="fa-brands fa-whatsapp"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">WhatsApp Enabled</span>
+            <span class="metric-value" id="clientsMetricWhatsapp">Ready</span>
+            <span class="metric-sub">One-click chat &amp; invoicing</span>
           </div>
         </div>
       </div>
 
-      <!-- Transactions Ledger Card -->
+      <!-- Clients Directory Card -->
       <div class="dashboard-card">
         <div class="dashboard-card-header">
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <h2 class="card-title">Transaction Ledger</h2>
-            <span class="badge-neutral" id="financeCountBadge">488 records</span>
+          <div class="header-title-group" style="display:flex; align-items:center; gap:10px;">
+            <h2 class="card-title">Client Directory</h2>
+            <span class="badge-neutral" id="clientsCountBadge">77 clients</span>
           </div>
 
-          <!-- Filters Bar -->
-          <div class="filter-controls-group">
-            <!-- Search box -->
+          <div class="filter-controls-group" style="gap: 10px;">
+            <!-- Search Clients -->
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="financeSearchInput" placeholder="Search by party name or details..." autocomplete="off">
-              <button type="button" class="btn-icon-clear search-clear-btn" id="financeSearchClearBtn" style="display:none;" title="Clear search">
+              <input type="text" id="clientSearchInput" placeholder="Search client by name, phone, WhatsApp..." autocomplete="off">
+              <button type="button" class="search-clear-btn" id="clientSearchClearBtn" style="display:none;">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
 
-            <!-- Month filter dropdown -->
-            <select id="financeMonthSelect" class="form-select finance-select" style="padding: 8px 12px; border: 1px solid var(--slate-200); border-radius: var(--radius-md); font-size: 0.86rem; background: var(--white); font-weight: 600; color: var(--slate-700);">
-              <option value="ALL">All Months (17 Months)</option>
+            <!-- Sort By -->
+            <select id="clientSortSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff; font-weight: 600;">
+              <option value="REVENUE_DESC">Sort: Highest Revenue</option>
+              <option value="NAME_ASC">Sort: Name (A–Z)</option>
+              <option value="INVOICES_DESC">Sort: Most Invoices</option>
             </select>
-
-            <!-- Type pills -->
-            <div class="status-filter-pills" id="financeTypePills">
-              <button type="button" class="filter-pill active" data-type="ALL">All</button>
-              <button type="button" class="filter-pill" data-type="CREDIT"><i class="fa-solid fa-circle" style="font-size:7px; color:#10b981; margin-right:4px;"></i> Credit</button>
-              <button type="button" class="filter-pill" data-type="DEBIT"><i class="fa-solid fa-circle" style="font-size:7px; color:#dc2626; margin-right:4px;"></i> Debit</button>
-            </div>
           </div>
         </div>
 
-        <!-- Transactions Table (Desktop & Tablet) -->
+        <!-- Client Grid -->
+        <div id="clientsGridContainer" class="clients-grid">
+          <!-- Dynamically populated client profile cards -->
+        </div>
+
+        <div class="empty-state" id="clientsEmptyState" style="display:none;">
+          <div class="empty-icon-wrap">
+            <i class="fa-solid fa-user-slash"></i>
+          </div>
+          <h3 class="empty-title">No Clients Found</h3>
+          <p class="empty-text">No clients match your search query.</p>
+          <button type="button" class="btn btn-primary" id="btnEmptyAddClient">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>+ Add New Client</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: SEPARATE EXPENSES PAGE (BUSINESS VS PERSONAL) -->
+    <section id="viewExpenses" class="view-section no-print">
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="pulse-dot"></span>
+            <span>BE CREATIVES Cash Outflow &amp; Cost Control</span>
+          </div>
+          <h1 class="hero-title">EXPENSE MANAGEMENT</h1>
+          <p class="hero-description">Track business operational expenses and personal expenses with strict separation and zero data loss.</p>
+        </div>
+        <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" id="btnExportExpensesCsv" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);" title="Export expenses to CSV">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Export CSV</span>
+          </button>
+          <button type="button" class="btn btn-hero-cta" id="btnOpenAddExpenseModal">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ Add Expense</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Expenses Metrics Strip -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon amber" style="background:#fef2f2; color:#dc2626;"><i class="fa-solid fa-arrow-up-right"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Outflow</span>
+            <span class="metric-value" id="expenseMetricTotal" style="color:#dc2626;">₹1,15,935</span>
+            <span class="metric-sub" id="expenseMetricTotalCount">280 entries</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon blue" style="background:#eff6ff; color:#2563eb;"><i class="fa-solid fa-briefcase"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Business Expenses</span>
+            <span class="metric-value" id="expenseMetricBusiness" style="color:#2563eb;">₹31,593</span>
+            <span class="metric-sub" id="expenseMetricBusinessCount">Operations &amp; vendors</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon" style="background:#fff7ed; color:#ea580c;"><i class="fa-solid fa-user-tag"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Personal Expenses</span>
+            <span class="metric-value" id="expenseMetricPersonal" style="color:#ea580c;">₹84,342</span>
+            <span class="metric-sub" id="expenseMetricPersonalCount">Personal drawings</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon maroon"><i class="fa-solid fa-chart-pie"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Personal Expense Ratio</span>
+            <span class="metric-value" id="expenseMetricRatio">72.7%</span>
+            <span class="metric-sub">Of total outflows</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expenses Table Card -->
+      <div class="dashboard-card">
+        <div class="dashboard-card-header">
+          <div class="header-title-group" style="display:flex; align-items:center; gap:10px;">
+            <h2 class="card-title">Expense Records</h2>
+            <span class="badge-neutral" id="expensesCountBadge">280 records</span>
+          </div>
+
+          <div class="filter-controls-group" style="flex-wrap: wrap; gap: 8px;">
+            <!-- Search Expenses -->
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="expenseSearchInput" placeholder="Search by name, note, category..." autocomplete="off">
+              <button type="button" class="search-clear-btn" id="expenseSearchClearBtn" style="display:none;">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Expense Type filter pills -->
+            <div class="status-filter-pills" id="expenseTypePills" role="tablist">
+              <button type="button" class="filter-pill active" data-type="ALL">All</button>
+              <button type="button" class="filter-pill" data-type="BUSINESS"><i class="fa-solid fa-briefcase" style="font-size:9px; margin-right:4px;"></i> Business</button>
+              <button type="button" class="filter-pill" data-type="PERSONAL"><i class="fa-solid fa-user" style="font-size:9px; margin-right:4px;"></i> Personal</button>
+            </div>
+
+            <!-- Month filter -->
+            <select id="expenseMonthSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff;">
+              <option value="ALL">All Months</option>
+            </select>
+
+            <!-- Year filter -->
+            <select id="expenseYearSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff;">
+              <option value="ALL">All Years</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+        </div>
+
         <div class="table-responsive">
-          <table class="data-table" id="financeTable">
+          <table class="data-table" id="expensesTable">
             <thead>
               <tr>
-                <th style="width: 140px;">DATE</th>
-                <th style="min-width: 220px;">NAME / PARTY</th>
-                <th style="min-width: 280px;">DETAILS / NOTE</th>
-                <th style="width: 120px;">TYPE</th>
-                <th style="width: 150px; text-align: right;">AMOUNT (₹)</th>
+                <th style="width: 120px;">DATE</th>
+                <th style="min-width: 200px;">EXPENSE NAME / PAYEE</th>
+                <th style="min-width: 240px;">DESCRIPTION / NOTE</th>
+                <th style="width: 150px;">TYPE</th>
+                <th style="width: 140px; text-align: right;">AMOUNT (₹)</th>
                 <th style="width: 100px; text-align: center;">ACTION</th>
               </tr>
             </thead>
-            <tbody id="financeTableBody">
-              <!-- Dynamically populated rows -->
+            <tbody id="expensesTableBody">
+              <!-- Dynamically populated expense rows sorted Latest -> Oldest -->
             </tbody>
           </table>
 
-          <!-- Mobile Transaction Cards -->
-          <div class="mobile-invoices-cards" id="mobileFinanceCards">
+          <!-- Mobile Expense Cards -->
+          <div class="mobile-invoices-cards" id="mobileExpensesCards">
             <!-- Dynamically populated cards on mobile -->
           </div>
 
-          <!-- Empty State for filtered results -->
-          <div class="empty-state" id="financeEmptyState" style="display:none;">
+          <div class="empty-state" id="expensesEmptyState" style="display:none;">
             <div class="empty-icon-wrap">
               <i class="fa-solid fa-receipt"></i>
             </div>
-            <h3 class="empty-title">No Transactions Found</h3>
-            <p class="empty-text">No records match your search or filter criteria.</p>
+            <h3 class="empty-title">No Expenses Found</h3>
+            <p class="empty-text">No expense records match your filter criteria.</p>
+            <button type="button" class="btn btn-primary" id="btnEmptyAddExpense">
+              <i class="fa-solid fa-plus"></i>
+              <span>+ Add New Expense</span>
+            </button>
           </div>
         </div>
 
-        <!-- Pagination Bar -->
-        <div class="finance-pagination-bar" id="financePaginationBar">
-          <div class="pagination-info" id="financePaginationInfo">
-            Showing 1–25 of 488 entries
+        <!-- Expenses Pagination -->
+        <div class="finance-pagination-bar" id="expensesPaginationBar">
+          <div class="pagination-info" id="expensesPaginationInfo">
+            Showing 1–25 of 280 expenses
           </div>
           <div class="pagination-controls">
-            <button type="button" class="btn btn-secondary btn-sm" id="btnFinancePrev" disabled>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnExpPrev" disabled>
               <i class="fa-solid fa-chevron-left"></i> Prev
             </button>
-            <span class="pagination-page-indicator" id="financePageIndicator">Page 1 of 20</span>
-            <button type="button" class="btn btn-secondary btn-sm" id="btnFinanceNext">
+            <span class="pagination-page-indicator" id="expensesPageIndicator">Page 1 of 12</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnExpNext">
               Next <i class="fa-solid fa-chevron-right"></i>
             </button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: SEPARATE MONTHLY REPORTS PAGE (2026 -> 2025 LATEST FIRST) -->
+    <section id="viewReports" class="view-section no-print">
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="pulse-dot"></span>
+            <span>BE CREATIVES Financial Statements</span>
+          </div>
+          <h1 class="hero-title">MONTHLY REPORTS</h1>
+          <p class="hero-description">Detailed monthly financial performance from 2025 to present in reverse chronological order (Latest → Oldest).</p>
+        </div>
+        <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" id="btnPrintReports" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);" onclick="window.print()">
+            <i class="fa-solid fa-print"></i>
+            <span>Print Reports</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reports Filter Bar Card -->
+      <div class="dashboard-card" style="margin-bottom: 24px;">
+        <div class="dashboard-card-header" style="flex-wrap: wrap; gap: 12px;">
+          <h2 class="card-title"><i class="fa-solid fa-sliders" style="margin-right:6px;"></i> Filter Reports</h2>
+          <div class="filter-controls-group" style="gap: 12px; flex-wrap: wrap;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <label for="reportYearSelect" style="font-size:0.84rem; font-weight:700; color:var(--slate-700);">Year:</label>
+              <select id="reportYearSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff; font-weight:600;">
+                <option value="ALL">All Years (2026 &amp; 2025)</option>
+                <option value="2026">Year 2026</option>
+                <option value="2025">Year 2025</option>
+              </select>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:6px;">
+              <label for="reportMonthSelect" style="font-size:0.84rem; font-weight:700; color:var(--slate-700);">Month:</label>
+              <select id="reportMonthSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff;">
+                <option value="ALL">All Months</option>
+              </select>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:6px;">
+              <label for="reportClientSelect" style="font-size:0.84rem; font-weight:700; color:var(--slate-700);">Client:</label>
+              <select id="reportClientSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff; max-width: 200px;">
+                <option value="ALL">All Clients</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Reports Chronological Container (2026 Sep down to 2025 May) -->
+      <div id="monthlyReportsContainer" class="monthly-reports-grid">
+        <!-- Dynamically populated monthly cards with financial breakdown & client collection -->
       </div>
     </section>
 
@@ -498,7 +903,20 @@
             <div class="form-card-body">
               <div class="form-group">
                 <label for="inputClientName">Client / Company Name <span class="required">*</span></label>
-                <input type="text" id="inputClientName" value="ALAM ENGAZ" placeholder="e.g. ALAM ENGAZ" required>
+                <input type="text" id="inputClientName" list="clientSuggestionsDatalist" value="ALAM ENGAZ" placeholder="e.g. ALAM ENGAZ (or select from client database)" required autocomplete="off">
+                <datalist id="clientSuggestionsDatalist"></datalist>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label for="inputClientWhatsapp"><i class="fa-brands fa-whatsapp" style="color:#25D366; margin-right:4px;"></i> WhatsApp Number</label>
+                  <input type="tel" id="inputClientWhatsapp" placeholder="e.g. +91 8547931509">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputClientPhone">Phone Number (Optional)</label>
+                  <input type="tel" id="inputClientPhone" placeholder="e.g. +91 8547931509">
+                </div>
               </div>
 
               <div class="form-grid-2" style="margin-top: 10px;">
@@ -508,8 +926,8 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="inputClientEmail">Email / Phone (Optional)</label>
-                  <input type="text" id="inputClientEmail" placeholder="e.g. contact@alamengaz.com">
+                  <label for="inputClientEmail">Email (Optional)</label>
+                  <input type="email" id="inputClientEmail" placeholder="e.g. contact@alamengaz.com">
                 </div>
               </div>
             </div>
@@ -1223,53 +1641,238 @@
     </div>
   </div>
 
-  <!-- Modal: Add New Cashbook Transaction -->
-  <div class="modal-overlay" id="modalAddTransaction" style="display:none;">
+  <!-- Modal: Add New Client -->
+  <div class="modal-overlay" id="modalAddClient" style="display:none;">
     <div class="modal-dialog" style="max-width: 520px;">
       <div class="modal-header">
-        <h3 class="modal-title"><i class="fa-solid fa-circle-plus" style="color:var(--brand-maroon); margin-right:8px;"></i> Add Transaction</h3>
-        <button type="button" class="modal-close-btn" id="btnCloseAddTxModal" title="Close">
+        <h3 class="modal-title"><i class="fa-solid fa-user-plus" style="color:var(--brand-maroon); margin-right:8px;"></i> <span id="modalAddClientTitle">Add New Client</span></h3>
+        <button type="button" class="modal-close-btn" id="btnCloseAddClientModal" title="Close">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <form id="formAddTransaction">
+      <form id="formAddClient">
+        <input type="hidden" id="editClientId" value="">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="form-group">
+            <label class="form-label" for="inputModalClientName">Client / Company Name <span class="required">*</span></label>
+            <input type="text" id="inputModalClientName" class="form-input" placeholder="e.g. Alam Engaz, Rahoof, Eza Coperate" required>
+          </div>
+
+          <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="inputModalClientWhatsapp"><i class="fa-brands fa-whatsapp" style="color:#25D366; margin-right:4px;"></i> WhatsApp Number</label>
+              <input type="tel" id="inputModalClientWhatsapp" class="form-input" placeholder="e.g. +91 8547931509">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inputModalClientPhone">Phone Number</label>
+              <input type="tel" id="inputModalClientPhone" class="form-input" placeholder="e.g. +91 8547931509">
+            </div>
+          </div>
+
+          <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="inputModalClientEmail">Email Address</label>
+              <input type="email" id="inputModalClientEmail" class="form-input" placeholder="contact@client.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inputModalClientAddress">Address / Location</label>
+              <input type="text" id="inputModalClientAddress" class="form-input" placeholder="Calicut, Kerala / Saudi Arabia">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputModalClientNotes">Internal Notes / Services</label>
+            <textarea id="inputModalClientNotes" class="form-input" rows="2" placeholder="Notes, branding projects, account terms..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelAddClient">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveClient">
+            <i class="fa-solid fa-check"></i> Save Client Profile
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Client Detailed Account Statement & Ledger History -->
+  <div class="modal-overlay" id="modalClientStatement" style="display:none;">
+    <div class="modal-dialog modal-lg" style="max-width: 860px; max-height: 90vh; display:flex; flex-direction:column;">
+      <div class="modal-header" style="background: var(--slate-900); color: #fff; border-radius: 12px 12px 0 0;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px; height:44px; border-radius:10px; background:var(--brand-maroon); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:800;" id="modalStatementAvatar">C</div>
+          <div>
+            <h3 class="modal-title" id="modalStatementClientName" style="color:#fff; font-size:1.2rem;">Client Name</h3>
+            <div style="font-size:0.8rem; color:#94a3b8; display:flex; gap:12px; margin-top:2px; flex-wrap:wrap;" id="modalStatementMeta">
+              <!-- WhatsApp, Phone, Location tags -->
+            </div>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseClientStatement" title="Close" style="color:#fff;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" style="overflow-y:auto; padding: 20px; display:flex; flex-direction:column; gap:20px;">
+        <!-- Client Stats Grid -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+          <div class="metric-card" style="padding:12px 16px; margin:0;">
+            <span class="metric-label">Total Received</span>
+            <span class="metric-value" id="statementTotalReceived" style="font-size:1.3rem; color:#059669;">₹0</span>
+          </div>
+          <div class="metric-card" style="padding:12px 16px; margin:0;">
+            <span class="metric-label">Total Invoices</span>
+            <span class="metric-value" id="statementTotalInvoices" style="font-size:1.3rem; color:var(--brand-maroon);">0</span>
+          </div>
+          <div class="metric-card" style="padding:12px 16px; margin:0;">
+            <span class="metric-label">Net Balance</span>
+            <span class="metric-value" id="statementNetBalance" style="font-size:1.3rem; color:#2563eb;">₹0 Cr</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions Bar -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary btn-sm" id="btnStatementCreateInvoice">
+            <i class="fa-solid fa-plus"></i> Create Invoice for Client
+          </button>
+          <a href="#" target="_blank" class="btn btn-sm" id="btnStatementWhatsAppChat" style="background:#25D366; color:#fff; text-decoration:none; display:none;">
+            <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+          </a>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnStatementEditClient">
+            <i class="fa-solid fa-user-pen"></i> Edit Profile
+          </button>
+        </div>
+
+        <!-- Section: Monthly Collection History -->
+        <div>
+          <h4 style="font-size:0.95rem; font-weight:800; color:var(--slate-800); margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-calendar-days" style="color:var(--brand-maroon);"></i> Monthly Payment History (Latest → Oldest)
+          </h4>
+          <div id="statementMonthlyHistoryContainer" style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Rendered monthly breakdown -->
+          </div>
+        </div>
+
+        <!-- Section: Linked Invoices & Transactions -->
+        <div>
+          <h4 style="font-size:0.95rem; font-weight:800; color:var(--slate-800); margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-receipt" style="color:#2563eb;"></i> Linked Invoices &amp; Historical Ledger Records
+          </h4>
+          <div class="table-responsive" style="max-height: 280px; overflow-y:auto; border:1px solid var(--slate-200); border-radius:8px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>INVOICE / ID</th>
+                  <th>DATE</th>
+                  <th>DETAILS</th>
+                  <th style="text-align:right;">AMOUNT (₹)</th>
+                  <th style="text-align:center;">STATUS</th>
+                  <th style="text-align:center;">ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="statementInvoicesTableBody">
+                <!-- Records for this client -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="background:var(--slate-50); border-top:1px solid var(--slate-200);">
+        <button type="button" class="btn btn-secondary" id="btnCloseStatementFooter">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add New Expense -->
+  <div class="modal-overlay" id="modalAddExpense" style="display:none;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-receipt" style="color:#dc2626; margin-right:8px;"></i> Add New Expense</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseAddExpenseModal" title="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formAddExpense">
         <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
           <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
             <div class="form-group">
-              <label class="form-label" for="inputTxDate">Date *</label>
-              <input type="date" id="inputTxDate" class="form-input" required>
+              <label class="form-label" for="inputExpenseDate">Date *</label>
+              <input type="date" id="inputExpenseDate" class="form-input" required>
             </div>
             <div class="form-group">
-              <label class="form-label" for="selectTxType">Type *</label>
-              <select id="selectTxType" class="form-input" required>
-                <option value="CREDIT">Credit (Money Received / Inflow)</option>
-                <option value="DEBIT">Debit (Money Given / Outflow)</option>
+              <label class="form-label" for="selectExpenseType">Expense Type *</label>
+              <select id="selectExpenseType" class="form-input" required>
+                <option value="BUSINESS">Business Expense (Operational / Vendor)</option>
+                <option value="PERSONAL">Personal Expense (Personal Drawing)</option>
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="inputTxName">Party / Client Name *</label>
-            <input type="text" id="inputTxName" class="form-input" placeholder="e.g. Alam Engaz, Rahoof, Printing Shop" required>
+            <label class="form-label" for="inputExpenseName">Expense Name / Payee *</label>
+            <input type="text" id="inputExpenseName" class="form-input" placeholder="e.g. Adobe Subscription, Printing Shop, Tea & Food, Personal" required>
+          </div>
+
+          <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="inputExpenseAmount">Amount (₹) *</label>
+              <input type="number" id="inputExpenseAmount" class="form-input" placeholder="e.g. 1500" min="0.01" step="any" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="selectExpenseCategory">Category</label>
+              <select id="selectExpenseCategory" class="form-input">
+                <option value="General">General Expense</option>
+                <option value="Software & Tools">Software &amp; Tools</option>
+                <option value="Printing & Materials">Printing &amp; Materials</option>
+                <option value="Freelancers & Vendors">Freelancers &amp; Vendors</option>
+                <option value="Food & Travel">Food &amp; Travel</option>
+                <option value="Office & Logistics">Office &amp; Logistics</option>
+                <option value="Personal">Personal Drawings</option>
+              </select>
+            </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="inputTxAmount">Amount (₹) *</label>
-            <input type="number" id="inputTxAmount" class="form-input" placeholder="e.g. 1500" min="0.01" step="any" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="inputTxDetails">Details / Description</label>
-            <textarea id="inputTxDetails" class="form-input" rows="3" placeholder="Optional notes, work reference, payment details..."></textarea>
+            <label class="form-label" for="inputExpenseDetails">Description / Reference</label>
+            <textarea id="inputExpenseDetails" class="form-input" rows="2" placeholder="Optional notes, invoice reference, payment details..."></textarea>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btnCancelAddTx">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btnSubmitAddTx">
-            <i class="fa-solid fa-check"></i> Save Transaction
+          <button type="button" class="btn btn-secondary" id="btnCancelAddExpense">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveExpense">
+            <i class="fa-solid fa-check"></i> Save Expense Record
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal: WhatsApp Invoice Share -->
+  <div class="modal-overlay" id="modalWhatsAppShare" style="display:none;">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-header" style="background: #25D366; color:#fff;">
+        <h3 class="modal-title" style="color:#fff;"><i class="fa-brands fa-whatsapp" style="margin-right:8px;"></i> Share Invoice via WhatsApp</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseWhatsAppModal" title="Close" style="color:#fff;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div class="form-group">
+          <label class="form-label" for="inputShareWhatsappNumber">Client WhatsApp Number</label>
+          <input type="tel" id="inputShareWhatsappNumber" class="form-input" placeholder="e.g. +91 8547931509">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Message Preview</label>
+          <textarea id="textShareWhatsappPreview" class="form-input" rows="7" readonly style="background:#f8fafc; font-family:monospace; font-size:0.84rem;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelWhatsAppShare">Cancel</button>
+        <button type="button" class="btn" id="btnLaunchWhatsAppDirect" style="background:#25D366; color:#fff; font-weight:700;">
+          <i class="fa-brands fa-whatsapp"></i> Send on WhatsApp
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1302,6 +1905,6 @@
   </script>
 
   <!-- Master Application Logic -->
-  <script src="script.js?v=2026091705"></script>
+  <script src="script.js?v=2026091706"></script>
 </body>
 </html>
