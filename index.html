@@ -23,27 +23,24 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Master Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2026091709">
+  <link rel="stylesheet" href="style.css?v=2026091710">
   
   <script>
-    // Automatic Self-Healing: If stylesheet fails to load due to stale browser cache, force clear and reload
-    window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        if (getComputedStyle(document.body).display !== 'flex') {
-          console.warn('Stale cache detected, self-healing styles...');
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(regs => {
-              regs.forEach(r => r.unregister());
-            });
-          }
-          if ('caches' in window) {
-            caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-          }
-          const link = document.querySelector('link[href*="style.css"]');
-          if (link) link.href = 'style.css?t=' + Date.now();
+    // Force clear any legacy PWA service worker and Cache Storage
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
         }
-      }, 100);
-    });
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
   </script>
   
   <!-- Standalone Libraries & Data -->
@@ -171,85 +168,65 @@
         </div>
       </div>
 
-      <!-- Financial Overview Master KPI Grid (8 Key Metrics) -->
+      <!-- Financial Overview Master KPI Grid (6 Key Metrics) -->
       <div class="dashboard-metrics-grid">
-        <!-- 1. Overall Total (2025 to present) -->
-        <div class="metric-card">
-          <div class="metric-icon blue"><i class="fa-solid fa-scale-balanced"></i></div>
-          <div class="metric-details">
-            <span class="metric-label">Overall Total</span>
-            <span class="metric-value" id="dashOverallTotal">₹3,05,179</span>
-            <span class="metric-sub">Total financial volume (2025 – Present)</span>
-          </div>
-        </div>
-
-        <!-- 2. Total Income / വരവ് -->
-        <div class="metric-card">
-          <div class="metric-icon emerald"><i class="fa-solid fa-arrow-down-left"></i></div>
-          <div class="metric-details">
-            <span class="metric-label">Total Income / വരവ്</span>
-            <span class="metric-value" id="dashTotalIncome" style="color: #059669;">₹1,89,244</span>
-            <span class="metric-sub" id="dashTotalIncomeSub">Total money received</span>
-          </div>
-        </div>
-
-        <!-- 3. Total Expense / ചെലവ് -->
+        <!-- ROW 1: Card 1 - TOTAL DEBIT (-) -->
         <div class="metric-card">
           <div class="metric-icon amber" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-arrow-up-right"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Total Expense / ചെലവ്</span>
-            <span class="metric-value" id="dashTotalExpense" style="color: #dc2626;">₹1,15,935</span>
-            <span class="metric-sub" id="dashTotalExpenseSub">Total business & personal outflow</span>
+            <span class="metric-label">TOTAL DEBIT (-)</span>
+            <span class="metric-value" id="dashTotalDebit" style="color: #dc2626;">₹1,15,935</span>
+            <span class="metric-sub" id="dashTotalDebitSub">Total outflow (2025 – Present)</span>
           </div>
         </div>
 
-        <!-- 4. Net Balance -->
+        <!-- ROW 1: Card 2 - TOTAL CREDIT (+) -->
+        <div class="metric-card">
+          <div class="metric-icon emerald"><i class="fa-solid fa-arrow-down-left"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">TOTAL CREDIT (+)</span>
+            <span class="metric-value" id="dashTotalCredit" style="color: #059669;">₹1,92,744</span>
+            <span class="metric-sub" id="dashTotalCreditSub">Total money received (2025 – Present)</span>
+          </div>
+        </div>
+
+        <!-- ROW 1: Card 3 - NET BALANCE -->
         <div class="metric-card" style="border-left: 4px solid var(--brand-maroon);">
           <div class="metric-icon maroon"><i class="fa-solid fa-vault"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Net Balance</span>
-            <span class="metric-value" id="dashNetBalance" style="color: var(--brand-maroon);">₹73,309 Cr</span>
-            <span class="metric-sub" id="dashNetBalanceSub">Income minus expenses</span>
+            <span class="metric-label">NET BALANCE</span>
+            <span class="metric-value" id="dashNetBalance" style="color: var(--brand-maroon);">₹76,809 Cr</span>
+            <span class="metric-sub" id="dashNetBalanceSub">Total Credit minus Total Debit</span>
           </div>
         </div>
 
-        <!-- 5. Total Unique Clients -->
+        <!-- ROW 2: Card 4 - TOTAL CLIENTS -->
         <div class="metric-card">
           <div class="metric-icon blue" style="background: #eff6ff; color: #2563eb;"><i class="fa-solid fa-users"></i></div>
           <div class="metric-details">
-            <span class="metric-label">Total Clients</span>
-            <span class="metric-value" id="dashTotalClients">77</span>
+            <span class="metric-label">TOTAL CLIENTS</span>
+            <span class="metric-value" id="dashTotalClients">87</span>
             <span class="metric-sub">Unique verified client accounts</span>
           </div>
         </div>
 
-        <!-- 6. Personal Expense -->
-        <div class="metric-card">
-          <div class="metric-icon" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-user-tag"></i></div>
-          <div class="metric-details">
-            <span class="metric-label">Personal Expense</span>
-            <span class="metric-value" id="dashPersonalExpense" style="color: #ea580c;">₹84,342</span>
-            <span class="metric-sub">Separately tracked personal drawings</span>
-          </div>
-        </div>
-
-        <!-- 7. Current Month Summary -->
+        <!-- ROW 2: Card 5 - CURRENT MONTH -->
         <div class="metric-card">
           <div class="metric-icon emerald" style="background: #ecfdf5; color: #059669;"><i class="fa-solid fa-calendar-check"></i></div>
           <div class="metric-details">
-            <span class="metric-label" id="dashCurrentMonthLabel">Current Month (Sep 2026)</span>
-            <span class="metric-value" id="dashCurrentMonthIncome">₹600</span>
-            <span class="metric-sub" id="dashCurrentMonthMeta">Exp: ₹17,707 | Net: -₹17,107 Dr</span>
+            <span class="metric-label" id="dashCurrentMonthLabel">CURRENT MONTH (SEPTEMBER 2026)</span>
+            <span class="metric-value" id="dashCurrentMonthCredit" style="color: #059669;">₹4,100</span>
+            <span class="metric-sub" id="dashCurrentMonthSub">Total cash received this month</span>
           </div>
         </div>
 
-        <!-- 8. Current Year Summary -->
+        <!-- ROW 2: Card 6 - CURRENT YEAR -->
         <div class="metric-card">
           <div class="metric-icon maroon" style="background: var(--brand-maroon-subtle); color: var(--brand-maroon);"><i class="fa-solid fa-calendar-days"></i></div>
           <div class="metric-details">
-            <span class="metric-label" id="dashCurrentYearLabel">Current Year (2026)</span>
-            <span class="metric-value" id="dashCurrentYearIncome">₹1,13,638</span>
-            <span class="metric-sub" id="dashCurrentYearMeta">Exp: ₹74,383 | Net: ₹39,255 Cr</span>
+            <span class="metric-label" id="dashCurrentYearLabel">CURRENT YEAR (2026)</span>
+            <span class="metric-value" id="dashCurrentYearCredit" style="color: var(--brand-maroon);">₹1,14,096</span>
+            <span class="metric-sub" id="dashCurrentYearSub">Total cash received this year</span>
           </div>
         </div>
       </div>
@@ -1923,6 +1900,6 @@
   </script>
 
   <!-- Master Application Logic -->
-  <script src="script.js?v=2026091709"></script>
+  <script src="script.js?v=2026091710"></script>
 </body>
 </html>

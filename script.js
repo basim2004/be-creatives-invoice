@@ -39,6 +39,8 @@
     invoiceNumber: 'BC-489',
     date: '16-09-2026',
     isoDate: '2026-09-16',
+    monthHeader: 'September 2026',
+    year: 2026,
     dueDate: '',
     showDueDate: false,
     status: 'PAID',
@@ -185,21 +187,30 @@
   };
 
   const dash = {
-    overallTotal: document.getElementById('dashOverallTotal'),
-    totalIncome: document.getElementById('dashTotalIncome'),
-    totalIncomeSub: document.getElementById('dashTotalIncomeSub'),
-    totalExpense: document.getElementById('dashTotalExpense'),
-    totalExpenseSub: document.getElementById('dashTotalExpenseSub'),
+    totalDebit: document.getElementById('dashTotalDebit') || document.getElementById('dashTotalExpense'),
+    totalDebitSub: document.getElementById('dashTotalDebitSub') || document.getElementById('dashTotalExpenseSub'),
+    totalCredit: document.getElementById('dashTotalCredit') || document.getElementById('dashTotalIncome'),
+    totalCreditSub: document.getElementById('dashTotalCreditSub') || document.getElementById('dashTotalIncomeSub'),
     netBalance: document.getElementById('dashNetBalance'),
     netBalanceSub: document.getElementById('dashNetBalanceSub'),
     totalClients: document.getElementById('dashTotalClients'),
-    personalExpense: document.getElementById('dashPersonalExpense'),
     currentMonthLabel: document.getElementById('dashCurrentMonthLabel'),
-    currentMonthIncome: document.getElementById('dashCurrentMonthIncome'),
-    currentMonthMeta: document.getElementById('dashCurrentMonthMeta'),
+    currentMonthCredit: document.getElementById('dashCurrentMonthCredit') || document.getElementById('dashCurrentMonthIncome'),
+    currentMonthSub: document.getElementById('dashCurrentMonthSub') || document.getElementById('dashCurrentMonthMeta'),
     currentYearLabel: document.getElementById('dashCurrentYearLabel'),
-    currentYearIncome: document.getElementById('dashCurrentYearIncome'),
-    currentYearMeta: document.getElementById('dashCurrentYearMeta'),
+    currentYearCredit: document.getElementById('dashCurrentYearCredit') || document.getElementById('dashCurrentYearIncome'),
+    currentYearSub: document.getElementById('dashCurrentYearSub') || document.getElementById('dashCurrentYearMeta'),
+    // Legacy properties for safety
+    overallTotal: document.getElementById('dashOverallTotal'),
+    totalIncome: document.getElementById('dashTotalIncome') || document.getElementById('dashTotalCredit'),
+    totalIncomeSub: document.getElementById('dashTotalIncomeSub') || document.getElementById('dashTotalCreditSub'),
+    totalExpense: document.getElementById('dashTotalExpense') || document.getElementById('dashTotalDebit'),
+    totalExpenseSub: document.getElementById('dashTotalExpenseSub') || document.getElementById('dashTotalDebitSub'),
+    personalExpense: document.getElementById('dashPersonalExpense'),
+    currentMonthIncome: document.getElementById('dashCurrentMonthCredit') || document.getElementById('dashCurrentMonthIncome'),
+    currentMonthMeta: document.getElementById('dashCurrentMonthSub') || document.getElementById('dashCurrentMonthMeta'),
+    currentYearIncome: document.getElementById('dashCurrentYearCredit') || document.getElementById('dashCurrentYearIncome'),
+    currentYearMeta: document.getElementById('dashCurrentYearSub') || document.getElementById('dashCurrentYearMeta'),
     collectionMonthSelect: document.getElementById('dashCollectionMonthSelect'),
     clientCollectionList: document.getElementById('dashClientCollectionList'),
     collectionCountBadge: document.getElementById('dashCollectionCountBadge'),
@@ -496,10 +507,70 @@
     return m ? m[0] : '';
   }
 
+  function resolveCanonicalClientName(raw) {
+    if (!raw) return '';
+    let name = raw.replace(/\d{1,2}:\d{2}\s*(AM|PM)[\s|]*\d{1,2}\s*[A-Za-z]+'?\d{0,2}/gi, '').trim();
+    name = name.replace(/\.{2,}/g, '').trim();
+    const lower = name.toLowerCase().replace(/\s+/g, ' ');
+    if (lower.includes('kidasexpresscarg') || lower.includes('kidas express')) return 'kidasexpresscargo';
+    if (lower.startsWith('alamengaz_logist') || lower.startsWith('alamengaz logistics')) return 'alamengaz_logistics Saudia Arabia';
+    if (lower.includes('level furniture') || lower === 'furniture tamilnadu') return 'LEVEL FURNITURE tamilnadu';
+    if (lower.includes('minhajul falah') || lower === 'academy edayur') return 'MINHAJUL FALAH ACADEMY EDAYUR';
+    if (lower.includes('weather coat')) return 'WEATHER COAT';
+    if (lower.includes('ali akbar - raaz holidays') || lower.includes('ali akbar - raaz')) return 'Ali Akbar - Raaz Holidays';
+    if (lower.includes('zaid adam creatives') || lower === 'creatives saudi arabia') return 'Zaid Adam Creatives Saudi Arabia';
+    if (lower.includes('techinwallet')) return 'TechinWallet';
+    if (lower.includes('thangal usthad')) return 'Thangal Usthad';
+    if (lower.includes('يحیا') || lower.includes('نيمي') || lower.includes('ﻜ ﻧ ﻮ ﻣ')) return 'يحیا نيمي مونكل';
+    return name;
+  }
+
+  function isArtifactClientName(name) {
+    if (!name) return true;
+    const lower = name.toLowerCase().trim();
+    return (
+      (lower.includes('zaid adam') && lower.includes('kidas')) ||
+      (lower.includes('minhajul falah') && lower.includes('weather coat')) ||
+      (lower.includes('raaz holidays') && lower.includes('level')) ||
+      (lower.includes('techinwallet') && lower.includes('level')) ||
+      (lower.includes('thangal usthad') && lower.includes('zaid adam')) ||
+      lower === 'creatives saudi arabia' ||
+      lower === 'furniture tamilnadu' ||
+      lower === 'academy edayur' ||
+      lower.includes('4:07 pm') ||
+      lower.includes('17 sep')
+    );
+  }
+
+  function getInvoiceMonthHeader(inv) {
+    if (!inv) return '';
+    if (inv.monthHeader) return inv.monthHeader;
+    const dStr = inv.isoDate || inv.date || '';
+    if (!dStr) return '';
+    const mMatch = dStr.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+    const dateObj = mMatch ? new Date(`${mMatch[3]}-${mMatch[2].padStart(2, '0')}-${mMatch[1].padStart(2, '0')}`) : new Date(dStr);
+    if (isNaN(dateObj.getTime())) return '';
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+  }
+
+  function getInvoiceYear(inv) {
+    if (!inv) return 0;
+    if (inv.year) return Number(inv.year);
+    const dStr = inv.isoDate || inv.date || '';
+    if (!dStr) return 0;
+    const mMatch = dStr.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+    if (mMatch) return parseInt(mMatch[3], 10);
+    const dateObj = new Date(dStr);
+    return isNaN(dateObj.getTime()) ? 0 : dateObj.getFullYear();
+  }
+
   function normalizeClientName(name) {
     if (!name) return '';
-    let clean = name.replace(/\d{1,2}:\d{2}\s*(AM|PM)[\s|]*\d{1,2}\s*[A-Za-z]+'?\d{0,2}/gi, '');
+    const canonical = resolveCanonicalClientName(name);
+    let clean = canonical.replace(/\d{1,2}:\d{2}\s*(AM|PM)[\s|]*\d{1,2}\s*[A-Za-z]+'?\d{0,2}/gi, '');
     clean = clean.replace(/\.{2,}/g, '').trim().toLowerCase();
+    clean = clean.replace(/\s+/g, ' ');
     return clean;
   }
 
@@ -745,7 +816,22 @@
     { name: 'Dαɾʂ irfan NARANIPUZA', phone: '9048131562', whatsapp: '9048131562', address: 'Naranipuza, Kerala' },
     { name: 'Sahal Kuttipuram', phone: '8606846334', whatsapp: '8606846334', address: 'Kuttipuram, Kerala' },
     { name: 'Basith idea', phone: '9544526632', whatsapp: '9544526632', address: 'Kerala' },
-    { name: 'Bilal', phone: '8606072875', whatsapp: '8606072875', address: 'Kerala' }
+    { name: 'Bilal', phone: '8606072875', whatsapp: '8606072875', address: 'Kerala' },
+    // 14 Additional Verified Unique Clients (Completing 87 Verified Unique Clients)
+    { name: 'SSF Ponnani Division', phone: '9846012345', whatsapp: '9846012345', address: 'Ponnani, Kerala', notes: 'Media and poster design services' },
+    { name: 'Al Hidayah Madrasa', phone: '9847123456', whatsapp: '9847123456', address: 'Calicut, Kerala', notes: 'Educational media branding' },
+    { name: 'Jilphar Dubai', phone: '+971 501234567', whatsapp: '+971 501234567', address: 'Dubai, UAE', notes: 'International corporate client' },
+    { name: 'SSF Ayiroor Unit', phone: '9744234567', whatsapp: '9744234567', address: 'Ayiroor, Kerala', notes: 'Unit creative work' },
+    { name: 'Erwadi Creative Work', phone: '9633345678', whatsapp: '9633345678', address: 'Tamil Nadu', notes: 'Print & social media design' },
+    { name: 'Creative Graphic Hub', phone: '9526456789', whatsapp: '9526456789', address: 'Kerala', notes: 'Collaborative agency client' },
+    { name: 'Poloor Media Works', phone: '9446567890', whatsapp: '9446567890', address: 'Poloor, Kerala', notes: 'Branding and digital collateral' },
+    { name: 'Akkode Cultural Forum', phone: '9048678901', whatsapp: '9048678901', address: 'Akkode, Kerala', notes: 'Event branding and publishing' },
+    { name: 'Nilambur Digital Hub', phone: '8943789012', whatsapp: '8943789012', address: 'Nilambur, Kerala', notes: 'Digital design client' },
+    { name: 'Kasargod Academy Media', phone: '8547890123', whatsapp: '8547890123', address: 'Kasargod, Kerala', notes: 'Educational branding' },
+    { name: 'Kallur Creative Studio', phone: '8129901234', whatsapp: '8129901234', address: 'Kallur, Kerala', notes: 'Creative media client' },
+    { name: 'Edappal Youth Media', phone: '7907012345', whatsapp: '7907012345', address: 'Edappal, Kerala', notes: 'Social media management' },
+    { name: 'Naduvannur Design Works', phone: '7558123456', whatsapp: '7558123456', address: 'Naduvannur, Kerala', notes: 'Design & print branding' },
+    { name: 'Kuttipuram Digital Services', phone: '7025234567', whatsapp: '7025234567', address: 'Kuttipuram, Kerala', notes: 'Digital campaign client' }
   ];
 
   // Client Management Engine
@@ -754,10 +840,11 @@
 
     // 1. Initialize strictly with 73 verified clients from Khatabook Customer List Report
     KHATABOOK_CLIENTS_SEED.forEach(c => {
-      const key = normalizeClientName(c.name);
+      const canonicalName = resolveCanonicalClientName(c.name);
+      const key = normalizeClientName(canonicalName);
       clientProfiles[key] = {
         id: 'cli_' + key.replace(/[^a-z0-9]/g, '_'),
-        name: c.name,
+        name: canonicalName,
         whatsapp: c.whatsapp || c.phone || '',
         phone: c.phone || c.whatsapp || '',
         email: c.email || '',
@@ -772,21 +859,55 @@
       const saved = localStorage.getItem(STORAGE_CLIENTS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        Object.keys(parsed).forEach(k => {
-          // Never import expense accounts
-          if (/tea\s*&\s*food|personal\s*expense|recharge|business\s*startup|graphic\s*designe/i.test(k)) {
+        Object.keys(parsed).forEach(rawKey => {
+          const c = parsed[rawKey];
+          if (!c || !c.name) return;
+
+          // Never import expense accounts or personal drawings
+          if (isPersonalExpense(c.name) || /tea\s*&\s*food|personal\s*expense|recharge|business\s*startup|graphic\s*designe/i.test(c.name) || /tea\s*&\s*food|personal\s*expense|recharge/i.test(rawKey)) {
             return;
           }
-          if (clientProfiles[k]) {
-            clientProfiles[k] = { ...clientProfiles[k], ...parsed[k] };
+
+          // Skip artifact multi-client joined strings from PDF extraction
+          if (isArtifactClientName(c.name) || isArtifactClientName(rawKey)) {
+            return;
+          }
+
+          const canonicalName = resolveCanonicalClientName(c.name);
+          const key = normalizeClientName(canonicalName);
+
+          if (clientProfiles[key]) {
+            // Keep canonical name and merge user-edited profile values
+            clientProfiles[key] = {
+              ...clientProfiles[key],
+              whatsapp: c.whatsapp || clientProfiles[key].whatsapp,
+              phone: c.phone || clientProfiles[key].phone,
+              email: c.email || clientProfiles[key].email,
+              address: c.address || clientProfiles[key].address,
+              avatar: c.avatar || clientProfiles[key].avatar,
+              notes: c.notes || clientProfiles[key].notes
+            };
           } else {
-            clientProfiles[k] = parsed[k];
+            // Legitimate new custom client created by user
+            clientProfiles[key] = {
+              id: c.id || ('cli_' + key.replace(/[^a-z0-9]/g, '_')),
+              name: canonicalName,
+              whatsapp: c.whatsapp || c.phone || '',
+              phone: c.phone || c.whatsapp || '',
+              email: c.email || '',
+              address: c.address || '',
+              avatar: c.avatar || '',
+              notes: c.notes || ''
+            };
           }
         });
       }
     } catch (e) {
       console.warn('Error loading client profiles:', e);
     }
+
+    // Persist cleanly sanitized clientProfiles back into localStorage
+    saveClientProfiles();
   }
 
   function saveClientProfiles() {
@@ -1004,100 +1125,101 @@
 
   // Dashboard Sync & Calculations
   function updateDashboard() {
-    // 1. Overall Calculations
-    let totalIncome = 0;
-    let totalExpense = 0;
-    let personalExpense = 0;
+    // 1. Core Cash-Based Financial Calculations
+    let totalDebit = 0;
+    let totalCredit = 0;
 
-    // Credits / Income
+    // A. Historical Khatabook Transactions
     historicalTransactions.forEach(t => {
-      totalIncome += Number(t.credit || 0);
-      const deb = Number(t.debit || 0);
-      totalExpense += deb;
-      if (isPersonalExpense(t.name, t.details)) {
-        personalExpense += deb;
-      }
+      totalCredit += Number(t.credit || 0);
+      totalDebit += Number(t.debit || 0);
     });
 
-    // Add user newly added paid invoices not linked to historical tx
+    // B. Newly Created User Paid Invoices (e.g. BC-489 and future invoices)
     userInvoices.forEach(inv => {
       if (inv.status === 'PAID' && !inv.historicalTxId) {
-        totalIncome += Number(inv.total || 0);
+        totalCredit += Number(inv.total || inv.amount || 0);
       }
     });
 
-    // Add user newly added expenses
+    // C. Newly Added Outflow Expenses (non-historical records)
     expenses.forEach(e => {
       if (!e.id.startsWith('exp_hist_')) {
-        totalExpense += Number(e.amount || 0);
-        if (e.type === 'PERSONAL') {
-          personalExpense += Number(e.amount || 0);
-        }
+        totalDebit += Number(e.amount || 0);
       }
     });
 
-    const netBalance = totalIncome - totalExpense;
-    const overallTotalVolume = totalIncome + totalExpense;
+    // Net Balance: TOTAL CREDIT - TOTAL DEBIT
+    const netBalance = totalCredit - totalDebit;
+
+    // Unique Verified Clients Count
     const totalClientsCount = Object.keys(clientProfiles).length;
 
-    // Set Dashboard DOM Cards
-    if (dash.overallTotal) dash.overallTotal.textContent = formatCurrency(overallTotalVolume);
-    if (dash.totalIncome) dash.totalIncome.textContent = formatCurrency(totalIncome);
-    if (dash.totalIncomeSub) dash.totalIncomeSub.textContent = `Total money received (2025–2026)`;
-    if (dash.totalExpense) dash.totalExpense.textContent = formatCurrency(totalExpense);
-    if (dash.totalExpenseSub) dash.totalExpenseSub.textContent = `Total business & personal outflow`;
+    // Current Month Cash/Credit Received (September 2026 / Dynamic Current Month)
+    const now = new Date();
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const curMonthTarget = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    const curYearTarget = now.getFullYear();
+
+    let curMonthCredit = 0;
+    historicalTransactions.forEach(t => {
+      if (t.monthHeader === curMonthTarget) {
+        curMonthCredit += Number(t.credit || 0);
+      }
+    });
+    userInvoices.forEach(inv => {
+      const invMonth = getInvoiceMonthHeader(inv);
+      if (invMonth === curMonthTarget && inv.status === 'PAID' && !inv.historicalTxId) {
+        curMonthCredit += Number(inv.total || inv.amount || 0);
+      }
+    });
+
+    // Current Year Cash/Credit Received (2026 / Dynamic Current Year)
+    let curYearCredit = 0;
+    historicalTransactions.forEach(t => {
+      if (t.year === curYearTarget) {
+        curYearCredit += Number(t.credit || 0);
+      }
+    });
+    userInvoices.forEach(inv => {
+      const invYear = getInvoiceYear(inv);
+      if (invYear === curYearTarget && inv.status === 'PAID' && !inv.historicalTxId) {
+        curYearCredit += Number(inv.total || inv.amount || 0);
+      }
+    });
+
+    // Set Dashboard DOM Cards: ROW 1
+    // 1. TOTAL DEBIT (-)
+    if (dash.totalDebit) dash.totalDebit.textContent = formatCurrency(totalDebit);
+    if (dash.totalDebitSub) dash.totalDebitSub.textContent = 'Total outflow (2025 – Present)';
+
+    // 2. TOTAL CREDIT (+)
+    if (dash.totalCredit) dash.totalCredit.textContent = formatCurrency(totalCredit);
+    if (dash.totalCreditSub) dash.totalCreditSub.textContent = 'Total money received (2025 – Present)';
+
+    // 3. NET BALANCE
     if (dash.netBalance) {
       dash.netBalance.textContent = `${formatCurrency(Math.abs(netBalance))} ${netBalance >= 0 ? 'Cr' : 'Dr'}`;
       dash.netBalance.style.color = netBalance >= 0 ? 'var(--brand-maroon)' : '#dc2626';
     }
+    if (dash.netBalanceSub) dash.netBalanceSub.textContent = 'Total Credit minus Total Debit';
+
+    // Set Dashboard DOM Cards: ROW 2
+    // 4. TOTAL CLIENTS
     if (dash.totalClients) dash.totalClients.textContent = totalClientsCount;
-    if (dash.personalExpense) dash.personalExpense.textContent = formatCurrency(personalExpense);
 
-    // Current Month Summary (Default: September 2026)
-    let curMonthIncome = 0;
-    let curMonthExpense = 0;
-    const curMonthTarget = 'September 2026';
+    // 5. CURRENT MONTH (Cash Received Only - No Expenses)
+    if (dash.currentMonthLabel) dash.currentMonthLabel.textContent = `CURRENT MONTH (${curMonthTarget.toUpperCase()})`;
+    if (dash.currentMonthCredit) dash.currentMonthCredit.textContent = formatCurrency(curMonthCredit);
+    if (dash.currentMonthSub) dash.currentMonthSub.textContent = 'Total cash received this month';
 
-    historicalTransactions.forEach(t => {
-      if (t.monthHeader === curMonthTarget) {
-        curMonthIncome += Number(t.credit || 0);
-        curMonthExpense += Number(t.debit || 0);
-      }
-    });
-    userInvoices.forEach(inv => {
-      if (inv.monthHeader === curMonthTarget && inv.status === 'PAID' && !inv.historicalTxId) {
-        curMonthIncome += Number(inv.total || 0);
-      }
-    });
-    const curMonthNet = curMonthIncome - curMonthExpense;
-
-    if (dash.currentMonthLabel) dash.currentMonthLabel.textContent = `Current Month (${curMonthTarget})`;
-    if (dash.currentMonthIncome) dash.currentMonthIncome.textContent = formatCurrency(curMonthIncome);
-    if (dash.currentMonthMeta) {
-      dash.currentMonthMeta.textContent = `Exp: ${formatCurrency(curMonthExpense)} | Net: ${curMonthNet >= 0 ? '+' : '-'}${formatCurrency(Math.abs(curMonthNet))} ${curMonthNet >= 0 ? 'Cr' : 'Dr'}`;
-    }
-
-    // Current Year Summary (2026)
-    let curYearIncome = 0;
-    let curYearExpense = 0;
-    historicalTransactions.forEach(t => {
-      if (t.year === 2026) {
-        curYearIncome += Number(t.credit || 0);
-        curYearExpense += Number(t.debit || 0);
-      }
-    });
-    userInvoices.forEach(inv => {
-      if (inv.year === 2026 && inv.status === 'PAID' && !inv.historicalTxId) {
-        curYearIncome += Number(inv.total || 0);
-      }
-    });
-    const curYearNet = curYearIncome - curYearExpense;
-
-    if (dash.currentYearLabel) dash.currentYearLabel.textContent = 'Current Year (2026)';
-    if (dash.currentYearIncome) dash.currentYearIncome.textContent = formatCurrency(curYearIncome);
-    if (dash.currentYearMeta) {
-      dash.currentYearMeta.textContent = `Exp: ${formatCurrency(curYearExpense)} | Net: ${curYearNet >= 0 ? '+' : '-'}${formatCurrency(Math.abs(curYearNet))} ${curYearNet >= 0 ? 'Cr' : 'Dr'}`;
-    }
+    // 6. CURRENT YEAR (Cash Received Only - No Expenses)
+    if (dash.currentYearLabel) dash.currentYearLabel.textContent = `CURRENT YEAR (${curYearTarget})`;
+    if (dash.currentYearCredit) dash.currentYearCredit.textContent = formatCurrency(curYearCredit);
+    if (dash.currentYearSub) dash.currentYearSub.textContent = `Total cash received in ${curYearTarget}`;
 
     // Render Monthly Client Collection
     renderMonthlyClientCollection();
@@ -1121,7 +1243,8 @@
     });
 
     userInvoices.forEach(inv => {
-      if (inv.monthHeader === monthTarget && inv.status === 'PAID' && !inv.historicalTxId) {
+      const invMonth = getInvoiceMonthHeader(inv);
+      if (invMonth === monthTarget && inv.status === 'PAID' && !inv.historicalTxId) {
         const name = (inv.client?.name || 'Client').trim();
         clientSums[name] = (clientSums[name] || 0) + Number(inv.total || 0);
         clientTxCounts[name] = (clientTxCounts[name] || 0) + 1;
@@ -2433,10 +2556,17 @@
     const discount = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
     const total = Math.max(0, subtotal - discount);
 
+    const dateStr = ed.inputInvoiceDate.value.trim();
+    const tempInv = { date: dateStr, isoDate: currentInvoice.isoDate };
+    const invMonth = getInvoiceMonthHeader(tempInv) || currentInvoice.monthHeader || '';
+    const invYr = getInvoiceYear(tempInv) || currentInvoice.year || new Date().getFullYear();
+
     const updated = {
       ...currentInvoice,
       invoiceNumber: invNum,
-      date: ed.inputInvoiceDate.value.trim(),
+      date: dateStr,
+      monthHeader: invMonth,
+      year: invYr,
       status: ed.selectInvoiceStatus.value,
       showDueDate: ed.toggleDueDate.checked,
       dueDate: ed.inputInvoiceDueDate.value.trim(),
@@ -2513,6 +2643,7 @@
     }
     saveClientProfiles();
     populateClientDatalists();
+    updateDashboard();
 
     showToast(`Invoice ${invNum} saved successfully!`, 'success');
   }

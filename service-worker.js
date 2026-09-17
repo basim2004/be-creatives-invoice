@@ -5,7 +5,7 @@
  * ensuring immediate updates without stale-cache issues, while strictly preserving localStorage.
  */
 
-const CACHE_NAME = 'be-invoice-v11';
+const CACHE_NAME = 'be-invoice-v12';
 
 const STATIC_ASSETS = [
   './',
@@ -35,33 +35,15 @@ const STATIC_ASSETS = [
   'assets/b-badge.png'
 ];
 
-// Install Event: Cache assets safely using allSettled so individual missing assets don't fail installation
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      const cachePromises = STATIC_ASSETS.map(url => {
-        return fetch(url)
-          .then(res => {
-            if (res.ok) return cache.put(url, res);
-            return Promise.resolve();
-          })
-          .catch(() => Promise.resolve());
-      });
-      return Promise.allSettled(cachePromises);
-    }).then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
-// Activate Event: Instantly remove all older cache versions and take immediate control
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames
-          .filter(name => name !== CACHE_NAME)
-          .map(name => caches.delete(name))
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.claim())
   );
 });
 

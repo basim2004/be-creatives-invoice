@@ -2638,15 +2638,15 @@ a {
    AGENCY DASHBOARD & MULTI-VIEW STYLES
    ========================================================================== */
 
-/* 8-Metric Master Financial Grid */
+/* 6-Metric Master Financial Grid (2 Rows x 3 Cards) */
 .dashboard-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-top: 16px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
   .dashboard-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
