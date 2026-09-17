@@ -774,6 +774,27 @@
     };
   }
 
+  // Expense Classification Engine:
+  // Strictly classifies 'Tea & Food...etc', 'personal expenses', and 'Recharge' as PERSONAL expenses.
+  // All other debit/outflow entries are strictly classified as BUSINESS expenses.
+  function isPersonalExpense(name, details) {
+    const n = (name || '').trim().toLowerCase();
+    const d = (details || '').trim().toLowerCase();
+    // 1. Tea & Food...etc
+    if (n.startsWith('tea & food') || n.includes('tea & food') || n.includes('tea and food') || /^(tea|food)\b/i.test(n)) {
+      return true;
+    }
+    // 2. personal expenses
+    if (n.includes('personal') || d.includes('personal')) {
+      return true;
+    }
+    // 3. Recharge
+    if (n.includes('recharge') || d.includes('recharge')) {
+      return true;
+    }
+    return false;
+  }
+
   // Expense Management Engine
   function loadExpenses() {
     expenses = [];
@@ -783,14 +804,24 @@
       if (Number(tx.debit || 0) > 0) {
         const name = (tx.name || '').trim();
         const details = (tx.details || '').trim();
-        const isPersonal = /personal/i.test(name) || /personal/i.test(details);
+        const isPersonal = isPersonalExpense(name, details);
 
-        let category = 'General';
-        if (isPersonal) category = 'Personal';
-        else if (/adobe|subscription|cloud|hosting|domain/i.test(details) || /adobe/i.test(name)) category = 'Software & Tools';
-        else if (/tea|food|hotel|lunch|dinner|travel|petrol|diesel/i.test(name) || /tea|food/i.test(details)) category = 'Food & Travel';
-        else if (/print|flex|banner|sheet/i.test(name) || /print/i.test(details)) category = 'Printing & Materials';
-        else if (/recharge|phone|bill|wifi/i.test(name)) category = 'Office & Logistics';
+        let category = 'Business Operations';
+        if (isPersonal) {
+          if (name.toLowerCase().includes('tea & food') || name.toLowerCase().startsWith('tea')) {
+            category = 'Food & Personal';
+          } else if (name.toLowerCase().includes('recharge')) {
+            category = 'Recharge & Mobile';
+          } else {
+            category = 'Personal Drawings';
+          }
+        } else {
+          if (/adobe|subscription|cloud|hosting|domain/i.test(details) || /adobe/i.test(name)) category = 'Software & Tools';
+          else if (/print|flex|banner|sheet/i.test(name) || /print/i.test(details)) category = 'Printing & Materials';
+          else if (/startup|business/i.test(name) || /startup/i.test(details)) category = 'Business Startup';
+          else if (/work|video|design/i.test(details) || /design/i.test(name)) category = 'Freelancers & Vendors';
+          else category = 'Business Operations';
+        }
 
         expenses.push({
           id: `exp_hist_${tx.id}`,
@@ -815,6 +846,9 @@
         if (Array.isArray(parsed)) {
           parsed.forEach(exp => {
             if (!expenses.some(e => e.id === exp.id)) {
+              if (isPersonalExpense(exp.name, exp.details)) {
+                exp.type = 'PERSONAL';
+              }
               expenses.push(exp);
             }
           });
@@ -896,7 +930,7 @@
       totalIncome += Number(t.credit || 0);
       const deb = Number(t.debit || 0);
       totalExpense += deb;
-      if (/personal/i.test(t.name || '') || /personal/i.test(t.details || '')) {
+      if (isPersonalExpense(t.name, t.details)) {
         personalExpense += deb;
       }
     });
@@ -1605,7 +1639,7 @@
           const deb = Number(t.debit || 0);
           income += cr;
           expense += deb;
-          if (/personal/i.test(t.name || '') || /personal/i.test(t.details || '')) {
+          if (isPersonalExpense(t.name, t.details)) {
             personal += deb;
           }
           if (cr > 0) {
@@ -2857,6 +2891,21 @@
     };
     if (expensesView.tableBody) expensesView.tableBody.addEventListener('click', handleDeleteExpenseClick);
     if (expensesView.mobileCards) expensesView.mobileCards.addEventListener('click', handleDeleteExpenseClick);
+
+    // Auto-detect Personal Expense in modal form
+    if (expensesView.inputName && expensesView.selectType) {
+      expensesView.inputName.addEventListener('input', () => {
+        const val = expensesView.inputName.value;
+        if (isPersonalExpense(val, '')) {
+          expensesView.selectType.value = 'PERSONAL';
+          if (expensesView.selectCategory) {
+            if (/recharge/i.test(val)) expensesView.selectCategory.value = 'Office & Logistics';
+            else if (/tea|food/i.test(val)) expensesView.selectCategory.value = 'Food & Travel';
+            else expensesView.selectCategory.value = 'Personal';
+          }
+        }
+      });
+    }
 
     // Save Expense Form
     if (expensesView.formAdd) {

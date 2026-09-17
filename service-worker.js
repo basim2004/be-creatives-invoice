@@ -5,7 +5,7 @@
  * ensuring immediate updates without stale-cache issues, while strictly preserving localStorage.
  */
 
-const CACHE_NAME = 'be-invoice-v8';
+const CACHE_NAME = 'be-invoice-v9';
 
 const STATIC_ASSETS = [
   './',
