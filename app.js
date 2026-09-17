@@ -9,6 +9,7 @@
   // Storage Keys
   const STORAGE_INVOICES_KEY = 'be_creatives_master_invoices_v1';
   const STORAGE_SETTINGS_KEY = 'be_creatives_master_settings_v1';
+  const STORAGE_FINANCE_KEY = 'be_creatives_transactions_v1';
 
   // Master Default Business Settings with B BADGE and original BE CREATIVES logo
   const DEFAULT_SETTINGS = {
@@ -121,14 +122,24 @@
   let searchQuery = '';
   let pendingDeleteId = null;
 
+  // Finance State
+  let financeTransactions = [];
+  let financeFilterType = 'ALL';
+  let financeFilterMonth = 'ALL';
+  let financeSearch = '';
+  let financeCurrentPage = 1;
+  const FINANCE_PAGE_SIZE = 25;
+
   // DOM Elements
   const views = {
     dashboard: document.getElementById('viewDashboard'),
+    finance: document.getElementById('viewFinance'),
     editor: document.getElementById('viewEditor')
   };
 
   const nav = {
     dashboardBtn: document.getElementById('navDashboardBtn'),
+    financeBtn: document.getElementById('navFinanceBtn'),
     newInvoiceBtn: document.getElementById('navNewInvoiceBtn'),
     settingsBtn: document.getElementById('navSettingsBtn'),
     dataMenuBtn: document.getElementById('navDataMenuBtn'),
@@ -155,6 +166,32 @@
     exportBackupBtn: document.getElementById('exportBackupBtn'),
     importBackupInput: document.getElementById('importBackupInput'),
     resetSampleDataBtn: document.getElementById('resetSampleDataBtn')
+  };
+
+  const finance = {
+    metricCredit: document.getElementById('financeMetricCredit'),
+    metricCreditCount: document.getElementById('financeMetricCreditCount'),
+    metricDebit: document.getElementById('financeMetricDebit'),
+    metricDebitCount: document.getElementById('financeMetricDebitCount'),
+    metricBalance: document.getElementById('financeMetricBalance'),
+    metricBalanceSub: document.getElementById('financeMetricBalanceSub'),
+    metricEntries: document.getElementById('financeMetricEntries'),
+    countBadge: document.getElementById('financeCountBadge'),
+    searchInput: document.getElementById('financeSearchInput'),
+    searchClearBtn: document.getElementById('financeSearchClearBtn'),
+    monthSelect: document.getElementById('financeMonthSelect'),
+    typePills: document.querySelectorAll('#financeTypePills .filter-pill'),
+    table: document.getElementById('financeTable'),
+    tableBody: document.getElementById('financeTableBody'),
+    mobileCards: document.getElementById('mobileFinanceCards'),
+    emptyState: document.getElementById('financeEmptyState'),
+    paginationBar: document.getElementById('financePaginationBar'),
+    paginationInfo: document.getElementById('financePaginationInfo'),
+    pageIndicator: document.getElementById('financePageIndicator'),
+    btnPrev: document.getElementById('btnFinancePrev'),
+    btnNext: document.getElementById('btnFinanceNext'),
+    btnExportCsv: document.getElementById('btnExportFinanceCsv'),
+    btnOpenAdd: document.getElementById('btnOpenAddTransaction')
   };
 
   const zoom = {
@@ -317,6 +354,16 @@
       toast.style.animation = 'fadeOut 0.25s forwards';
       setTimeout(() => toast.remove(), 260);
     }, 3200);
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   // Storage
@@ -523,6 +570,8 @@
   }
 
   function showDashboard() {
+    if (views.finance) views.finance.classList.remove('active');
+    if (nav.financeBtn) nav.financeBtn.classList.remove('active');
     views.editor.classList.remove('active');
     views.dashboard.classList.add('active');
     nav.dashboardBtn.classList.add('active');
@@ -530,12 +579,210 @@
   }
 
   function showEditor() {
+    if (views.finance) views.finance.classList.remove('active');
+    if (nav.financeBtn) nav.financeBtn.classList.remove('active');
     views.dashboard.classList.remove('active');
     views.editor.classList.add('active');
     nav.dashboardBtn.classList.remove('active');
     setTimeout(() => {
       if (typeof applyZoom === 'function') applyZoom('fit');
     }, 50);
+  }
+
+  function showFinance() {
+    views.dashboard.classList.remove('active');
+    views.editor.classList.remove('active');
+    if (views.finance) views.finance.classList.add('active');
+    nav.dashboardBtn.classList.remove('active');
+    if (nav.financeBtn) nav.financeBtn.classList.add('active');
+    renderFinance();
+  }
+
+  function loadFinanceTransactions() {
+    try {
+      const saved = localStorage.getItem(STORAGE_FINANCE_KEY);
+      if (saved) {
+        financeTransactions = JSON.parse(saved);
+      } else if (window.KHATABOOK_SEED_DATA && Array.isArray(window.KHATABOOK_SEED_DATA.transactions)) {
+        financeTransactions = JSON.parse(JSON.stringify(window.KHATABOOK_SEED_DATA.transactions));
+        saveFinanceTransactions();
+      }
+    } catch (err) {
+      console.error('Error loading finance data:', err);
+      if (window.KHATABOOK_SEED_DATA && Array.isArray(window.KHATABOOK_SEED_DATA.transactions)) {
+        financeTransactions = JSON.parse(JSON.stringify(window.KHATABOOK_SEED_DATA.transactions));
+      }
+    }
+  }
+
+  function saveFinanceTransactions() {
+    try {
+      localStorage.setItem(STORAGE_FINANCE_KEY, JSON.stringify(financeTransactions));
+    } catch (e) {
+      console.warn('Storage full or error saving finance:', e);
+    }
+  }
+
+  function populateFinanceMonthDropdown() {
+    if (!finance.monthSelect) return;
+    const currentVal = finance.monthSelect.value || 'ALL';
+    finance.monthSelect.innerHTML = '<option value="ALL">All Months (17 Months)</option>';
+
+    const months = [];
+    financeTransactions.forEach(t => {
+      if (t.monthHeader && !months.includes(t.monthHeader)) {
+        months.push(t.monthHeader);
+      }
+    });
+
+    months.forEach(m => {
+      const count = financeTransactions.filter(t => t.monthHeader === m).length;
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = `${m} (${count})`;
+      finance.monthSelect.appendChild(opt);
+    });
+
+    finance.monthSelect.value = currentVal;
+  }
+
+  function getFilteredFinanceTransactions() {
+    return financeTransactions.filter(tx => {
+      if (financeFilterType !== 'ALL' && tx.type !== financeFilterType) return false;
+      if (financeFilterMonth !== 'ALL' && tx.monthHeader !== financeFilterMonth) return false;
+      if (financeSearch.trim()) {
+        const q = financeSearch.toLowerCase().trim();
+        const nameMatch = (tx.name || '').toLowerCase().includes(q);
+        const detailsMatch = (tx.details || '').toLowerCase().includes(q);
+        const dateMatch = (tx.date || '').toLowerCase().includes(q);
+        const amtMatch = String(tx.amount || tx.credit || tx.debit || '').includes(q);
+        if (!nameMatch && !detailsMatch && !dateMatch && !amtMatch) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderFinance() {
+    const filtered = getFilteredFinanceTransactions();
+    const totalCount = filtered.length;
+
+    let totalCredit = 0;
+    let totalDebit = 0;
+    let creditCount = 0;
+    let debitCount = 0;
+
+    filtered.forEach(tx => {
+      const cr = Number(tx.credit) || (tx.type === 'CREDIT' ? Number(tx.amount) || 0 : 0);
+      const db = Number(tx.debit) || (tx.type === 'DEBIT' ? Number(tx.amount) || 0 : 0);
+      totalCredit += cr;
+      totalDebit += db;
+      if (tx.type === 'CREDIT' || cr > 0) creditCount++;
+      if (tx.type === 'DEBIT' || db > 0) debitCount++;
+    });
+
+    const netBalance = totalCredit - totalDebit;
+
+    if (finance.metricCredit) finance.metricCredit.textContent = formatCurrency(totalCredit);
+    if (finance.metricCreditCount) finance.metricCreditCount.textContent = `${creditCount} credit entries`;
+    if (finance.metricDebit) finance.metricDebit.textContent = formatCurrency(totalDebit);
+    if (finance.metricDebitCount) finance.metricDebitCount.textContent = `${debitCount} debit entries`;
+    if (finance.metricBalance) {
+      finance.metricBalance.textContent = `${formatCurrency(Math.abs(netBalance))} ${netBalance >= 0 ? 'Cr' : 'Dr'}`;
+      finance.metricBalance.style.color = netBalance >= 0 ? 'var(--brand-maroon)' : '#dc2626';
+    }
+    if (finance.metricBalanceSub) {
+      finance.metricBalanceSub.textContent = netBalance >= 0 ? 'Positive Net Balance' : 'Negative Net Outflow';
+    }
+    if (finance.metricEntries) finance.metricEntries.textContent = totalCount;
+    if (finance.countBadge) finance.countBadge.textContent = `${totalCount} of ${financeTransactions.length} records`;
+
+    const totalPages = Math.max(1, Math.ceil(totalCount / FINANCE_PAGE_SIZE));
+    if (financeCurrentPage > totalPages) financeCurrentPage = totalPages;
+    if (financeCurrentPage < 1) financeCurrentPage = 1;
+
+    const startIdx = (financeCurrentPage - 1) * FINANCE_PAGE_SIZE;
+    const endIdx = Math.min(startIdx + FINANCE_PAGE_SIZE, totalCount);
+    const pageItems = filtered.slice(startIdx, endIdx);
+
+    if (finance.paginationInfo) {
+      finance.paginationInfo.textContent = totalCount === 0 
+        ? 'Showing 0 entries' 
+        : `Showing ${startIdx + 1}–${endIdx} of ${totalCount} entries`;
+    }
+    if (finance.pageIndicator) {
+      finance.pageIndicator.textContent = `Page ${financeCurrentPage} of ${totalPages}`;
+    }
+    if (finance.btnPrev) finance.btnPrev.disabled = financeCurrentPage <= 1;
+    if (finance.btnNext) finance.btnNext.disabled = financeCurrentPage >= totalPages;
+
+    if (totalCount === 0) {
+      if (finance.tableBody) finance.tableBody.innerHTML = '';
+      if (finance.mobileCards) finance.mobileCards.innerHTML = '';
+      if (finance.emptyState) finance.emptyState.style.display = 'flex';
+      if (finance.paginationBar) finance.paginationBar.style.display = 'none';
+      return;
+    }
+
+    if (finance.emptyState) finance.emptyState.style.display = 'none';
+    if (finance.paginationBar) finance.paginationBar.style.display = 'flex';
+
+    let tableHtml = '';
+    let mobileHtml = '';
+
+    pageItems.forEach(tx => {
+      const isCredit = tx.type === 'CREDIT' || (Number(tx.credit) > 0);
+      const badgeClass = isCredit ? 'badge-credit' : 'badge-debit';
+      const badgeIcon = isCredit ? 'fa-arrow-down-left' : 'fa-arrow-up-right';
+      const badgeText = isCredit ? 'Credit' : 'Debit';
+      const amtClass = isCredit ? 'tx-amount-credit' : 'tx-amount-debit';
+      const amtSign = isCredit ? '+' : '-';
+      const amtVal = isCredit ? (tx.credit || tx.amount) : (tx.debit || tx.amount);
+
+      tableHtml += `
+        <tr>
+          <td><span class="table-tx-date">${escapeHtml(tx.date || '')}</span></td>
+          <td><span class="table-tx-name">${escapeHtml(tx.name || '—')}</span></td>
+          <td><span class="table-tx-details">${escapeHtml(tx.details || '—')}</span></td>
+          <td>
+            <span class="${badgeClass}">
+              <i class="fa-solid ${badgeIcon}"></i> ${badgeText}
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <span class="${amtClass}">${amtSign} ₹${Number(amtVal).toLocaleString('en-IN')}</span>
+          </td>
+          <td style="text-align: center;">
+            <button type="button" class="btn-icon-action danger btn-delete-tx" data-id="${tx.id}" title="Delete Record">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+
+      mobileHtml += `
+        <div class="mobile-invoice-card" style="border-left: 4px solid ${isCredit ? '#10b981' : '#dc2626'};">
+          <div class="mobile-card-top">
+            <span class="table-tx-date" style="font-weight: 700; color: var(--slate-700);">${escapeHtml(tx.date || '')}</span>
+            <span class="${badgeClass}">
+              <i class="fa-solid ${badgeIcon}"></i> ${badgeText}
+            </span>
+          </div>
+          <div class="mobile-card-middle" style="margin: 8px 0;">
+            <div style="font-weight: 700; color: var(--slate-900); font-size: 0.95rem;">${escapeHtml(tx.name || '—')}</div>
+            <div style="font-size: 0.8rem; color: var(--slate-500); margin-top: 3px;">${escapeHtml(tx.details || '—')}</div>
+          </div>
+          <div class="mobile-card-bottom" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--slate-100); padding-top: 8px; margin-top: 8px;">
+            <span class="${amtClass}" style="font-size: 1.05rem;">${amtSign} ₹${Number(amtVal).toLocaleString('en-IN')}</span>
+            <button type="button" class="btn-icon-action danger btn-delete-tx" data-id="${tx.id}" title="Delete Record">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    if (finance.tableBody) finance.tableBody.innerHTML = tableHtml;
+    if (finance.mobileCards) finance.mobileCards.innerHTML = mobileHtml;
   }
 
   // Create New Invoice
@@ -1390,11 +1637,186 @@
   // Events Attachment
   function attachEvents() {
     nav.dashboardBtn.addEventListener('click', showDashboard);
+    if (nav.financeBtn) nav.financeBtn.addEventListener('click', showFinance);
+    const btnDashboardGoFinance = document.getElementById('btnDashboardGoFinance');
+    if (btnDashboardGoFinance) btnDashboardGoFinance.addEventListener('click', showFinance);
     nav.logoHome.addEventListener('click', showDashboard);
     nav.newInvoiceBtn.addEventListener('click', createNewInvoice);
     nav.settingsBtn.addEventListener('click', openSettingsModal);
     dash.btnNew.addEventListener('click', createNewInvoice);
     dash.btnEmptyCreate.addEventListener('click', createNewInvoice);
+
+    // Finance Search and Filters
+    if (finance.searchInput) {
+      finance.searchInput.addEventListener('input', e => {
+        financeSearch = e.target.value;
+        if (finance.searchClearBtn) finance.searchClearBtn.style.display = financeSearch ? 'block' : 'none';
+        financeCurrentPage = 1;
+        renderFinance();
+      });
+    }
+
+    if (finance.searchClearBtn) {
+      finance.searchClearBtn.addEventListener('click', () => {
+        if (finance.searchInput) finance.searchInput.value = '';
+        financeSearch = '';
+        finance.searchClearBtn.style.display = 'none';
+        financeCurrentPage = 1;
+        renderFinance();
+      });
+    }
+
+    if (finance.monthSelect) {
+      finance.monthSelect.addEventListener('change', e => {
+        financeFilterMonth = e.target.value;
+        financeCurrentPage = 1;
+        renderFinance();
+      });
+    }
+
+    if (finance.typePills) {
+      finance.typePills.forEach(p => p.addEventListener('click', () => {
+        finance.typePills.forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+        financeFilterType = p.getAttribute('data-type');
+        financeCurrentPage = 1;
+        renderFinance();
+      }));
+    }
+
+    // Finance Pagination
+    if (finance.btnPrev) {
+      finance.btnPrev.addEventListener('click', () => {
+        if (financeCurrentPage > 1) {
+          financeCurrentPage--;
+          renderFinance();
+        }
+      });
+    }
+
+    if (finance.btnNext) {
+      finance.btnNext.addEventListener('click', () => {
+        financeCurrentPage++;
+        renderFinance();
+      });
+    }
+
+    // Finance Delete Record
+    const handleFinanceDelete = e => {
+      const btn = e.target.closest('.btn-delete-tx');
+      if (!btn) return;
+      const txId = btn.getAttribute('data-id');
+      if (!txId) return;
+      if (confirm('Delete this transaction record?')) {
+        financeTransactions = financeTransactions.filter(t => t.id !== txId);
+        saveFinanceTransactions();
+        populateFinanceMonthDropdown();
+        renderFinance();
+        showToast('Transaction record deleted.', 'info');
+      }
+    };
+
+    if (finance.tableBody) finance.tableBody.addEventListener('click', handleFinanceDelete);
+    if (finance.mobileCards) finance.mobileCards.addEventListener('click', handleFinanceDelete);
+
+    // Finance Export CSV
+    if (finance.btnExportCsv) {
+      finance.btnExportCsv.addEventListener('click', () => {
+        const records = getFilteredFinanceTransactions();
+        if (!records.length) {
+          showToast('No records to export.', 'info');
+          return;
+        }
+        const headers = ['Date', 'Name / Party', 'Details / Note', 'Type', 'Debit (INR)', 'Credit (INR)', 'Amount (INR)'];
+        const rows = records.map(r => [
+          `"${(r.date || '').replace(/"/g, '""')}"`,
+          `"${(r.name || '').replace(/"/g, '""')}"`,
+          `"${(r.details || '').replace(/"/g, '""')}"`,
+          `"${r.type}"`,
+          r.debit || 0,
+          r.credit || 0,
+          r.amount || (r.type === 'CREDIT' ? r.credit : r.debit) || 0
+        ]);
+        const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BE_Creatives_Cashbook_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Exported ${records.length} transactions to CSV!`, 'success');
+      });
+    }
+
+    // Finance Add Modal
+    const modalAddTx = document.getElementById('modalAddTransaction');
+    const formAddTx = document.getElementById('formAddTransaction');
+    const btnCloseAddTx = document.getElementById('btnCloseAddTxModal');
+    const btnCancelAddTx = document.getElementById('btnCancelAddTx');
+
+    if (finance.btnOpenAdd && modalAddTx) {
+      finance.btnOpenAdd.addEventListener('click', () => {
+        const today = new Date();
+        const iso = today.toISOString().split('T')[0];
+        if (formAddTx) formAddTx.reset();
+        const dateInput = document.getElementById('inputTxDate');
+        if (dateInput) dateInput.value = iso;
+        modalAddTx.style.display = 'flex';
+      });
+    }
+
+    if (btnCloseAddTx && modalAddTx) {
+      btnCloseAddTx.addEventListener('click', () => { modalAddTx.style.display = 'none'; });
+    }
+    if (btnCancelAddTx && modalAddTx) {
+      btnCancelAddTx.addEventListener('click', () => { modalAddTx.style.display = 'none'; });
+    }
+
+    if (formAddTx) {
+      formAddTx.addEventListener('submit', e => {
+        e.preventDefault();
+        const dateVal = document.getElementById('inputTxDate').value;
+        const typeVal = document.getElementById('selectTxType').value;
+        const nameVal = document.getElementById('inputTxName').value.trim();
+        const amtVal = parseFloat(document.getElementById('inputTxAmount').value) || 0;
+        const detailsVal = document.getElementById('inputTxDetails').value.trim();
+
+        if (!nameVal || amtVal <= 0) {
+          showToast('Please enter a valid party name and amount.', 'danger');
+          return;
+        }
+
+        const dObj = new Date(dateVal);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const fullMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const dStr = isNaN(dObj.getTime()) ? dateVal : `${dObj.getDate()} ${months[dObj.getMonth()]} ${dObj.getFullYear()}`;
+        const mHeader = isNaN(dObj.getTime()) ? 'Recent' : `${fullMonths[dObj.getMonth()]} ${dObj.getFullYear()}`;
+
+        const newTx = {
+          id: 'tx_user_' + Date.now(),
+          date: dStr,
+          isoDate: dateVal,
+          year: isNaN(dObj.getTime()) ? new Date().getFullYear() : dObj.getFullYear(),
+          monthHeader: mHeader,
+          name: nameVal,
+          details: detailsVal,
+          type: typeVal,
+          amount: amtVal,
+          debit: typeVal === 'DEBIT' ? amtVal : 0,
+          credit: typeVal === 'CREDIT' ? amtVal : 0
+        };
+
+        financeTransactions.unshift(newTx);
+        saveFinanceTransactions();
+        populateFinanceMonthDropdown();
+        if (modalAddTx) modalAddTx.style.display = 'none';
+        renderFinance();
+        showToast('Transaction added successfully!', 'success');
+      });
+    }
 
     // Dropdown
     nav.dataMenuBtn.addEventListener('click', e => {
@@ -1844,6 +2266,8 @@
   function init() {
     loadSettings();
     loadInvoices();
+    loadFinanceTransactions();
+    populateFinanceMonthDropdown();
     attachEvents();
 
     // Default to first invoice (BC-78)

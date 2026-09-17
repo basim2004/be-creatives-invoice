@@ -420,7 +420,7 @@ a {
 }
 
 .view-section.active {
-  display: block;
+  display: block !important;
 }
 
 .app-main {
@@ -2512,4 +2512,106 @@ a {
   .mob-bar-btn i {
     font-size: 0.92rem;
   }
+}
+
+/* ==========================================================================
+   FINANCE & CASHBOOK SYSTEM
+   ========================================================================== */
+#viewFinance {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 24px 28px 60px;
+}
+
+.finance-hero {
+  background: linear-gradient(135deg, #182234 0%, #293548 60%, #3e4f68 100%);
+}
+
+.badge-credit {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.badge-debit {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.tx-amount-credit {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  color: #059669;
+  font-size: 0.96rem;
+  text-align: right;
+  display: block;
+}
+
+.tx-amount-debit {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  color: #dc2626;
+  font-size: 0.96rem;
+  text-align: right;
+  display: block;
+}
+
+.finance-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  border-top: 1px solid var(--slate-200);
+  background: var(--slate-50);
+  font-size: 0.84rem;
+  color: var(--slate-600);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagination-page-indicator {
+  font-weight: 600;
+  color: var(--slate-700);
+  font-size: 0.84rem;
+}
+
+.table-tx-date {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  white-space: nowrap;
+}
+
+.table-tx-name {
+  font-weight: 700;
+  color: var(--slate-900);
+  font-size: 0.9rem;
+}
+
+.table-tx-details {
+  font-size: 0.82rem;
+  color: var(--slate-600);
+  line-height: 1.4;
+  word-break: break-word;
 }

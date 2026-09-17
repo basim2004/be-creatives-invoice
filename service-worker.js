@@ -5,7 +5,7 @@
  * ensuring immediate updates without stale-cache issues, while strictly preserving localStorage.
  */
 
-const CACHE_NAME = 'be-invoice-v5';
+const CACHE_NAME = 'be-invoice-v7';
 
 const STATIC_ASSETS = [
   './',
@@ -26,6 +26,7 @@ const STATIC_ASSETS = [
   'assets/html2canvas.min.js',
   'assets/jspdf.umd.min.js',
   'assets/html2pdf.bundle.min.js',
+  'assets/khatabook-data.js',
   'assets/signature-be-creatives.svg',
   'assets/stamp-seal.svg',
   'assets/be-creatives-stamp.svg',

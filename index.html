@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Master Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2026091703">
+  <link rel="stylesheet" href="style.css?v=2026091705">
   
   <script>
     // Automatic Self-Healing: If stylesheet fails to load due to stale browser cache, force clear and reload
@@ -46,7 +46,8 @@
     });
   </script>
   
-  <!-- Standalone Libraries -->
+  <!-- Standalone Libraries & Data -->
+  <script src="assets/khatabook-data.js"></script>
   <script src="assets/qrcode.js"></script>
   <script src="assets/html2canvas.min.js"></script>
   <script src="assets/jspdf.umd.min.js"></script>
@@ -87,6 +88,10 @@
         <button type="button" class="nav-btn active" id="navDashboardBtn">
           <i class="fa-solid fa-table-columns"></i>
           <span>Dashboard</span>
+        </button>
+        <button type="button" class="nav-btn" id="navFinanceBtn">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Finance</span>
         </button>
         <button type="button" class="nav-btn primary-btn" id="navNewInvoiceBtn">
           <i class="fa-solid fa-plus"></i>
@@ -131,7 +136,11 @@
           <h1 class="hero-title">INVOICE MANAGEMENT</h1>
           <p class="hero-description">Manage, create, duplicate, and export client-ready invoices matching the exact BE CREATIVES master design reference.</p>
         </div>
-        <div class="hero-actions">
+        <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" id="btnDashboardGoFinance" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Cashbook & Finance</span>
+          </button>
           <button type="button" class="btn btn-hero-cta" id="btnDashboardNewInvoice">
             <i class="fa-solid fa-plus"></i>
             <span>+ NEW INVOICE</span>
@@ -235,6 +244,152 @@
             <button type="button" class="btn btn-primary" id="btnEmptyCreateInvoice">
               <i class="fa-solid fa-plus"></i>
               <span>+ Create First Invoice</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: CASHBOOK & FINANCE MANAGER (KHATABOOK HISTORICAL & REAL-TIME) -->
+    <section id="viewFinance" class="view-section no-print">
+      <div class="dashboard-hero finance-hero">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="pulse-dot"></span>
+            <span>Khatabook & Cash Flow Ledger</span>
+          </div>
+          <h1 class="hero-title">FINANCE & CASHBOOK</h1>
+          <p class="hero-description">Historical Khatabook records (11 May 2025 – 16 Sep 2026) and real-time cash flow management with zero data loss.</p>
+        </div>
+        <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary" id="btnExportFinanceCsv" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);" title="Export all filtered transactions to CSV">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Export CSV</span>
+          </button>
+          <button type="button" class="btn btn-hero-cta" id="btnOpenAddTransaction">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ Add Transaction</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon emerald"><i class="fa-solid fa-arrow-down-left"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Inflow (Credit)</span>
+            <span class="metric-value" id="financeMetricCredit">₹1,89,244.00</span>
+            <span class="metric-sub" id="financeMetricCreditCount">Money Received</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon amber" style="background:#fef2f2; color:#dc2626;"><i class="fa-solid fa-arrow-up-right"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Outflow (Debit)</span>
+            <span class="metric-value" id="financeMetricDebit">₹1,15,935.00</span>
+            <span class="metric-sub" id="financeMetricDebitCount">Money Given / Spent</span>
+          </div>
+        </div>
+
+        <div class="metric-card" style="border-left: 4px solid var(--brand-maroon);">
+          <div class="metric-icon maroon"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Net Balance</span>
+            <span class="metric-value" id="financeMetricBalance">₹73,309.00 Cr</span>
+            <span class="metric-sub" id="financeMetricBalanceSub">Positive Net Balance</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon blue"><i class="fa-solid fa-receipt"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Records</span>
+            <span class="metric-value" id="financeMetricEntries">488</span>
+            <span class="metric-sub">11 May 2025 – 16 Sep 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Ledger Card -->
+      <div class="dashboard-card">
+        <div class="dashboard-card-header">
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <h2 class="card-title">Transaction Ledger</h2>
+            <span class="badge-neutral" id="financeCountBadge">488 records</span>
+          </div>
+
+          <!-- Filters Bar -->
+          <div class="filter-controls-group">
+            <!-- Search box -->
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="financeSearchInput" placeholder="Search by party name or details..." autocomplete="off">
+              <button type="button" class="btn-icon-clear search-clear-btn" id="financeSearchClearBtn" style="display:none;" title="Clear search">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Month filter dropdown -->
+            <select id="financeMonthSelect" class="form-select finance-select" style="padding: 8px 12px; border: 1px solid var(--slate-200); border-radius: var(--radius-md); font-size: 0.86rem; background: var(--white); font-weight: 600; color: var(--slate-700);">
+              <option value="ALL">All Months (17 Months)</option>
+            </select>
+
+            <!-- Type pills -->
+            <div class="status-filter-pills" id="financeTypePills">
+              <button type="button" class="filter-pill active" data-type="ALL">All</button>
+              <button type="button" class="filter-pill" data-type="CREDIT"><i class="fa-solid fa-circle" style="font-size:7px; color:#10b981; margin-right:4px;"></i> Credit</button>
+              <button type="button" class="filter-pill" data-type="DEBIT"><i class="fa-solid fa-circle" style="font-size:7px; color:#dc2626; margin-right:4px;"></i> Debit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions Table (Desktop & Tablet) -->
+        <div class="table-responsive">
+          <table class="data-table" id="financeTable">
+            <thead>
+              <tr>
+                <th style="width: 140px;">DATE</th>
+                <th style="min-width: 220px;">NAME / PARTY</th>
+                <th style="min-width: 280px;">DETAILS / NOTE</th>
+                <th style="width: 120px;">TYPE</th>
+                <th style="width: 150px; text-align: right;">AMOUNT (₹)</th>
+                <th style="width: 100px; text-align: center;">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="financeTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+
+          <!-- Mobile Transaction Cards -->
+          <div class="mobile-invoices-cards" id="mobileFinanceCards">
+            <!-- Dynamically populated cards on mobile -->
+          </div>
+
+          <!-- Empty State for filtered results -->
+          <div class="empty-state" id="financeEmptyState" style="display:none;">
+            <div class="empty-icon-wrap">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h3 class="empty-title">No Transactions Found</h3>
+            <p class="empty-text">No records match your search or filter criteria.</p>
+          </div>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="finance-pagination-bar" id="financePaginationBar">
+          <div class="pagination-info" id="financePaginationInfo">
+            Showing 1–25 of 488 entries
+          </div>
+          <div class="pagination-controls">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnFinancePrev" disabled>
+              <i class="fa-solid fa-chevron-left"></i> Prev
+            </button>
+            <span class="pagination-page-indicator" id="financePageIndicator">Page 1 of 20</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnFinanceNext">
+              Next <i class="fa-solid fa-chevron-right"></i>
             </button>
           </div>
         </div>
@@ -1068,6 +1223,56 @@
     </div>
   </div>
 
+  <!-- Modal: Add New Cashbook Transaction -->
+  <div class="modal-overlay" id="modalAddTransaction" style="display:none;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-circle-plus" style="color:var(--brand-maroon); margin-right:8px;"></i> Add Transaction</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseAddTxModal" title="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="formAddTransaction">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="inputTxDate">Date *</label>
+              <input type="date" id="inputTxDate" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="selectTxType">Type *</label>
+              <select id="selectTxType" class="form-input" required>
+                <option value="CREDIT">Credit (Money Received / Inflow)</option>
+                <option value="DEBIT">Debit (Money Given / Outflow)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputTxName">Party / Client Name *</label>
+            <input type="text" id="inputTxName" class="form-input" placeholder="e.g. Alam Engaz, Rahoof, Printing Shop" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputTxAmount">Amount (₹) *</label>
+            <input type="number" id="inputTxAmount" class="form-input" placeholder="e.g. 1500" min="0.01" step="any" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputTxDetails">Details / Description</label>
+            <textarea id="inputTxDetails" class="form-input" rows="3" placeholder="Optional notes, work reference, payment details..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelAddTx">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitAddTx">
+            <i class="fa-solid fa-check"></i> Save Transaction
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Feedback Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -1097,6 +1302,6 @@
   </script>
 
   <!-- Master Application Logic -->
-  <script src="script.js?v=2026091704"></script>
+  <script src="script.js?v=2026091705"></script>
 </body>
 </html>
