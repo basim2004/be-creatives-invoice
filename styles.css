@@ -1517,9 +1517,18 @@ a {
   position: relative;
 }
 
+.master-middle-grid.no-links {
+  grid-template-columns: 1fr;
+}
+
 .middle-col-deliverables {
   padding-right: 20px;
   border-right: 1.5px solid #d1d5db;
+}
+
+.master-middle-grid.no-links .middle-col-deliverables {
+  padding-right: 0;
+  border-right: none;
 }
 
 .middle-col-links {

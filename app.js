@@ -409,27 +409,38 @@
     clientName: document.getElementById('sheetClientName'),
     clientSubdetails: document.getElementById('sheetClientSubdetails'),
     itemsTableBody: document.getElementById('sheetItemsTableBody'),
+    totalPayable: document.getElementById('sheetTotalPayable'),
+    grandTotal: document.getElementById('sheetTotalPayable') || document.getElementById('sheetGrandTotal'),
+    deliverablesCol: document.getElementById('sheetDeliverablesCol'),
     deliverablesList: document.getElementById('sheetDeliverablesList'),
-    websitesBlock: document.getElementById('sheetWebsitesBlock'),
-    websitesList: document.getElementById('sheetWebsitesList'),
+    middleGrid: document.getElementById('sheetMiddleGrid') || document.querySelector('.master-middle-grid'),
+    websitesBlock: document.getElementById('sheetWebsitesBlock') || document.querySelector('.middle-col-links'),
+    websitesList: document.getElementById('sheetWebsiteLinksList') || document.getElementById('sheetWebsitesList'),
     subtotal: document.getElementById('sheetSubtotal'),
     discountRow: document.getElementById('sheetDiscountRow'),
     discountAmount: document.getElementById('sheetDiscountAmount'),
-    grandTotal: document.getElementById('sheetGrandTotal'),
-    qrCodeWrap: document.getElementById('sheetQrCodeWrap'),
+    qrCol: document.getElementById('sheetQrCol'),
+    qrCodeWrap: document.getElementById('sheetQrCol') || document.getElementById('sheetQrCodeWrap'),
     dynamicQrBox: document.getElementById('sheetDynamicQrBox'),
     customQrImg: document.getElementById('sheetCustomQrImg'),
-    payeeName: document.getElementById('sheetPayeeName'),
+    qrCaption: document.getElementById('sheetQrCaption'),
+    payeeName: document.getElementById('sheetAccountName') || document.getElementById('sheetPayeeName'),
     bankName: document.getElementById('sheetBankName'),
-    accountNumberRow: document.getElementById('sheetAccountNumberRow'),
+    accountNumberRow: document.getElementById('rowAccountNumber') || document.getElementById('sheetAccountNumberRow'),
     accountNumber: document.getElementById('sheetAccountNumber'),
-    ifscCodeRow: document.getElementById('sheetIfscCodeRow'),
+    ifscCodeRow: document.getElementById('rowIfsc') || document.getElementById('sheetIfscCodeRow'),
     ifscCode: document.getElementById('sheetIfscCode'),
-    gpayRow: document.getElementById('sheetGpayRow'),
+    gpayRow: document.getElementById('rowGpay') || document.getElementById('sheetGpayRow'),
     gpayNumber: document.getElementById('sheetGpayNumber'),
-    upiIdRow: document.getElementById('sheetUpiIdRow'),
-    upiId: document.getElementById('sheetUpiId'),
-    paymentNote: document.getElementById('sheetPaymentNote')
+    upiIdRow: document.getElementById('rowUpi') || document.getElementById('sheetUpiIdRow'),
+    primaryUpi: document.getElementById('sheetPrimaryUpi'),
+    secondaryUpi: document.getElementById('sheetSecondaryUpi'),
+    upiId: document.getElementById('sheetPrimaryUpi') || document.getElementById('sheetUpiId'),
+    paymentNoteRow: document.getElementById('sheetPaymentNoteRow'),
+    paymentNote: document.getElementById('sheetPaymentNoteText') || document.getElementById('sheetPaymentNote'),
+    stampImg: document.getElementById('sheetStampImg'),
+    sigImg: document.getElementById('sheetSigImg'),
+    sigCaption: document.getElementById('sheetSigCaption')
   };
 
   const deleteModal = {
@@ -1964,26 +1975,36 @@
       `).join('');
     }
 
-    // Website Links
-    if (sheet.websitesBlock && sheet.websitesList) {
+    // Website Links & Middle Grid
+    const linksEl = document.getElementById('sheetWebsiteLinksList') || sheet.websitesList;
+    const linksCol = document.getElementById('sheetWebsitesBlock') || document.querySelector('.middle-col-links');
+    const midGrid = document.getElementById('sheetMiddleGrid') || document.querySelector('.master-middle-grid');
+    if (linksEl && linksCol) {
       if (websiteLinks.length > 0) {
-        sheet.websitesBlock.style.display = 'block';
-        sheet.websitesList.innerHTML = websiteLinks.map(l => `
+        linksCol.style.display = 'block';
+        if (midGrid) midGrid.classList.remove('no-links');
+        linksEl.innerHTML = websiteLinks.map(l => `
           <a href="${escapeHtml(l.url)}" target="_blank" class="master-website-card" rel="noopener noreferrer">
             <span class="site-card-title">${escapeHtml(l.title)}</span>
             <span class="site-card-url">${escapeHtml(l.url)}</span>
           </a>
         `).join('');
       } else {
-        sheet.websitesBlock.style.display = 'none';
+        linksCol.style.display = 'none';
+        if (midGrid) midGrid.classList.add('no-links');
+        linksEl.innerHTML = '';
       }
     }
 
-    // Totals
+    // Totals - CRITICAL: Always update Master TOTAL AMOUNT PAYABLE Bar
+    const formattedPayable = formatCurrency(grandTotal, curr) + '/-';
+    if (sheet.totalPayable) sheet.totalPayable.textContent = formattedPayable;
+    if (sheet.grandTotal) sheet.grandTotal.textContent = formattedPayable;
+    const directTotalPayableEl = document.getElementById('sheetTotalPayable');
+    if (directTotalPayableEl) directTotalPayableEl.textContent = formattedPayable;
     if (sheet.subtotal) sheet.subtotal.textContent = formatCurrency(subtotal, curr);
     if (sheet.discountRow) sheet.discountRow.style.display = discount > 0 ? 'table-row' : 'none';
     if (sheet.discountAmount) sheet.discountAmount.textContent = '-' + formatCurrency(discount, curr);
-    if (sheet.grandTotal) sheet.grandTotal.textContent = formatCurrency(grandTotal, curr);
 
     // Payment Section
     const payee = ed.inputPayeeName.value.trim() || businessSettings.accountName || 'BASIM ASLAM P';
@@ -1995,22 +2016,53 @@
     const secUpi = ed.inputSecondaryUpi.value.trim() || businessSettings.secondaryUpi || 'basimaslam419@okaxis';
     const note = ed.inputPaymentNote.value.trim() || businessSettings.paymentNote || 'Kindly share payment screenshot.';
 
-    if (sheet.payeeName) sheet.payeeName.textContent = payee;
-    if (sheet.bankName) sheet.bankName.textContent = bank;
-    if (sheet.accountNumber) sheet.accountNumber.textContent = accNo;
-    if (sheet.ifscCode) sheet.ifscCode.textContent = ifsc;
-    if (sheet.gpayNumber) sheet.gpayNumber.textContent = gpay;
-    if (sheet.upiId) sheet.upiId.textContent = priUpi;
-    if (sheet.paymentNote) sheet.paymentNote.textContent = note;
+    const payeeEl = document.getElementById('sheetAccountName') || sheet.payeeName;
+    if (payeeEl) payeeEl.textContent = payee;
+    
+    const bankEl = document.getElementById('sheetBankName') || sheet.bankName;
+    if (bankEl) bankEl.textContent = bank;
 
-    if (sheet.accountNumberRow) sheet.accountNumberRow.style.display = ed.toggleShowAccountNo.checked ? 'table-row' : 'none';
-    if (sheet.ifscCodeRow) sheet.ifscCodeRow.style.display = ed.toggleShowIfsc.checked ? 'table-row' : 'none';
-    if (sheet.gpayRow) sheet.gpayRow.style.display = ed.toggleShowGpay.checked ? 'table-row' : 'none';
-    if (sheet.upiIdRow) sheet.upiIdRow.style.display = ed.toggleShowUpiId.checked ? 'table-row' : 'none';
+    const accEl = document.getElementById('sheetAccountNumber') || sheet.accountNumber;
+    if (accEl) accEl.textContent = accNo;
+
+    const ifscEl = document.getElementById('sheetIfscCode') || sheet.ifscCode;
+    if (ifscEl) ifscEl.textContent = ifsc;
+
+    const gpayEl = document.getElementById('sheetGpayNumber') || sheet.gpayNumber;
+    if (gpayEl) gpayEl.textContent = gpay;
+
+    const pUpiEl = document.getElementById('sheetPrimaryUpi') || sheet.primaryUpi;
+    if (pUpiEl) pUpiEl.textContent = priUpi;
+
+    const sUpiEl = document.getElementById('sheetSecondaryUpi') || sheet.secondaryUpi;
+    if (sUpiEl) sUpiEl.textContent = secUpi;
+
+    const noteEl = document.getElementById('sheetPaymentNoteText') || sheet.paymentNote;
+    if (noteEl) noteEl.textContent = note;
+
+    const accRow = document.getElementById('rowAccountNumber') || sheet.accountNumberRow;
+    if (accRow) accRow.style.display = ed.toggleShowAccountNo.checked ? 'table-row' : 'none';
+
+    const ifscRow = document.getElementById('rowIfsc') || sheet.ifscCodeRow;
+    if (ifscRow) ifscRow.style.display = ed.toggleShowIfsc.checked ? 'table-row' : 'none';
+
+    const gpayRow = document.getElementById('rowGpay') || sheet.gpayRow;
+    if (gpayRow) gpayRow.style.display = ed.toggleShowGpay.checked ? 'table-row' : 'none';
+
+    const upiRow = document.getElementById('rowUpi') || sheet.upiIdRow;
+    if (upiRow) upiRow.style.display = ed.toggleShowUpiId.checked ? 'table-row' : 'none';
+
+    // QR Caption
+    const qrCapEl = document.getElementById('sheetQrCaption') || sheet.qrCaption;
+    const upiForQr = ed.inputQrUpiId.value.trim() || secUpi || 'basimaslam419@okaxis';
+    if (qrCapEl) {
+      qrCapEl.textContent = `UPI ID: ${upiForQr}`;
+    }
 
     // QR Code
     const showQr = ed.toggleShowQr.checked;
-    if (sheet.qrCodeWrap) sheet.qrCodeWrap.style.display = showQr ? 'flex' : 'none';
+    const qrCol = document.getElementById('sheetQrCol') || sheet.qrCodeWrap;
+    if (qrCol) qrCol.style.display = showQr ? 'flex' : 'none';
 
     if (showQr) {
       if (ed.qrModeUpload.checked && ed.uploadedQrPreviewImg && ed.uploadedQrPreviewImg.src) {
@@ -2023,7 +2075,6 @@
         if (sheet.customQrImg) sheet.customQrImg.style.display = 'none';
         if (sheet.dynamicQrBox) {
           sheet.dynamicQrBox.style.display = 'flex';
-          const upiForQr = ed.inputQrUpiId.value.trim() || secUpi || 'basimaslam419@okaxis';
           const payeeForQr = ed.inputQrPayeeName.value.trim() || payee || 'BASIM ASLAM P';
           renderDynamicUpiQr(grandTotal, upiForQr, payeeForQr);
         }
