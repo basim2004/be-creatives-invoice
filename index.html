@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BE CREATIVES — Premium Invoice Management System</title>
+  
+  <!-- Web App Manifest & PWA Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#641A1D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BE Invoice">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <!-- Google Fonts: Outfit (Brand), Inter (Data), Great Vibes (Thank you script) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Master Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=2026091703">
+  
+  <script>
+    // Automatic Self-Healing: If stylesheet fails to load due to stale browser cache, force clear and reload
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        if (getComputedStyle(document.body).display !== 'flex') {
+          console.warn('Stale cache detected, self-healing styles...');
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+              regs.forEach(r => r.unregister());
+            });
+          }
+          if ('caches' in window) {
+            caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+          }
+          const link = document.querySelector('link[href*="style.css"]');
+          if (link) link.href = 'style.css?t=' + Date.now();
+        }
+      }, 100);
+    });
+  </script>
+  
+  <!-- Standalone Libraries -->
+  <script src="assets/qrcode.js"></script>
+  <script src="assets/html2canvas.min.js"></script>
+  <script src="assets/jspdf.umd.min.js"></script>
+  <script src="assets/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="app-header no-print">
+    <div class="header-container">
+      <div class="brand-group" id="navLogoHome" role="button" title="Go to Dashboard">
+        <img src="be creatives agency.png" alt="BE CREATIVES" class="header-logo" onerror="this.src='B BADGE.png'" style="height: 38px; width: auto; max-width: 140px; object-fit: contain;">
+        <div class="brand-title-wrap">
+          <span class="brand-name">BE CREATIVES</span>
+          <span class="brand-subtitle">BE Invoice</span>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <!-- Native PWA Install Button (Chrome, Android, Windows) -->
+        <button type="button" class="nav-btn btn-install-pwa" id="btnInstallApp" style="display:none;" title="Install BE Creatives Invoice App">
+          <i class="fa-solid fa-download"></i>
+          <span class="install-label-desktop">INSTALL APP</span>
+          <span class="install-label-mobile">Install</span>
+        </button>
+
+        <!-- Installed Standalone Indicator -->
+        <span class="installed-app-badge" id="badgeAppInstalled" style="display:none;" title="Running in standalone mode">
+          <i class="fa-solid fa-circle-check"></i> <span class="installed-text">Installed</span>
+        </span>
+
+        <!-- iOS Safari Install Help Button -->
+        <button type="button" class="nav-btn btn-ios-install" id="btnIosInstallHelp" style="display:none;" title="How to Install on iOS">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+          <span class="ios-btn-text">Install</span>
+        </button>
+
+        <button type="button" class="nav-btn active" id="navDashboardBtn">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="nav-btn primary-btn" id="navNewInvoiceBtn">
+          <i class="fa-solid fa-plus"></i>
+          <span>+ NEW INVOICE</span>
+        </button>
+        <button type="button" class="nav-btn" id="navSettingsBtn" title="Business Defaults">
+          <i class="fa-solid fa-gear"></i>
+          <span class="nav-settings-text">Settings</span>
+        </button>
+        <div class="nav-dropdown-wrapper">
+          <button type="button" class="nav-btn" id="navDataMenuBtn" title="Backup & Restore">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+          <div class="nav-dropdown" id="navDataMenu">
+            <button type="button" class="dropdown-item" id="exportBackupBtn">
+              <i class="fa-solid fa-cloud-arrow-down"></i> Export JSON Backup
+            </button>
+            <label class="dropdown-item" for="importBackupInput" style="cursor:pointer;">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Import JSON Backup
+              <input type="file" id="importBackupInput" accept=".json" style="display:none;">
+            </label>
+            <button type="button" class="dropdown-item danger" id="resetSampleDataBtn">
+              <i class="fa-solid fa-rotate-left"></i> Reset to Reference (BC-78)
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Application Body -->
+  <main class="app-main">
+
+    <!-- VIEW 1: INVOICE DASHBOARD -->
+    <section id="viewDashboard" class="view-section active no-print">
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="pulse-dot"></span>
+            <span>Agency Billing Hub</span>
+          </div>
+          <h1 class="hero-title">INVOICE MANAGEMENT</h1>
+          <p class="hero-description">Manage, create, duplicate, and export client-ready invoices matching the exact BE CREATIVES master design reference.</p>
+        </div>
+        <div class="hero-actions">
+          <button type="button" class="btn btn-hero-cta" id="btnDashboardNewInvoice">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ NEW INVOICE</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon maroon"><i class="fa-solid fa-file-invoice"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Total Invoices</span>
+            <span class="metric-value" id="metricTotalInvoices">1</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon emerald"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Paid Revenue</span>
+            <span class="metric-value" id="metricPaidRevenue">₹3,500</span>
+            <span class="metric-sub" id="metricPaidCount">1 invoice paid</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon amber"><i class="fa-solid fa-clock"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Pending Receivables</span>
+            <span class="metric-value" id="metricPendingRevenue">₹0</span>
+            <span class="metric-sub" id="metricPendingCount">0 pending</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon blue"><i class="fa-solid fa-chart-pie"></i></div>
+          <div class="metric-details">
+            <span class="metric-label">Overall Total</span>
+            <span class="metric-value" id="metricOverallTotal">₹3,500</span>
+            <span class="metric-sub">Across all clients</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoices Table Card -->
+      <div class="dashboard-card">
+        <div class="dashboard-card-header">
+          <div class="header-title-group" style="display:flex; align-items:center; gap:10px;">
+            <h2 class="card-title">Saved Invoices</h2>
+            <span class="badge-neutral" id="invoicesCountBadge">1 records</span>
+          </div>
+
+          <div class="filter-controls-group">
+            <!-- Search Invoices -->
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="invoiceSearchInput" placeholder="Search invoices by number or client..." autocomplete="off">
+              <button type="button" class="search-clear-btn" id="searchClearBtn" style="display:none;">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Status Filters -->
+            <div class="status-filter-pills" role="tablist">
+              <button type="button" class="filter-pill active" data-filter="ALL">All</button>
+              <button type="button" class="filter-pill" data-filter="PAID">Paid</button>
+              <button type="button" class="filter-pill" data-filter="PENDING">Pending</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="invoicesTable">
+            <thead>
+              <tr>
+                <th style="width: 130px;">Invoice No</th>
+                <th>Client</th>
+                <th style="width: 130px;">Date</th>
+                <th style="width: 140px; text-align: right;">Amount</th>
+                <th style="width: 130px; text-align: center;">Status</th>
+                <th style="width: 240px; text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+
+          <!-- Mobile Invoices Card List (Shown on Mobile Viewports) -->
+          <div class="mobile-invoices-cards" id="mobileInvoicesCards">
+            <!-- Dynamically populated cards on mobile -->
+          </div>
+
+          <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="empty-icon-wrap">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <h3 class="empty-title">No Invoices Found</h3>
+            <p class="empty-text">No invoices match your current search or filter.</p>
+            <button type="button" class="btn btn-primary" id="btnEmptyCreateInvoice">
+              <i class="fa-solid fa-plus"></i>
+              <span>+ Create First Invoice</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: INVOICE EDITOR & MASTER LIVE A4 PREVIEW -->
+    <section id="viewEditor" class="view-section no-print">
+      <!-- Editor Top Toolbar -->
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <button type="button" class="btn btn-outline" id="btnEditorBack">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Dashboard</span>
+          </button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="editor-id-tag" id="editorCurrentInvoiceTitle">BC-78</span>
+            <span class="editor-status-indicator" id="editorStatusIndicator">PAID</span>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button type="button" class="btn btn-secondary" id="btnEditorDuplicate" title="Duplicate this invoice">
+            <i class="fa-regular fa-copy"></i>
+            <span>Duplicate</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnEditorPrint" title="Print Invoice (A4)">
+            <i class="fa-solid fa-print"></i>
+            <span>Print Invoice</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnEditorDownloadPdf" title="1-Click Client-Ready PDF Download">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Download PDF</span>
+          </button>
+          <button type="button" class="btn btn-primary" id="btnEditorSave">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save Invoice</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Split Layout: Left Controls, Right Master A4 Document -->
+      <div class="editor-split-container">
+        
+        <!-- Left: Full Editor Controls -->
+        <div class="editor-form-pane">
+
+          <!-- Card 1: Invoice Meta & Status -->
+          <div class="form-card collapsible" data-section="invoice-details">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-hashtag card-icon"></i>
+                <h3>Invoice Details</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="inputInvoiceNumber">Invoice Number <span class="required">*</span></label>
+                  <input type="text" id="inputInvoiceNumber" value="BC-78" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="inputInvoiceDate">Date <span class="required">*</span></label>
+                  <input type="text" id="inputInvoiceDate" value="16-09-2026" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="selectInvoiceStatus">Payment Status</label>
+                  <select id="selectInvoiceStatus">
+                    <option value="PAID">PAID</option>
+                    <option value="PENDING">PENDING</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label class="toggle-switch-label">
+                    <input type="checkbox" id="toggleDueDate">
+                    <span>Show Due Date on Invoice</span>
+                  </label>
+                  <input type="text" id="inputInvoiceDueDate" placeholder="e.g. 26-09-2026" style="margin-top:4px; display:none;">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputCurrencySymbol">Currency</label>
+                  <input type="text" id="inputCurrencySymbol" value="₹" placeholder="₹">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Client Information -->
+          <div class="form-card collapsible" data-section="client-details">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-user card-icon"></i>
+                <h3>Client Details (BILL TO)</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <div class="form-group">
+                <label for="inputClientName">Client / Company Name <span class="required">*</span></label>
+                <input type="text" id="inputClientName" value="ALAM ENGAZ" placeholder="e.g. ALAM ENGAZ" required>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label for="inputClientAddress">Address / Location (Optional)</label>
+                  <input type="text" id="inputClientAddress" placeholder="e.g. Commercial Center, Calicut / Riyadh">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputClientEmail">Email / Phone (Optional)</label>
+                  <input type="text" id="inputClientEmail" placeholder="e.g. contact@alamengaz.com">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Items & Services -->
+          <div class="form-card collapsible" data-section="items-table">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-list-check card-icon"></i>
+                <h3>Service Items Table</h3>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" class="btn btn-sm btn-outline header-action-btn" id="btnAddItemBtn">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add Item</span>
+                </button>
+                <i class="fa-solid fa-chevron-down collapse-icon"></i>
+              </div>
+            </div>
+
+            <div class="form-card-body">
+              <div class="items-editor-list" id="itemsEditorList">
+                <!-- Item rows populated here -->
+              </div>
+
+              <button type="button" class="btn btn-outline btn-full-width" id="btnAddItemBtnSecondary" style="margin-top: 12px;">
+                <i class="fa-solid fa-plus"></i>
+                <span>+ Add Service Item</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 4: Deliverables Checklist Manager -->
+          <div class="form-card collapsible" data-section="deliverables">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-circle-check card-icon"></i>
+                <h3>Deliverables Checklist</h3>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" class="btn btn-sm btn-outline header-action-btn" id="btnAddDeliverableBtn">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add Deliverable</span>
+                </button>
+                <i class="fa-solid fa-chevron-down collapse-icon"></i>
+              </div>
+            </div>
+
+            <div class="form-card-body">
+              <p class="form-card-desc">Edit checklist items displayed under the DELIVERABLES column.</p>
+
+              <div class="deliverables-editor-list" id="deliverablesEditorList">
+                <!-- Deliverable items dynamically rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Website Links Section Manager -->
+          <div class="form-card collapsible" data-section="website-links">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-link card-icon"></i>
+                <h3>Website Links</h3>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" class="btn btn-sm btn-outline header-action-btn" id="btnAddWebsiteLinkBtn">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add Website Card</span>
+                </button>
+                <i class="fa-solid fa-chevron-down collapse-icon"></i>
+              </div>
+            </div>
+
+            <div class="form-card-body">
+              <p class="form-card-desc">Working clickable hyperlinks with portal titles displayed under the WEBSITE LINKS column.</p>
+
+              <div class="website-links-editor-list" id="websiteLinksEditorList">
+                <!-- Website cards dynamically rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 6: QR Code Manager (Generate vs Upload) -->
+          <div class="form-card collapsible" data-section="qr-code">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-qrcode card-icon"></i>
+                <h3>QR Code Settings</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label class="toggle-switch-label" style="font-weight: 700;">
+                  <input type="checkbox" id="toggleShowQr" checked>
+                  <span>Show QR Code on Invoice</span>
+                </label>
+              </div>
+
+              <div id="qrControlsContainer">
+                <label style="font-size: 0.78rem; font-weight: 600; color: var(--slate-700); margin-bottom: 6px; display: block;">QR Code Mode:</label>
+                
+                <div style="display: flex; gap: 18px; margin-bottom: 12px;">
+                  <label class="toggle-switch-label">
+                    <input type="radio" name="qrModeRadio" id="qrModeGenerate" value="generate" checked>
+                    <span>Generate Dynamic UPI QR</span>
+                  </label>
+                  <label class="toggle-switch-label">
+                    <input type="radio" name="qrModeRadio" id="qrModeUpload" value="upload">
+                    <span>Upload Custom QR Image</span>
+                  </label>
+                </div>
+
+                <!-- Upload Section -->
+                <div id="qrUploadSection" style="display: none; background: var(--slate-50); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--slate-200); margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="uploadedQrThumb" style="width: 58px; height: 58px; background: #fff; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                      <img id="uploadedQrPreviewImg" src="qr code.png" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                      <div style="display: flex; gap: 8px;">
+                        <label class="btn btn-sm btn-outline" for="inputUploadQrFile" style="cursor: pointer;">
+                          <i class="fa-solid fa-upload"></i> <span id="uploadQrBtnText">Upload QR Image</span>
+                          <input type="file" id="inputUploadQrFile" accept="image/*" style="display: none;">
+                        </label>
+                        <button type="button" class="btn btn-sm btn-outline danger" id="btnRemoveUploadedQr" style="display: none;">
+                          <i class="fa-solid fa-trash"></i> Remove QR
+                        </button>
+                      </div>
+                      <span style="font-size: 0.72rem; color: var(--slate-500);">Upload your custom payment QR image (GPay, PhonePe, Paytm, Camera/Files)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dynamic Generated Settings -->
+                <div id="qrGenerateSection">
+                  <div class="form-grid-2">
+                    <div class="form-group">
+                      <label for="inputQrUpiId">UPI ID for Dynamic QR</label>
+                      <input type="text" id="inputQrUpiId" value="basimaslam419@okaxis">
+                    </div>
+                    <div class="form-group">
+                      <label for="inputQrPayeeName">Payee Name</label>
+                      <input type="text" id="inputQrPayeeName" value="BASIM ASLAM P">
+                    </div>
+                  </div>
+                  <small class="form-hint" style="margin-top: 4px; display: block;">QR amount automatically tracks invoice total.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 7: Payment Details & Toggles -->
+          <div class="form-card collapsible" data-section="payment-banking">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-building-columns card-icon"></i>
+                <h3>Payment &amp; Banking Details</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <!-- Toggles Strip -->
+              <div class="form-grid-3" style="margin-bottom: 14px; background: var(--slate-50); padding: 10px; border-radius: var(--radius-sm);">
+                <label class="toggle-switch-label">
+                  <input type="checkbox" id="toggleShowUpiId" checked>
+                  <span>Show UPI ID</span>
+                </label>
+
+                <label class="toggle-switch-label">
+                  <input type="checkbox" id="toggleShowGpay" checked>
+                  <span>Show GPay</span>
+                </label>
+
+                <label class="toggle-switch-label">
+                  <input type="checkbox" id="toggleShowBank" checked>
+                  <span>Show Bank Name</span>
+                </label>
+
+                <label class="toggle-switch-label">
+                  <input type="checkbox" id="toggleShowAccountNo" checked>
+                  <span>Show Account No</span>
+                </label>
+
+                <label class="toggle-switch-label">
+                  <input type="checkbox" id="toggleShowIfsc" checked>
+                  <span>Show IFSC Code</span>
+                </label>
+              </div>
+
+              <!-- Payment Fields -->
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="inputPayeeName">Account Name</label>
+                  <input type="text" id="inputPayeeName" value="BASIM ASLAM P">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputBankName">Bank Name</label>
+                  <input type="text" id="inputBankName" value="Indian Post Payment Bank">
+                </div>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label for="inputAccountNumber">Account Number</label>
+                  <input type="text" id="inputAccountNumber" value="026210067305">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputIfscCode">IFSC Code</label>
+                  <input type="text" id="inputIfscCode" value="IPOS0000001">
+                </div>
+              </div>
+
+              <div class="form-grid-3" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label for="inputGpayNumber">GPay Number</label>
+                  <input type="text" id="inputGpayNumber" value="+91 8547931509">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputPrimaryUpi">Primary UPI ID</label>
+                  <input type="text" id="inputPrimaryUpi" value="8547931509@ibl">
+                </div>
+
+                <div class="form-group">
+                  <label for="inputSecondaryUpi">Secondary UPI ID</label>
+                  <input type="text" id="inputSecondaryUpi" value="basimaslam419@okaxis">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 10px;">
+                <label for="inputPaymentNote">Payment Note</label>
+                <input type="text" id="inputPaymentNote" value="Kindly share the payment screenshot after the transfer.">
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 8: Totals & Discount -->
+          <div class="form-card collapsible" data-section="calculation-totals">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-calculator card-icon"></i>
+                <h3>Calculation &amp; Total</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label for="inputDiscountAmount">Discount Amount (₹)</label>
+                  <input type="number" id="inputDiscountAmount" min="0" value="0">
+                </div>
+
+                <div class="form-group">
+                  <label>Grand Total Display</label>
+                  <div style="font-family: var(--font-brand); font-size: 1.3rem; font-weight:900; color: var(--brand-maroon); padding: 6px 0;" id="calcTotalSummaryDisplay">
+                    ₹3,500/-
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Master Live A4 Preview Canvas -->
+        <div class="editor-preview-pane">
+          <div class="preview-header-bar">
+            <div class="preview-title">
+              <i class="fa-solid fa-eye"></i>
+              <span class="preview-title-text">Live A4 Preview</span>
+            </div>
+            
+            <!-- Zoom & Fit Controls -->
+            <div class="preview-zoom-bar">
+              <button type="button" class="zoom-btn" id="btnZoomOut" title="Zoom Out">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <button type="button" class="zoom-btn-label" id="btnZoomReset" title="Reset Zoom">
+                <span id="zoomPercent">Fit</span>
+              </button>
+              <button type="button" class="zoom-btn" id="btnZoomIn" title="Zoom In">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              <button type="button" class="zoom-btn-fit" id="btnFitScreen" title="Fit to Screen">
+                <i class="fa-solid fa-expand"></i>
+                <span class="fit-btn-label">Fit to Screen</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="preview-sheet-wrapper" id="previewSheetWrapper">
+            
+            <!-- MASTER A4 INVOICE SHEET -->
+            <div class="a4-invoice-sheet invoice-page" id="a4InvoiceSheet">
+              
+              <!-- 1. TOP HEADER SECTION -->
+              <div class="master-header-row">
+                <!-- Slanted Maroon Polygon with BE CREATIVES Logo & Tag Stack (SVG for 100% PDF Fidelity) -->
+                <div class="master-header-polygon">
+                  <svg class="polygon-bg-svg" viewBox="0 0 385 116" preserveAspectRatio="none">
+                    <polygon points="0,0 385,0 300,116 0,116" fill="#641A1D" />
+                  </svg>
+                  <div class="polygon-content-wrap">
+                    <img src="be creatives agency.png" alt="BE CREATIVES" class="polygon-logo-img" id="sheetPolygonLogo" style="height: 74px; width: auto; max-width: 165px; object-fit: contain;">
+                    <div class="polygon-v-divider"></div>
+                    <div class="polygon-tag-stack">
+                      <span>DESIGN</span>
+                      <span>BRAND</span>
+                      <span>DIGITAL</span>
+                      <span>SOLUTIONS</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Top Right Brand Info -->
+                <div class="master-header-right">
+                  <h1 class="master-agency-name" id="sheetAgencyName">BE CREATIVES</h1>
+                  <p class="master-agency-tagline" id="sheetAgencyTagline">Creative Solutions, Limitless Possibilities</p>
+                  
+                  <a href="https://instagram.com/be_creatives__" target="_blank" class="master-instagram-badge" id="sheetInstagramBadge">
+                    <i class="fa-brands fa-instagram"></i>
+                    <div class="insta-text-group">
+                      <span class="insta-label">FOLLOW US ON INSTAGRAM</span>
+                      <span class="insta-handle" id="sheetInstagramHandle">@be_creatives__</span>
+                    </div>
+                  </a>
+
+                  <div class="master-ideas-block">
+                    <span class="ideas-text">I D E A S</span>
+                    <span class="ideas-text">B R A N D S</span>
+                    <span class="ideas-text">E X P E R I E N C E S</span>
+                    <div class="ideas-underline"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. INVOICE META & CLIENT SECTION -->
+              <div class="master-meta-client-section">
+                <div class="invoice-title-row">
+                  <div class="invoice-title-block">
+                    <div class="master-invoice-headline">INVOICE</div>
+                    <div class="master-creative-services-tag">C R E A T I V E &nbsp; S E R V I C E S</div>
+                    
+                    <table class="meta-details-table">
+                      <tr>
+                        <td class="meta-key">INVOICE NO</td>
+                        <td class="meta-colon">:</td>
+                        <td class="meta-val" id="sheetInvoiceNumber">BC-78</td>
+                      </tr>
+                      <tr>
+                        <td class="meta-key">DATE</td>
+                        <td class="meta-colon">:</td>
+                        <td class="meta-val" id="sheetInvoiceDate">16-09-2026</td>
+                      </tr>
+                      <tr id="sheetDueDateRow" style="display:none;">
+                        <td class="meta-key">DUE DATE</td>
+                        <td class="meta-colon">:</td>
+                        <td class="meta-val" id="sheetInvoiceDueDate">26-09-2026</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="meta-divider-line"></div>
+
+                <div class="bill-to-block">
+                  <span class="bill-to-label">BILL TO:</span>
+                  <div class="bill-to-client-name" id="sheetClientName">ALAM ENGAZ</div>
+                  <div class="bill-to-subdetails" id="sheetClientSubdetails" style="display:none;"></div>
+                </div>
+              </div>
+
+              <!-- 3. SERVICE ITEMS TABLE -->
+              <div class="master-table-section">
+                <table class="master-invoice-table">
+                  <thead>
+                    <tr>
+                      <th>DESCRIPTION</th>
+                      <th class="td-qty">QTY</th>
+                      <th class="td-rate">RATE (₹)</th>
+                      <th class="td-amount">AMOUNT (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sheetItemsTableBody">
+                    <!-- Dynamic service items -->
+                  </tbody>
+                </table>
+
+                <!-- TOTAL AMOUNT PAYABLE BAR -->
+                <div class="master-payable-bar">
+                  <span class="payable-label">TOTAL AMOUNT PAYABLE</span>
+                  <span class="payable-value" id="sheetTotalPayable">₹3,500/-</span>
+                </div>
+              </div>
+
+              <!-- 4. DELIVERABLES & WEBSITE LINKS (TWO COLUMNS) -->
+              <div class="master-middle-grid">
+                <!-- Left: Deliverables -->
+                <div class="middle-col-deliverables">
+                  <div class="pill-section-badge">DELIVERABLES</div>
+                  <div class="deliverables-sheet-list" id="sheetDeliverablesList">
+                    <!-- Dynamic checkmark items -->
+                  </div>
+                </div>
+
+                <!-- Right: Website Links -->
+                <div class="middle-col-links">
+                  <div class="pill-section-badge">WEBSITE LINKS</div>
+                  <div class="website-links-sheet-list" id="sheetWebsiteLinksList">
+                    <!-- Dynamic clickable website cards -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. PAYMENT DETAILS SECTION -->
+              <div class="master-payment-section">
+                <div class="master-payment-card" id="sheetPaymentCard">
+                  
+                  <!-- Left Details -->
+                  <div class="payment-left-col">
+                    <div class="pill-section-badge" style="margin-bottom:6px;">PAYMENT DETAILS</div>
+                    <table class="payment-info-table">
+                      <tr id="rowAccountName">
+                        <td class="p-key">Account Name</td>
+                        <td class="p-colon">:</td>
+                        <td class="p-val" id="sheetAccountName">BASIM ASLAM P</td>
+                      </tr>
+                      <tr id="rowBankName">
+                        <td class="p-key">Bank Name</td>
+                        <td class="p-colon">:</td>
+                        <td class="p-val" id="sheetBankName">Indian Post Payment Bank</td>
+                      </tr>
+                      <tr id="rowAccountNumber">
+                        <td class="p-key">Account Number</td>
+                        <td class="p-colon">:</td>
+                        <td class="p-val" id="sheetAccountNumber">026210067305</td>
+                      </tr>
+                      <tr id="rowIfsc">
+                        <td class="p-key">IFSC Code</td>
+                        <td class="p-colon">:</td>
+                        <td class="p-val" id="sheetIfscCode">IPOS0000001</td>
+                      </tr>
+                      <tr id="rowGpay">
+                        <td class="p-key" style="padding-top:6px;">GPay Number</td>
+                        <td class="p-colon" style="padding-top:6px;">:</td>
+                        <td class="p-val" style="padding-top:6px;" id="sheetGpayNumber">+91 8547931509</td>
+                      </tr>
+                      <tr id="rowUpi">
+                        <td class="p-key">UPI ID</td>
+                        <td class="p-colon">:</td>
+                        <td class="p-val">
+                          <div id="sheetPrimaryUpi">8547931509@ibl</div>
+                          <div id="sheetSecondaryUpi">basimaslam419@okaxis</div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div class="payment-note-row" id="sheetPaymentNoteRow">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span id="sheetPaymentNoteText">Kindly share the payment screenshot after the transfer.</span>
+                    </div>
+                  </div>
+
+                  <!-- Right QR Column -->
+                  <div class="payment-qr-col" id="sheetQrCol">
+                    <div class="qr-white-frame">
+                      <div class="master-qr-box" id="sheetDynamicQrBox">
+                        <!-- Dynamic SVG QR or Uploaded Image rendered here -->
+                      </div>
+                      <div class="qr-center-gpay-badge" id="sheetQrCenterBadge">
+                        <img src="assets/gpay-logo.svg" alt="GPay">
+                      </div>
+                    </div>
+                    <div class="qr-caption-upi-id" id="sheetQrCaption">UPI ID: basimaslam419@okaxis</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 6. FOOTER: THANK YOU, B BADGE, SIGNATURE -->
+              <div class="master-footer-row">
+                <!-- Left: Thank You -->
+                <div class="footer-thankyou-block">
+                  <div class="thankyou-script">Thank You!</div>
+                  <div class="thankyou-sub">for choosing BE Creatives.</div>
+                  <div class="thankyou-appreciate">We appreciate your trust and support.</div>
+                </div>
+
+                <!-- Center: Circular B BADGE (Exact Asset) -->
+                <div class="footer-stamp-block">
+                  <img src="B BADGE.png" alt="BE CREATIVES Badge" class="master-stamp-img" id="sheetStampImg" onerror="this.src='be badge.png'" style="width: 116px; height: 116px; max-width: 120px; max-height: 120px; object-fit: contain;">
+                </div>
+
+                <!-- Right: Authorized Signature -->
+                <div class="footer-signature-block">
+                  <div class="sig-for-agency">For BE Creatives</div>
+                  <div class="sig-image-wrap">
+                    <img src="assets/signature-be-creatives.svg" alt="Signature" class="master-sig-img" id="sheetSigImg" style="max-width: 160px; max-height: 48px; object-fit: contain;">
+                  </div>
+                  <div class="sig-line-rule"></div>
+                  <div class="sig-auth-caption" id="sheetSigCaption">Authorized Signature</div>
+                </div>
+              </div>
+
+            </div>
+            <!-- END A4 SHEET -->
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: BUSINESS SETTINGS -->
+  <div class="modal-overlay" id="modalSettings" style="display:none;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-sliders modal-icon"></i>
+          <div>
+            <h2 class="modal-title">BUSINESS SETTINGS</h2>
+            <p class="modal-subtitle">Configure defaults that automatically populate new invoices without altering previous records.</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeSettingsModalBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="settings-section">
+          <h4 class="settings-sec-title"><i class="fa-solid fa-building"></i> Agency Defaults</h4>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="settingBusinessName">Agency Name</label>
+              <input type="text" id="settingBusinessName" value="BE CREATIVES">
+            </div>
+            <div class="form-group">
+              <label for="settingTagline">Tagline</label>
+              <input type="text" id="settingTagline" value="Creative Solutions, Limitless Possibilities">
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:10px;">
+            <div class="form-group">
+              <label for="settingInstagram">Instagram Handle</label>
+              <input type="text" id="settingInstagram" value="@be_creatives__">
+            </div>
+            <div class="form-group">
+              <label for="settingInstagramUrl">Instagram URL</label>
+              <input type="url" id="settingInstagramUrl" value="https://instagram.com/be_creatives__">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4 class="settings-sec-title"><i class="fa-solid fa-credit-card"></i> Default Banking &amp; UPI</h4>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="settingAccountName">Account Name</label>
+              <input type="text" id="settingAccountName" value="BASIM ASLAM P">
+            </div>
+            <div class="form-group">
+              <label for="settingBankName">Bank Name</label>
+              <input type="text" id="settingBankName" value="Indian Post Payment Bank">
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:10px;">
+            <div class="form-group">
+              <label for="settingAccountNumber">Account Number</label>
+              <input type="text" id="settingAccountNumber" value="026210067305">
+            </div>
+            <div class="form-group">
+              <label for="settingIfsc">IFSC Code</label>
+              <input type="text" id="settingIfsc" value="IPOS0000001">
+            </div>
+          </div>
+          <div class="form-grid-3" style="margin-top:10px;">
+            <div class="form-group">
+              <label for="settingGpay">GPay Number</label>
+              <input type="text" id="settingGpay" value="+91 8547931509">
+            </div>
+            <div class="form-group">
+              <label for="settingPrimaryUpi">Primary UPI ID</label>
+              <input type="text" id="settingPrimaryUpi" value="8547931509@ibl">
+            </div>
+            <div class="form-group">
+              <label for="settingSecondaryUpi">Secondary UPI (QR Target)</label>
+              <input type="text" id="settingSecondaryUpi" value="basimaslam419@okaxis">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4 class="settings-sec-title"><i class="fa-solid fa-image"></i> Digital Assets (Upload)</h4>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label>Logo Asset</label>
+              <div class="asset-preview-thumb"><img src="be creatives agency.png" id="settingLogoPreview" alt="Logo" style="max-height:100%; max-width:100%; object-fit:contain;"></div>
+              <label class="btn btn-sm btn-outline" for="settingLogoUpload" style="cursor:pointer;">
+                <i class="fa-solid fa-upload"></i> Upload Logo
+                <input type="file" id="settingLogoUpload" accept="image/*" style="display:none;">
+              </label>
+            </div>
+            <div class="form-group">
+              <label>B BADGE / Stamp</label>
+              <div class="asset-preview-thumb"><img src="B BADGE.png" id="settingStampPreview" alt="Stamp" style="max-height:100%; max-width:100%; object-fit:contain;"></div>
+              <label class="btn btn-sm btn-outline" for="settingStampUpload" style="cursor:pointer;">
+                <i class="fa-solid fa-upload"></i> Upload Badge
+                <input type="file" id="settingStampUpload" accept="image/*" style="display:none;">
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Authorized Signature</label>
+              <div class="asset-preview-thumb"><img src="assets/signature-be-creatives.svg" id="settingSigPreview" alt="Sig" style="max-height:100%; max-width:100%; object-fit:contain;"></div>
+              <label class="btn btn-sm btn-outline" for="settingSigUpload" style="cursor:pointer;">
+                <i class="fa-solid fa-upload"></i> Upload Sig
+                <input type="file" id="settingSigUpload" accept="image/*" style="display:none;">
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btnResetSettings">Reset to Defaults</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-secondary" id="btnCancelSettings">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnSaveSettings">Save Defaults</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DELETE CONFIRMATION -->
+  <div class="modal-overlay" id="modalDeleteConfirm" style="display:none;">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header danger-header">
+        <div class="danger-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="modal-title">Delete Invoice?</h3>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="font-size:1rem; font-weight:600; color:#111827;">Are you sure you want to delete invoice <strong id="deleteTargetInvNum">BC-78</strong>?</p>
+        <p style="font-size:0.82rem; color:#6b7280; margin-top:4px;">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer" style="justify-content:center; gap:12px;">
+        <button type="button" class="btn btn-secondary" id="btnCancelDelete">CANCEL</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDelete">DELETE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Action Bar (Fixed on Mobile Viewports, min 44px touch targets) -->
+  <div class="mobile-bottom-bar no-print" id="mobileBottomBar">
+    <button type="button" class="mob-bar-btn" id="mobBtnSave" title="Save Invoice">
+      <i class="fa-solid fa-floppy-disk"></i>
+      <span>SAVE</span>
+    </button>
+    <button type="button" class="mob-bar-btn" id="mobBtnPdf" title="Download PDF">
+      <i class="fa-solid fa-file-pdf"></i>
+      <span>PDF</span>
+    </button>
+    <button type="button" class="mob-bar-btn" id="mobBtnPrint" title="Print Invoice">
+      <i class="fa-solid fa-print"></i>
+      <span>PRINT</span>
+    </button>
+    <button type="button" class="mob-bar-btn primary" id="mobBtnNew" title="Create New Invoice">
+      <i class="fa-solid fa-plus"></i>
+      <span>NEW</span>
+    </button>
+  </div>
+
+  <!-- MODAL: IOS SAFARI INSTALL GUIDE -->
+  <div class="modal-overlay" id="modalIosInstall" style="display:none;">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-brands fa-apple modal-icon"></i>
+          <div>
+            <h3 class="modal-title">Install on iOS</h3>
+            <p class="modal-subtitle">Add BE Invoice to your Home Screen</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseIosModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="ios-install-guide">
+          <div class="ios-step-item">
+            <div class="ios-step-num">1</div>
+            <div class="ios-step-text">Tap the <strong>Share</strong> button <i class="fa-solid fa-arrow-up-from-bracket" style="color:var(--brand-maroon);"></i> at the bottom of Safari.</div>
+          </div>
+          <div class="ios-step-item">
+            <div class="ios-step-num">2</div>
+            <div class="ios-step-text">Scroll down the share sheet and tap <strong>Add to Home Screen</strong> <i class="fa-regular fa-square-plus" style="color:var(--brand-maroon);"></i>.</div>
+          </div>
+          <div class="ios-step-item">
+            <div class="ios-step-num">3</div>
+            <div class="ios-step-text">Tap <strong>Add</strong> in the top right corner. The app icon will appear on your home screen!</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:center;">
+        <button type="button" class="btn btn-primary" id="btnGotItIos" style="min-width:140px;">Got it!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Feedback Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Firebase App & Google Analytics -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA0uYPx6VdhOblhlg00UpbfETNZVst23lM",
+      authDomain: "be-creatives-invoice.firebaseapp.com",
+      projectId: "be-creatives-invoice",
+      storageBucket: "be-creatives-invoice.firebasestorage.app",
+      messagingSenderId: "1041764678465",
+      appId: "1:1041764678465:web:ad73db3e32e6cfb4c4bfc0",
+      measurementId: "G-6132EDVVY9"
+    };
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      window.firebaseApp = app;
+      window.firebaseAnalytics = analytics;
+    } catch (err) {
+      console.warn('Firebase initialization notice:', err);
+    }
+  </script>
+
+  <!-- Master Application Logic -->
+  <script src="script.js?v=2026091704"></script>
+</body>
+</html>

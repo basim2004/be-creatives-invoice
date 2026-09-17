@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="160" height="160">
+  <defs>
+    <path id="circlePathOuter" d="M 100, 100 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" />
+    <path id="circlePathInner" d="M 100, 100 m -52, 0 a 52,52 0 1,1 104,0 a 52,52 0 1,1 -104,0" />
+    <filter id="stampRoughness" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
+    </filter>
+  </defs>
+  
+  <g filter="url(#stampRoughness)" stroke="#681920" fill="none" opacity="0.88" transform="rotate(-6 100 100)">
+    <!-- Outer Rings -->
+    <circle cx="100" cy="100" r="92" stroke-width="3.5" stroke-dasharray="8 3 3 3" />
+    <circle cx="100" cy="100" r="84" stroke-width="1.8" />
+    
+    <!-- Inner Rings -->
+    <circle cx="100" cy="100" r="58" stroke-width="1.8" />
+    <circle cx="100" cy="100" r="54" stroke-width="0.8" stroke-dasharray="3 2" />
+    
+    <!-- Circular Text -->
+    <text font-family="'Outfit', 'Montserrat', Arial, sans-serif" font-size="11" font-weight="800" fill="#681920" letter-spacing="3.2">
+      <textPath href="#circlePathOuter" startOffset="50%" text-anchor="middle">
+        BE CREATIVES • DIGITAL AGENCY
+      </textPath>
+    </text>
+    
+    <!-- Inner Decorative Stars & Center Text -->
+    <g fill="#681920" stroke="none">
+      <polygon points="100,68 102.5,74.5 109.5,74.5 104,78.5 106,85 100,81 94,85 96,78.5 90.5,74.5 97.5,74.5" />
+      <text x="100" y="103" font-family="'Outfit', Arial, sans-serif" font-size="12" font-weight="900" text-anchor="middle" letter-spacing="2">OFFICIAL</text>
+      <text x="100" y="117" font-family="'Outfit', Arial, sans-serif" font-size="9.5" font-weight="700" text-anchor="middle" letter-spacing="2.5">SEAL</text>
+      <polygon points="100,126 101.8,131 106.5,131 102.8,133.8 104.2,138.5 100,135.5 95.8,138.5 97.2,133.8 93.5,131 98.2,131" />
+    </g>
+  </g>
+</svg>
