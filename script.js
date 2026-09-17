@@ -249,11 +249,15 @@
     btnOpenAdd: document.getElementById('btnOpenAddClientModal'),
     emptyState: document.getElementById('clientsEmptyState'),
     btnEmptyAdd: document.getElementById('btnEmptyAddClient'),
-    // Modal Add
+    // Modal Add / Edit Client
     modalAdd: document.getElementById('modalAddClient'),
     formAdd: document.getElementById('formAddClient'),
     modalAddTitle: document.getElementById('modalAddClientTitle'),
     editClientId: document.getElementById('editClientId'),
+    avatarPreview: document.getElementById('modalClientAvatarPreview'),
+    inputAvatar: document.getElementById('inputModalClientAvatar'),
+    btnRemoveAvatar: document.getElementById('btnRemoveClientAvatar'),
+    inputAvatarData: document.getElementById('inputModalClientAvatarData'),
     inputName: document.getElementById('inputModalClientName'),
     inputWhatsapp: document.getElementById('inputModalClientWhatsapp'),
     inputPhone: document.getElementById('inputModalClientPhone'),
@@ -493,7 +497,10 @@
   }
 
   function normalizeClientName(name) {
-    return (name || '').trim().toLowerCase();
+    if (!name) return '';
+    let clean = name.replace(/\d{1,2}:\d{2}\s*(AM|PM)[\s|]*\d{1,2}\s*[A-Za-z]+'?\d{0,2}/gi, '');
+    clean = clean.replace(/\.{2,}/g, '').trim().toLowerCase();
+    return clean;
   }
 
   function showToast(msg, type = 'info') {
@@ -562,7 +569,7 @@
         year: tx.year || 2025,
         dueDate: '',
         showDueDate: false,
-        status: isCredit ? 'PAID' : 'EXPENSE',
+        status: 'PAID', // All 488 historical Khatabook records are settled/paid invoices
         currency: '₹',
         client: {
           name: (tx.name || 'Client').trim(),
@@ -623,6 +630,9 @@
           if (inv.invoiceNumber === 'BC-78') {
             inv.invoiceNumber = 'BC-489';
           }
+          if (inv.status === 'EXPENSE') {
+            inv.status = 'PAID';
+          }
         });
       }
     } catch (e) {
@@ -661,49 +671,112 @@
     }
   }
 
+  // Master Verified Clients Seed (73 clients extracted from Khatabook Customer List Report PDF)
+  const KHATABOOK_CLIENTS_SEED = [
+    { name: 'ALAM ENGAZ', phone: '+91 8547931509', whatsapp: '+91 8547931509', email: 'contact@alamengaz.com', address: 'Commercial Center, Riyadh', notes: 'Corporate Portal & Email Signature Hub client' },
+    { name: 'Badrudeen Kabaka', phone: '8310783057', whatsapp: '8310783057', address: 'Karnataka / Kerala' },
+    { name: 'kidasexpresscargo', phone: '9539004488', whatsapp: '9539004488', address: 'Cargo & Logistics' },
+    { name: 'alamengaz_logistics Saudia Arabia', phone: '5456336910', whatsapp: '5456336910', address: 'Saudi Arabia' },
+    { name: 'Athnan Ayr', phone: '9645006755', whatsapp: '9645006755', address: 'Kerala' },
+    { name: 'Eza Coperate UAE', phone: '5655360701', whatsapp: '5655360701', address: 'UAE' },
+    { name: 'Salih Edr New', phone: '6282946004', whatsapp: '6282946004', address: 'Edarikode, Kerala' },
+    { name: 'Mk Kubaib Kidangayam', phone: '7736502167', whatsapp: '7736502167', address: 'Kidangayam, Kerala' },
+    { name: 'Mk Althaf Ottapalam', phone: '9645460638', whatsapp: '9645460638', address: 'Ottapalam, Kerala' },
+    { name: 'WEATHER COAT', phone: '9744351105', whatsapp: '9744351105', address: 'Kerala' },
+    { name: 'Mk Vahab', phone: '8289932780', whatsapp: '8289932780', address: 'Kerala' },
+    { name: 'Mk Ubaid Mangalore', phone: '7760896503', whatsapp: '7760896503', address: 'Mangalore' },
+    { name: 'Yesgreen', phone: '9946268286', whatsapp: '9946268286', address: 'Kerala' },
+    { name: 'Aslam Ayr', phone: '9074920381', whatsapp: '9074920381', address: 'Kerala' },
+    { name: 'Uae Work', phone: '7152255973', whatsapp: '7152255973', address: 'UAE' },
+    { name: 'Yaseen Eza Work', phone: '6282800160', whatsapp: '6282800160', address: 'UAE' },
+    { name: 'Dαɾʂ jabir KKD', phone: '7902246256', whatsapp: '7902246256', address: 'Kozhikode, Kerala' },
+    { name: 'Dαɾʂ Riyas CLT', phone: '6238496036', whatsapp: '6238496036', address: 'Calicut, Kerala' },
+    { name: 'Zaid Adam Creatives Saudi Arabia', phone: '', whatsapp: '', address: 'Saudi Arabia' },
+    { name: 'TopArc Mhd Safvan', phone: '7736119800', whatsapp: '7736119800', address: 'Kerala' },
+    { name: 'Dαɾʂ Gafoor AYR', phone: '9074468462', whatsapp: '9074468462', address: 'Kerala' },
+    { name: 'DALAILUL KAIRATH', phone: '7034149149', whatsapp: '7034149149', address: 'Kerala' },
+    { name: 'Dαɾʂ Haris KDR', phone: '6238294197', whatsapp: '6238294197', address: 'KDR, Kerala' },
+    { name: 'Haseeb Pravasi Sahithyotsv', phone: '', whatsapp: '', address: 'Kerala / GCC' },
+    { name: 'Markaz Hybrid School', phone: '9207500240', whatsapp: '9207500240', address: 'Karanthur, Calicut' },
+    { name: 'Dαɾʂ MIDU ATP', phone: '8075192282', whatsapp: '8075192282', address: 'ATP, Kerala' },
+    { name: 'LEVEL FURNITURE tamilnadu', phone: '8147796969', whatsapp: '8147796969', address: 'Tamil Nadu' },
+    { name: 'Mk Ali Akbar', phone: '9656710054', whatsapp: '9656710054', address: 'Kerala' },
+    { name: 'Brillance Shop', phone: '7339293925', whatsapp: '7339293925', address: 'Kerala' },
+    { name: 'MINHAJUL FALAH ACADEMY EDAYUR', phone: '8086333447', whatsapp: '8086333447', address: 'Edayur, Kerala' },
+    { name: 'Thangal Usthad', phone: '9746892687', whatsapp: '9746892687', address: 'Kerala' },
+    { name: 'usthad Ramshik Falili', phone: '9846858686', whatsapp: '9846858686', address: 'Kerala' },
+    { name: 'TechinWallet', phone: '9074727570', whatsapp: '9074727570', address: 'Fintech / IT' },
+    { name: 'Oben Kochi', phone: '6238859218', whatsapp: '6238859218', address: 'Kochi, Kerala' },
+    { name: 'MK sinan Pershanoor', phone: '9207158516', whatsapp: '9207158516', address: 'Pershanoor, Kerala' },
+    { name: 'Sree Work', phone: '9061757402', whatsapp: '9061757402', address: 'Kerala' },
+    { name: 'Dezga | Digital Marketing & Design', phone: '8139040016', whatsapp: '8139040016', address: 'Calicut, Kerala' },
+    { name: 'Ajmal_hashimi Sharjah Nabba', phone: '5456581442', whatsapp: '5456581442', address: 'Sharjah, UAE' },
+    { name: 'Shinas Work Gulf', phone: '', whatsapp: '', address: 'Gulf' },
+    { name: 'Zaul Fashion Work', phone: '9037579047', whatsapp: '9037579047', address: 'Fashion & Apparel' },
+    { name: 'Sana Media Digital Print', phone: '9895438121', whatsapp: '9895438121', address: 'Printing & Media' },
+    { name: 'Adwils...', phone: '9747050874', whatsapp: '9747050874', address: 'Kerala' },
+    { name: 'Adbea Digital Marketing', phone: '7907409548', whatsapp: '7907409548', address: 'Digital Marketing' },
+    { name: 'Mk Fuad Poloor', phone: '8590752586', whatsapp: '8590752586', address: 'Poloor, Kerala' },
+    { name: 'Nabeel Nilamboor Work', phone: '8943138339', whatsapp: '8943138339', address: 'Nilamboor, Kerala' },
+    { name: 'Faiz Hospital Work Africa....', phone: '9526020002', whatsapp: '9526020002', address: 'Africa / Healthcare' },
+    { name: 'ABDHUL NASIR MADANI Work', phone: '9442646313', whatsapp: '9442646313', address: 'Kerala' },
+    { name: 'EDAYUR DYFI', phone: '8943600524', whatsapp: '8943600524', address: 'Edayur, Kerala' },
+    { name: 'Rahoof Azahari Akkode', phone: '9744709893', whatsapp: '9744709893', address: 'Akkode, Kerala' },
+    { name: 'Mk Anas Kallur', phone: '9895420557', whatsapp: '9895420557', address: 'Kallur, Kerala' },
+    { name: 'MK Lukkuman AKODE', phone: '8086472712', whatsapp: '8086472712', address: 'Akode, Kerala' },
+    { name: 'Gulf Work Colab', phone: '', whatsapp: '', address: 'Gulf' },
+    { name: 'يحیا نيمي مونكل', phone: '9288313313', whatsapp: '9288313313', address: 'Moonakkal, Kerala' },
+    { name: 'Fast Track Cargo Qatar', phone: '7472142100', whatsapp: '7472142100', address: 'Qatar' },
+    { name: 'Mk Hashir Kasargode', phone: '8547430630', whatsapp: '8547430630', address: 'Kasargode, Kerala' },
+    { name: 'Sys Kerala Media', phone: '9947545424', whatsapp: '9947545424', address: 'Kerala' },
+    { name: 'Ali Akbar - Raaz Holidays', phone: '9562557225', whatsapp: '9562557225', address: 'Tours & Travel' },
+    { name: 'DYFI EDAPPAL', phone: '9747320501', whatsapp: '9747320501', address: 'Edappal, Kerala' },
+    { name: 'Noufal Ali Bangalore', phone: '9447312293', whatsapp: '9447312293', address: 'Bangalore' },
+    { name: 'naji Smart Design', phone: '9048529716', whatsapp: '9048529716', address: 'Design Studio' },
+    { name: 'Ashiq Ssf Naduvannur', phone: '8943654840', whatsapp: '8943654840', address: 'Naduvannur, Kerala' },
+    { name: 'maccellservice', phone: '9526333800', whatsapp: '9526333800', address: 'Kerala' },
+    { name: 'Rahmania Madrasa Ksd', phone: '8281831696', whatsapp: '8281831696', address: 'Kasargod, Kerala' },
+    { name: 'Meem Design Riyas Clt', phone: '9061040484', whatsapp: '9061040484', address: 'Calicut, Kerala' },
+    { name: 'Dαɾʂ Siraj Puthanpalli', phone: '9946456817', whatsapp: '9946456817', address: 'Puthanpalli, Kerala' },
+    { name: 'Bayment Work', phone: '9846641303', whatsapp: '9846641303', address: 'Kerala' },
+    { name: 'Dαɾʂ Fahad Parapnagadi', phone: '9567578899', whatsapp: '9567578899', address: 'Parappanangadi, Kerala' },
+    { name: 'Dαɾʂ Ayyub MRY', phone: '9605858341', whatsapp: '9605858341', address: 'MRY, Kerala' },
+    { name: 'Dαɾʂ Hanlala Vnb', phone: '9961016906', whatsapp: '9961016906', address: 'Vnb, Kerala' },
+    { name: 'Dαɾʂ irfan NARANIPUZA', phone: '9048131562', whatsapp: '9048131562', address: 'Naranipuza, Kerala' },
+    { name: 'Sahal Kuttipuram', phone: '8606846334', whatsapp: '8606846334', address: 'Kuttipuram, Kerala' },
+    { name: 'Basith idea', phone: '9544526632', whatsapp: '9544526632', address: 'Kerala' },
+    { name: 'Bilal', phone: '8606072875', whatsapp: '8606072875', address: 'Kerala' }
+  ];
+
   // Client Management Engine
   function loadClientProfiles() {
     clientProfiles = {};
 
-    // 1. Initialize from 488 historical records + invoices
-    historicalTransactions.forEach(tx => {
-      const rawName = (tx.name || '').trim();
-      if (!rawName) return;
-      const key = normalizeClientName(rawName);
-      if (!clientProfiles[key]) {
-        const phone = extractPhone(rawName + ' ' + (tx.details || ''));
-        clientProfiles[key] = {
-          id: 'cli_' + key.replace(/[^a-z0-9]/g, '_'),
-          name: rawName,
-          whatsapp: phone || '',
-          phone: phone || '',
-          email: '',
-          address: '',
-          notes: ''
-        };
-      }
+    // 1. Initialize strictly with 73 verified clients from Khatabook Customer List Report
+    KHATABOOK_CLIENTS_SEED.forEach(c => {
+      const key = normalizeClientName(c.name);
+      clientProfiles[key] = {
+        id: 'cli_' + key.replace(/[^a-z0-9]/g, '_'),
+        name: c.name,
+        whatsapp: c.whatsapp || c.phone || '',
+        phone: c.phone || c.whatsapp || '',
+        email: c.email || '',
+        address: c.address || '',
+        avatar: c.avatar || '',
+        notes: c.notes || ''
+      };
     });
 
-    // 2. Add ALAM ENGAZ
-    const alamKey = normalizeClientName('ALAM ENGAZ');
-    if (!clientProfiles[alamKey]) {
-      clientProfiles[alamKey] = {
-        id: 'cli_alam_engaz',
-        name: 'ALAM ENGAZ',
-        whatsapp: '+91 8547931509',
-        phone: '+91 8547931509',
-        email: 'contact@alamengaz.com',
-        address: 'Commercial Center, Riyadh',
-        notes: 'Corporate Portal & Email Signature Hub client'
-      };
-    }
-
-    // 3. Merge stored client updates
+    // 2. Merge user customized client edits / additions from localStorage
     try {
       const saved = localStorage.getItem(STORAGE_CLIENTS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         Object.keys(parsed).forEach(k => {
+          // Never import expense accounts
+          if (/tea\s*&\s*food|personal\s*expense|recharge|business\s*startup|graphic\s*designe/i.test(k)) {
+            return;
+          }
           if (clientProfiles[k]) {
             clientProfiles[k] = { ...clientProfiles[k], ...parsed[k] };
           } else {
@@ -1333,7 +1406,7 @@
       html += `
         <div class="client-profile-card">
           <div class="client-card-top">
-            <div class="client-avatar-circle">${initial}</div>
+            <div class="client-avatar-circle">${c.avatar ? `<img src="${c.avatar}" alt="${escapeHtml(c.name)}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : initial}</div>
             <div class="client-card-header-info">
               <h3 class="client-name-title">${escapeHtml(c.name)}</h3>
               <div class="client-contact-tags">
@@ -1385,7 +1458,13 @@
     const stats = getClientStats(clientName);
 
     if (clientsView.statementName) clientsView.statementName.textContent = profile.name || clientName;
-    if (clientsView.statementAvatar) clientsView.statementAvatar.textContent = (profile.name || 'C').charAt(0).toUpperCase();
+    if (clientsView.statementAvatar) {
+      if (profile.avatar) {
+        clientsView.statementAvatar.innerHTML = `<img src="${profile.avatar}" alt="${escapeHtml(profile.name)}" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">`;
+      } else {
+        clientsView.statementAvatar.textContent = (profile.name || 'C').charAt(0).toUpperCase();
+      }
+    }
 
     // Meta tags
     if (clientsView.statementMeta) {
@@ -1480,10 +1559,26 @@
       if (clientsView.inputEmail) clientsView.inputEmail.value = c.email || '';
       if (clientsView.inputAddress) clientsView.inputAddress.value = c.address || '';
       if (clientsView.inputNotes) clientsView.inputNotes.value = c.notes || '';
+
+      // Avatar preview
+      if (clientsView.inputAvatarData) clientsView.inputAvatarData.value = c.avatar || '';
+      if (clientsView.avatarPreview) {
+        if (c.avatar) {
+          clientsView.avatarPreview.innerHTML = `<img src="${c.avatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        } else {
+          clientsView.avatarPreview.innerHTML = `<span style="font-size:1.5rem; font-weight:800;">${(c.name || 'C').charAt(0).toUpperCase()}</span>`;
+        }
+      }
+      if (clientsView.btnRemoveAvatar) {
+        clientsView.btnRemoveAvatar.style.display = c.avatar ? 'inline-block' : 'none';
+      }
     } else {
       if (clientsView.modalAddTitle) clientsView.modalAddTitle.textContent = 'Add New Client';
       if (clientsView.editClientId) clientsView.editClientId.value = '';
       if (clientsView.formAdd) clientsView.formAdd.reset();
+      if (clientsView.inputAvatarData) clientsView.inputAvatarData.value = '';
+      if (clientsView.avatarPreview) clientsView.avatarPreview.innerHTML = '<i class="fa-solid fa-user"></i>';
+      if (clientsView.btnRemoveAvatar) clientsView.btnRemoveAvatar.style.display = 'none';
     }
 
     clientsView.modalAdd.style.display = 'flex';
@@ -2798,6 +2893,44 @@
       });
     }
 
+    // Client Avatar File Upload Listener
+    if (clientsView.inputAvatar) {
+      clientsView.inputAvatar.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('Image size exceeds 2MB limit. Please choose a smaller photo.', 'warning');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const dataUrl = ev.target.result;
+          if (clientsView.inputAvatarData) clientsView.inputAvatarData.value = dataUrl;
+          if (clientsView.avatarPreview) {
+            clientsView.avatarPreview.innerHTML = `<img src="${dataUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+          }
+          if (clientsView.btnRemoveAvatar) clientsView.btnRemoveAvatar.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (clientsView.btnRemoveAvatar) {
+      clientsView.btnRemoveAvatar.addEventListener('click', () => {
+        if (clientsView.inputAvatarData) clientsView.inputAvatarData.value = '';
+        if (clientsView.inputAvatar) clientsView.inputAvatar.value = '';
+        const nameVal = clientsView.inputName?.value.trim();
+        if (clientsView.avatarPreview) {
+          if (nameVal) {
+            clientsView.avatarPreview.innerHTML = `<span style="font-size:1.5rem; font-weight:800;">${nameVal.charAt(0).toUpperCase()}</span>`;
+          } else {
+            clientsView.avatarPreview.innerHTML = '<i class="fa-solid fa-user"></i>';
+          }
+        }
+        clientsView.btnRemoveAvatar.style.display = 'none';
+      });
+    }
+
     // Add Client Modal Form Submit
     if (clientsView.formAdd) {
       clientsView.formAdd.addEventListener('submit', e => {
@@ -2813,6 +2946,7 @@
           phone: clientsView.inputPhone.value.trim(),
           email: clientsView.inputEmail.value.trim(),
           address: clientsView.inputAddress.value.trim(),
+          avatar: clientsView.inputAvatarData?.value || '',
           notes: clientsView.inputNotes.value.trim()
         };
 

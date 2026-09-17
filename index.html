@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Master Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2026091708">
+  <link rel="stylesheet" href="style.css?v=2026091709">
   
   <script>
     // Automatic Self-Healing: If stylesheet fails to load due to stale browser cache, force clear and reload
@@ -1653,6 +1653,24 @@
       <form id="formAddClient">
         <input type="hidden" id="editClientId" value="">
         <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+          <!-- Profile Photo / Logo Upload -->
+          <div class="client-avatar-upload-card" style="display:flex; align-items:center; gap:16px; padding:12px 16px; background:var(--slate-50); border:1px solid var(--slate-200); border-radius:10px;">
+            <div id="modalClientAvatarPreview" style="width:58px; height:58px; border-radius:50%; background:var(--brand-maroon); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800; overflow:hidden; flex-shrink:0; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.12);">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+              <span style="font-size:0.84rem; font-weight:700; color:var(--slate-800);">Client Profile Photo / Logo</span>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <label class="btn btn-sm btn-outline" for="inputModalClientAvatar" style="cursor:pointer; margin:0; font-size:0.78rem; padding:5px 12px;">
+                  <i class="fa-solid fa-camera"></i> Upload Photo
+                  <input type="file" id="inputModalClientAvatar" accept="image/*" style="display:none;">
+                </label>
+                <button type="button" class="btn btn-sm btn-secondary" id="btnRemoveClientAvatar" style="font-size:0.78rem; padding:5px 10px; display:none;">Remove</button>
+              </div>
+            </div>
+            <input type="hidden" id="inputModalClientAvatarData" value="">
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="inputModalClientName">Client / Company Name <span class="required">*</span></label>
             <input type="text" id="inputModalClientName" class="form-input" placeholder="e.g. Alam Engaz, Rahoof, Eza Coperate" required>
@@ -1905,6 +1923,6 @@
   </script>
 
   <!-- Master Application Logic -->
-  <script src="script.js?v=2026091708"></script>
+  <script src="script.js?v=2026091709"></script>
 </body>
 </html>
