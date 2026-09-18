@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Master Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2026091710">
+  <link rel="stylesheet" href="style.css?v=2026091801">
   
   <script>
     // Force clear any legacy PWA service worker and Cache Storage
@@ -731,21 +731,28 @@
             <span>BE CREATIVES Financial Statements</span>
           </div>
           <h1 class="hero-title">MONTHLY REPORTS</h1>
-          <p class="hero-description">Detailed monthly financial performance from 2025 to present in reverse chronological order (Latest → Oldest).</p>
+          <p class="hero-description">Detailed monthly financial performance from 2025 to present in reverse chronological order (Latest → Oldest) with instant PDF statement downloads.</p>
         </div>
         <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-secondary" id="btnPrintReports" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);" onclick="window.print()">
+          <button type="button" class="btn" id="btnExportAllReportsPdf" style="background: linear-gradient(135deg, #059669, #047857); color: #fff; font-weight: 700; border: none; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Export Statement PDF</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnPrintReports" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
             <i class="fa-solid fa-print"></i>
-            <span>Print Reports</span>
+            <span>Print View</span>
           </button>
         </div>
       </div>
 
       <!-- Reports Filter Bar Card -->
-      <div class="dashboard-card" style="margin-bottom: 24px;">
+      <div class="dashboard-card" style="margin-bottom: 20px;">
         <div class="dashboard-card-header" style="flex-wrap: wrap; gap: 12px;">
-          <h2 class="card-title"><i class="fa-solid fa-sliders" style="margin-right:6px;"></i> Filter Reports</h2>
-          <div class="filter-controls-group" style="gap: 12px; flex-wrap: wrap;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-sliders" style="color:var(--brand-maroon); font-size:1.1rem;"></i>
+            <h2 class="card-title" style="margin:0;">Filter Financial Statements</h2>
+          </div>
+          <div class="filter-controls-group" style="gap: 12px; flex-wrap: wrap; align-items:center;">
             <div style="display:flex; align-items:center; gap:6px;">
               <label for="reportYearSelect" style="font-size:0.84rem; font-weight:700; color:var(--slate-700);">Year:</label>
               <select id="reportYearSelect" class="form-select" style="padding: 7px 12px; border: 1px solid var(--slate-300); border-radius: var(--radius-md); font-size: 0.84rem; background: #fff; font-weight:600;">
@@ -768,7 +775,50 @@
                 <option value="ALL">All Clients</option>
               </select>
             </div>
+
+            <button type="button" class="btn btn-secondary btn-sm" id="btnResetReportFilters" style="padding: 6px 12px; font-size:0.82rem;">
+              <i class="fa-solid fa-rotate-left"></i> Reset Filters
+            </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Executive Period Summary KPI Strip -->
+      <div class="report-period-kpi-grid" id="reportPeriodKpiGrid">
+        <div class="period-kpi-card income-kpi">
+          <div class="period-kpi-header">
+            <span class="period-kpi-label">TOTAL INFLOW / വരവ്</span>
+            <div class="period-kpi-icon"><i class="fa-solid fa-arrow-down-left"></i></div>
+          </div>
+          <div class="period-kpi-value" id="reportPeriodIncome">₹0</div>
+          <div class="period-kpi-sub" id="reportPeriodIncomeSub">Client revenue &amp; collections</div>
+        </div>
+
+        <div class="period-kpi-card expense-kpi">
+          <div class="period-kpi-header">
+            <span class="period-kpi-label">TOTAL OUTFLOW / ചെലവ്</span>
+            <div class="period-kpi-icon"><i class="fa-solid fa-arrow-up-right"></i></div>
+          </div>
+          <div class="period-kpi-value" id="reportPeriodExpense">₹0</div>
+          <div class="period-kpi-sub" id="reportPeriodExpenseSub">Business + Personal spend</div>
+        </div>
+
+        <div class="period-kpi-card personal-kpi">
+          <div class="period-kpi-header">
+            <span class="period-kpi-label">PERSONAL EXPENSE / വ്യക്തിഗത</span>
+            <div class="period-kpi-icon"><i class="fa-solid fa-user-tag"></i></div>
+          </div>
+          <div class="period-kpi-value" id="reportPeriodPersonal">₹0</div>
+          <div class="period-kpi-sub" id="reportPeriodPersonalSub">Personal drawings &amp; daily</div>
+        </div>
+
+        <div class="period-kpi-card net-kpi" id="reportPeriodNetCard">
+          <div class="period-kpi-header">
+            <span class="period-kpi-label">PERIOD NET PROFIT / ലാഭം</span>
+            <div class="period-kpi-icon"><i class="fa-solid fa-vault"></i></div>
+          </div>
+          <div class="period-kpi-value" id="reportPeriodNet">₹0 Cr</div>
+          <div class="period-kpi-sub" id="reportPeriodNetSub">Inflow minus Outflow</div>
         </div>
       </div>
 
@@ -1427,119 +1477,250 @@
 
   </main>
 
-  <!-- MODAL: BUSINESS SETTINGS -->
+  <!-- MODAL: BUSINESS SETTINGS (MODERN MULTI-TAB) -->
   <div class="modal-overlay" id="modalSettings" style="display:none;">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg settings-modal-dialog">
       <div class="modal-header">
         <div class="modal-title-wrap">
-          <i class="fa-solid fa-sliders modal-icon"></i>
+          <i class="fa-solid fa-sliders modal-icon" style="color:var(--brand-maroon);"></i>
           <div>
-            <h2 class="modal-title">BUSINESS SETTINGS</h2>
-            <p class="modal-subtitle">Configure defaults that automatically populate new invoices without altering previous records.</p>
+            <h2 class="modal-title">SYSTEM &amp; BUSINESS SETTINGS</h2>
+            <p class="modal-subtitle">Configure agency defaults, banking details, QR targets, invoice defaults, and digital brand assets.</p>
           </div>
         </div>
-        <button type="button" class="modal-close-btn" id="closeSettingsModalBtn"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" class="modal-close-btn" id="closeSettingsModalBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <div class="modal-body">
-        <div class="settings-section">
-          <h4 class="settings-sec-title"><i class="fa-solid fa-building"></i> Agency Defaults</h4>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="settingBusinessName">Agency Name</label>
-              <input type="text" id="settingBusinessName" value="BE CREATIVES">
+      <!-- Settings Tabs Navigation -->
+      <div class="settings-tabs-bar">
+        <button type="button" class="settings-tab-btn active" data-tab="tabAgency">
+          <i class="fa-solid fa-building"></i> <span>Agency Profile</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tabBanking">
+          <i class="fa-solid fa-credit-card"></i> <span>Banking &amp; UPI</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tabInvoiceDefaults">
+          <i class="fa-solid fa-file-invoice"></i> <span>Invoice Defaults</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tabBrandAssets">
+          <i class="fa-solid fa-palette"></i> <span>Brand Assets</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="tabDataTools">
+          <i class="fa-solid fa-database"></i> <span>Data &amp; Backup</span>
+        </button>
+      </div>
+
+      <div class="modal-body settings-modal-body">
+        <!-- TAB 1: AGENCY PROFILE -->
+        <div class="settings-tab-pane active" id="tabAgency">
+          <div class="settings-section">
+            <h4 class="settings-sec-title"><i class="fa-solid fa-building"></i> Agency Information</h4>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="settingBusinessName">Agency / Brand Name *</label>
+                <input type="text" id="settingBusinessName" class="form-input" placeholder="e.g. BE CREATIVES">
+              </div>
+              <div class="form-group">
+                <label for="settingTagline">Agency Tagline / Subtitle</label>
+                <input type="text" id="settingTagline" class="form-input" placeholder="e.g. Creative Solutions, Limitless Possibilities">
+              </div>
             </div>
-            <div class="form-group">
-              <label for="settingTagline">Tagline</label>
-              <input type="text" id="settingTagline" value="Creative Solutions, Limitless Possibilities">
+            <div class="form-grid-2" style="margin-top:12px;">
+              <div class="form-group">
+                <label for="settingPhone">Phone / WhatsApp Number</label>
+                <input type="text" id="settingPhone" class="form-input" placeholder="e.g. +91 8547931509">
+              </div>
+              <div class="form-group">
+                <label for="settingEmail">Official Email</label>
+                <input type="email" id="settingEmail" class="form-input" placeholder="e.g. becreativesagency@gmail.com">
+              </div>
             </div>
-          </div>
-          <div class="form-grid-2" style="margin-top:10px;">
-            <div class="form-group">
-              <label for="settingInstagram">Instagram Handle</label>
-              <input type="text" id="settingInstagram" value="@be_creatives__">
+            <div class="form-group" style="margin-top:12px;">
+              <label for="settingAddress">Location / Address</label>
+              <input type="text" id="settingAddress" class="form-input" placeholder="e.g. Kozhikode, Kerala, India">
             </div>
-            <div class="form-group">
-              <label for="settingInstagramUrl">Instagram URL</label>
-              <input type="url" id="settingInstagramUrl" value="https://instagram.com/be_creatives__">
+            <div class="form-grid-2" style="margin-top:12px;">
+              <div class="form-group">
+                <label for="settingInstagram">Instagram Handle</label>
+                <input type="text" id="settingInstagram" class="form-input" placeholder="e.g. @be_creatives__">
+              </div>
+              <div class="form-group">
+                <label for="settingInstagramUrl">Instagram Profile URL</label>
+                <input type="url" id="settingInstagramUrl" class="form-input" placeholder="e.g. https://instagram.com/be_creatives__">
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="settings-section">
-          <h4 class="settings-sec-title"><i class="fa-solid fa-credit-card"></i> Default Banking &amp; UPI</h4>
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label for="settingAccountName">Account Name</label>
-              <input type="text" id="settingAccountName" value="BASIM ASLAM P">
+        <!-- TAB 2: BANKING & UPI -->
+        <div class="settings-tab-pane" id="tabBanking" style="display:none;">
+          <div class="settings-section">
+            <h4 class="settings-sec-title"><i class="fa-solid fa-credit-card"></i> Default Banking &amp; Payee</h4>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="settingAccountName">Account Payee Name *</label>
+                <input type="text" id="settingAccountName" class="form-input" placeholder="e.g. BASIM ASLAM P">
+              </div>
+              <div class="form-group">
+                <label for="settingBankName">Bank Name *</label>
+                <input type="text" id="settingBankName" class="form-input" placeholder="e.g. Indian Post Payment Bank">
+              </div>
             </div>
-            <div class="form-group">
-              <label for="settingBankName">Bank Name</label>
-              <input type="text" id="settingBankName" value="Indian Post Payment Bank">
+            <div class="form-grid-2" style="margin-top:12px;">
+              <div class="form-group">
+                <label for="settingAccountNumber">Account Number *</label>
+                <input type="text" id="settingAccountNumber" class="form-input" placeholder="e.g. 026210067305">
+              </div>
+              <div class="form-group">
+                <label for="settingIfsc">IFSC Code *</label>
+                <input type="text" id="settingIfsc" class="form-input" placeholder="e.g. IPOS0000001">
+              </div>
             </div>
           </div>
-          <div class="form-grid-2" style="margin-top:10px;">
-            <div class="form-group">
-              <label for="settingAccountNumber">Account Number</label>
-              <input type="text" id="settingAccountNumber" value="026210067305">
+
+          <div class="settings-section" style="margin-top:16px;">
+            <h4 class="settings-sec-title"><i class="fa-solid fa-qrcode"></i> UPI &amp; Digital Payment Defaults</h4>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="settingGpay">GPay / Mobile Number</label>
+                <input type="text" id="settingGpay" class="form-input" placeholder="e.g. +91 8547931509">
+              </div>
+              <div class="form-group">
+                <label for="settingPrimaryUpi">Primary UPI ID</label>
+                <input type="text" id="settingPrimaryUpi" class="form-input" placeholder="e.g. 8547931509@ibl">
+              </div>
+              <div class="form-group">
+                <label for="settingSecondaryUpi">Secondary UPI (QR Target)</label>
+                <input type="text" id="settingSecondaryUpi" class="form-input" placeholder="e.g. basimaslam419@okaxis">
+              </div>
             </div>
-            <div class="form-group">
-              <label for="settingIfsc">IFSC Code</label>
-              <input type="text" id="settingIfsc" value="IPOS0000001">
-            </div>
-          </div>
-          <div class="form-grid-3" style="margin-top:10px;">
-            <div class="form-group">
-              <label for="settingGpay">GPay Number</label>
-              <input type="text" id="settingGpay" value="+91 8547931509">
-            </div>
-            <div class="form-group">
-              <label for="settingPrimaryUpi">Primary UPI ID</label>
-              <input type="text" id="settingPrimaryUpi" value="8547931509@ibl">
-            </div>
-            <div class="form-group">
-              <label for="settingSecondaryUpi">Secondary UPI (QR Target)</label>
-              <input type="text" id="settingSecondaryUpi" value="basimaslam419@okaxis">
+            <div class="form-group" style="margin-top:12px;">
+              <label for="settingPaymentNote">Default Payment Instructions Note</label>
+              <textarea id="settingPaymentNote" class="form-input" rows="2" placeholder="e.g. Kindly share payment screenshot once completed."></textarea>
             </div>
           </div>
         </div>
 
-        <div class="settings-section">
-          <h4 class="settings-sec-title"><i class="fa-solid fa-image"></i> Digital Assets (Upload)</h4>
-          <div class="form-grid-3">
-            <div class="form-group">
-              <label>Logo Asset</label>
-              <div class="asset-preview-thumb"><img src="be creatives agency.png" id="settingLogoPreview" alt="Logo" style="max-height:100%; max-width:100%; object-fit:contain;"></div>
-              <label class="btn btn-sm btn-outline" for="settingLogoUpload" style="cursor:pointer;">
-                <i class="fa-solid fa-upload"></i> Upload Logo
-                <input type="file" id="settingLogoUpload" accept="image/*" style="display:none;">
+        <!-- TAB 3: INVOICE DEFAULTS -->
+        <div class="settings-tab-pane" id="tabInvoiceDefaults" style="display:none;">
+          <div class="settings-section">
+            <h4 class="settings-sec-title"><i class="fa-solid fa-file-invoice"></i> Invoicing Defaults &amp; Numbering</h4>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label for="settingInvoicePrefix">Default Invoice Prefix</label>
+                <input type="text" id="settingInvoicePrefix" class="form-input" placeholder="e.g. BC-">
+              </div>
+              <div class="form-group">
+                <label for="settingCurrency">Currency Symbol</label>
+                <input type="text" id="settingCurrency" class="form-input" placeholder="e.g. ₹">
+              </div>
+              <div class="form-group">
+                <label for="settingPaymentTerms">Default Payment Terms</label>
+                <input type="text" id="settingPaymentTerms" class="form-input" placeholder="e.g. Due on Receipt">
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:12px;">
+              <label for="settingSignatoryCaption">Signatory Caption</label>
+              <input type="text" id="settingSignatoryCaption" class="form-input" placeholder="e.g. Authorized Signatory">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: BRAND ASSETS -->
+        <div class="settings-tab-pane" id="tabBrandAssets" style="display:none;">
+          <div class="settings-section">
+            <h4 class="settings-sec-title"><i class="fa-solid fa-image"></i> Brand Assets &amp; Badges</h4>
+            <p style="font-size:0.82rem; color:var(--slate-500); margin-bottom:14px;">Upload custom logos or signatures for official invoice stamping and statements.</p>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>Agency Logo</label>
+                <div class="asset-preview-thumb">
+                  <img src="be creatives agency.png" id="settingLogoPreview" alt="Logo" style="max-height:100%; max-width:100%; object-fit:contain;">
+                </div>
+                <label class="btn btn-sm btn-outline" for="settingLogoUpload" style="cursor:pointer; width:100%; justify-content:center;">
+                  <i class="fa-solid fa-upload"></i> Upload Logo
+                  <input type="file" id="settingLogoUpload" accept="image/*" style="display:none;">
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label>B BADGE / Stamp</label>
+                <div class="asset-preview-thumb">
+                  <img src="B BADGE.png" id="settingStampPreview" alt="Stamp" style="max-height:100%; max-width:100%; object-fit:contain;">
+                </div>
+                <label class="btn btn-sm btn-outline" for="settingStampUpload" style="cursor:pointer; width:100%; justify-content:center;">
+                  <i class="fa-solid fa-upload"></i> Upload Stamp
+                  <input type="file" id="settingStampUpload" accept="image/*" style="display:none;">
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label>Authorized Signature</label>
+                <div class="asset-preview-thumb">
+                  <img src="assets/signature-be-creatives.svg" id="settingSigPreview" alt="Sig" style="max-height:100%; max-width:100%; object-fit:contain;">
+                </div>
+                <label class="btn btn-sm btn-outline" for="settingSigUpload" style="cursor:pointer; width:100%; justify-content:center;">
+                  <i class="fa-solid fa-upload"></i> Upload Sig
+                  <input type="file" id="settingSigUpload" accept="image/*" style="display:none;">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: DATA TOOLS -->
+        <div class="settings-tab-pane" id="tabDataTools" style="display:none;">
+          <div class="settings-section">
+            <h4 class="settings-sec-title"><i class="fa-solid fa-database"></i> System Data &amp; Backup Operations</h4>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
+              <button type="button" class="btn btn-secondary" id="btnSettingsExportJson" style="justify-content:flex-start; padding:12px;">
+                <i class="fa-solid fa-cloud-arrow-down" style="color:#059669; font-size:1.1rem; margin-right:8px;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:700; font-size:0.86rem;">Export Full JSON Backup</div>
+                  <div style="font-size:0.75rem; color:var(--slate-500);">Download all invoices, clients &amp; expenses</div>
+                </div>
+              </button>
+
+              <label class="btn btn-secondary" for="inputSettingsImportJson" style="justify-content:flex-start; padding:12px; cursor:pointer;">
+                <i class="fa-solid fa-cloud-arrow-up" style="color:#2563eb; font-size:1.1rem; margin-right:8px;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:700; font-size:0.86rem;">Import JSON Backup</div>
+                  <div style="font-size:0.75rem; color:var(--slate-500);">Restore data from previous JSON file</div>
+                </div>
+                <input type="file" id="inputSettingsImportJson" accept=".json" style="display:none;">
               </label>
             </div>
-            <div class="form-group">
-              <label>B BADGE / Stamp</label>
-              <div class="asset-preview-thumb"><img src="B BADGE.png" id="settingStampPreview" alt="Stamp" style="max-height:100%; max-width:100%; object-fit:contain;"></div>
-              <label class="btn btn-sm btn-outline" for="settingStampUpload" style="cursor:pointer;">
-                <i class="fa-solid fa-upload"></i> Upload Badge
-                <input type="file" id="settingStampUpload" accept="image/*" style="display:none;">
-              </label>
-            </div>
-            <div class="form-group">
-              <label>Authorized Signature</label>
-              <div class="asset-preview-thumb"><img src="assets/signature-be-creatives.svg" id="settingSigPreview" alt="Sig" style="max-height:100%; max-width:100%; object-fit:contain;"></div>
-              <label class="btn btn-sm btn-outline" for="settingSigUpload" style="cursor:pointer;">
-                <i class="fa-solid fa-upload"></i> Upload Sig
-                <input type="file" id="settingSigUpload" accept="image/*" style="display:none;">
-              </label>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;">
+              <button type="button" class="btn btn-secondary" id="btnSettingsRestoreLedger" style="justify-content:flex-start; padding:12px;">
+                <i class="fa-solid fa-book-bookmark" style="color:var(--brand-maroon); font-size:1.1rem; margin-right:8px;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:700; font-size:0.86rem;">Restore Historical Ledger</div>
+                  <div style="font-size:0.75rem; color:var(--slate-500);">Restore all 488 historical transactions</div>
+                </div>
+              </button>
+
+              <button type="button" class="btn btn-secondary" id="btnSettingsResetAll" style="justify-content:flex-start; padding:12px; color:#dc2626; border-color:#fecaca;">
+                <i class="fa-solid fa-rotate-left" style="color:#dc2626; font-size:1.1rem; margin-right:8px;"></i>
+                <div style="text-align:left;">
+                  <div style="font-weight:700; font-size:0.86rem;">Reset to Reference (BC-489)</div>
+                  <div style="font-size:0.75rem; color:#dc2626;">Reset current invoice back to ALAM ENGAZ</div>
+                </div>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline" id="btnResetSettings">Reset to Defaults</button>
-        <div style="display:flex; gap:8px;">
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button type="button" class="btn btn-outline" id="btnResetSettings">
+          <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+        </button>
+        <div style="display:flex; gap:10px;">
           <button type="button" class="btn btn-secondary" id="btnCancelSettings">Cancel</button>
-          <button type="button" class="btn btn-primary" id="btnSaveSettings">Save Defaults</button>
+          <button type="button" class="btn btn-primary" id="btnSaveSettings" style="background:var(--brand-maroon); color:#fff;">
+            <i class="fa-solid fa-check"></i> Save Settings
+          </button>
         </div>
       </div>
     </div>
@@ -1871,6 +2052,9 @@
     </div>
   </div>
 
+  <!-- Hidden Render Container for Clean A4 Monthly Report PDF Generation -->
+  <div id="monthPdfExportContainer" style="position:fixed; left:-9999px; top:0; width:210mm; background:#ffffff; z-index:-1000; overflow:hidden;"></div>
+
   <!-- Toast Feedback Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -1900,6 +2084,6 @@
   </script>
 
   <!-- Master Application Logic -->
-  <script src="script.js?v=2026091710"></script>
+  <script src="script.js?v=2026091801"></script>
 </body>
 </html>

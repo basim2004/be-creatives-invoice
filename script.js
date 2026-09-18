@@ -17,6 +17,9 @@
   const DEFAULT_SETTINGS = {
     name: 'BE CREATIVES',
     tagline: 'Creative Solutions, Limitless Possibilities',
+    phone: '+91 8547931509',
+    email: 'becreativesagency@gmail.com',
+    address: 'Kozhikode, Kerala, India',
     instagram: '@be_creatives__',
     instagramUrl: 'https://instagram.com/be_creatives__',
     accountName: 'BASIM ASLAM P',
@@ -26,7 +29,10 @@
     gpay: '+91 8547931509',
     primaryUpi: '8547931509@ibl',
     secondaryUpi: 'basimaslam419@okaxis',
-    paymentNote: 'Kindly share the payment screenshot after the transfer.',
+    paymentNote: 'Kindly share payment screenshot once completed.',
+    invoicePrefix: 'BC-',
+    currencySymbol: '₹',
+    paymentTerms: 'Due on Receipt',
     logoUrl: 'be creatives agency.png',
     stampUrl: 'B BADGE.png',
     signatureUrl: 'assets/signature-be-creatives.svg',
@@ -336,7 +342,14 @@
     yearSelect: document.getElementById('reportYearSelect'),
     monthSelect: document.getElementById('reportMonthSelect'),
     clientSelect: document.getElementById('reportClientSelect'),
-    container: document.getElementById('monthlyReportsContainer')
+    container: document.getElementById('monthlyReportsContainer'),
+    btnResetFilters: document.getElementById('btnResetReportFilters'),
+    btnExportPdf: document.getElementById('btnExportAllReportsPdf'),
+    periodIncome: document.getElementById('reportPeriodIncome'),
+    periodExpense: document.getElementById('reportPeriodExpense'),
+    periodPersonal: document.getElementById('reportPeriodPersonal'),
+    periodNet: document.getElementById('reportPeriodNet'),
+    periodNetCard: document.getElementById('reportPeriodNetCard')
   };
 
   const whatsAppModal = {
@@ -467,22 +480,47 @@
 
   const settingsModal = {
     overlay: document.getElementById('modalSettings'),
-    btnClose: document.getElementById('btnCloseSettings'),
+    btnClose: document.getElementById('closeSettingsModalBtn') || document.getElementById('btnCloseSettings'),
     btnCancel: document.getElementById('btnCancelSettings'),
     btnSave: document.getElementById('btnSaveSettings'),
     btnReset: document.getElementById('btnResetSettings'),
-    inputName: document.getElementById('setAgencyName'),
-    inputTagline: document.getElementById('setAgencyTagline'),
-    inputInstagram: document.getElementById('setInstagramHandle'),
-    inputInstagramUrl: document.getElementById('setInstagramUrl'),
-    inputPayeeName: document.getElementById('setPayeeName'),
-    inputBankName: document.getElementById('setBankName'),
-    inputAccountNo: document.getElementById('setAccountNo'),
-    inputIfsc: document.getElementById('setIfsc'),
-    inputGpay: document.getElementById('setGpayNumber'),
-    inputPrimaryUpi: document.getElementById('setPrimaryUpi'),
-    inputSecondaryUpi: document.getElementById('setSecondaryUpi'),
-    inputPaymentNote: document.getElementById('setPaymentNote')
+    // Tabs
+    tabBtns: document.querySelectorAll('.settings-tab-btn'),
+    tabPanes: document.querySelectorAll('.settings-tab-pane'),
+    // Agency Profile
+    inputName: document.getElementById('settingBusinessName'),
+    inputTagline: document.getElementById('settingTagline'),
+    inputPhone: document.getElementById('settingPhone'),
+    inputEmail: document.getElementById('settingEmail'),
+    inputAddress: document.getElementById('settingAddress'),
+    inputInstagram: document.getElementById('settingInstagram'),
+    inputInstagramUrl: document.getElementById('settingInstagramUrl'),
+    // Banking & UPI
+    inputPayeeName: document.getElementById('settingAccountName'),
+    inputBankName: document.getElementById('settingBankName'),
+    inputAccountNo: document.getElementById('settingAccountNumber'),
+    inputIfsc: document.getElementById('settingIfsc'),
+    inputGpay: document.getElementById('settingGpay'),
+    inputPrimaryUpi: document.getElementById('settingPrimaryUpi'),
+    inputSecondaryUpi: document.getElementById('settingSecondaryUpi'),
+    inputPaymentNote: document.getElementById('settingPaymentNote'),
+    // Invoice Defaults
+    inputInvoicePrefix: document.getElementById('settingInvoicePrefix'),
+    inputCurrency: document.getElementById('settingCurrency'),
+    inputPaymentTerms: document.getElementById('settingPaymentTerms'),
+    inputSignatoryCaption: document.getElementById('settingSignatoryCaption'),
+    // Brand Assets
+    logoPreview: document.getElementById('settingLogoPreview'),
+    logoUpload: document.getElementById('settingLogoUpload'),
+    stampPreview: document.getElementById('settingStampPreview'),
+    stampUpload: document.getElementById('settingStampUpload'),
+    sigPreview: document.getElementById('settingSigPreview'),
+    sigUpload: document.getElementById('settingSigUpload'),
+    // Data operations
+    btnExportJson: document.getElementById('btnSettingsExportJson'),
+    inputImportJson: document.getElementById('inputSettingsImportJson'),
+    btnRestoreLedger: document.getElementById('btnSettingsRestoreLedger'),
+    btnResetAll: document.getElementById('btnSettingsResetAll')
   };
 
   // Utility Functions
@@ -1851,6 +1889,12 @@
       targetMonths = targetMonths.filter(m => m === reportFilterMonth);
     }
 
+    let periodIncome = 0;
+    let periodExpense = 0;
+    let periodPersonal = 0;
+    let periodClientsSet = new Set();
+    let periodTxCount = 0;
+
     let html = '';
 
     targetMonths.forEach(monthStr => {
@@ -1859,26 +1903,45 @@
       let expense = 0;
       let personal = 0;
       const clientMap = {};
+      const inflowList = [];
+      const outflowList = [];
 
-      // Transactions
+      // 1. Transactions from Khatabook Ledger
       historicalTransactions.forEach(t => {
         if (t.monthHeader === monthStr) {
           invCount++;
           const cr = Number(t.credit || 0);
           const deb = Number(t.debit || 0);
-          income += cr;
-          expense += deb;
-          if (isPersonalExpense(t.name, t.details)) {
-            personal += deb;
-          }
+          const isPers = isPersonalExpense(t.name, t.details);
+
           if (cr > 0) {
+            income += cr;
             const n = (t.name || 'Client').trim();
             clientMap[n] = (clientMap[n] || 0) + cr;
+            inflowList.push({
+              date: t.date || '',
+              name: n,
+              details: t.details || 'Collection received',
+              amount: cr
+            });
+          }
+
+          if (deb > 0) {
+            expense += deb;
+            if (isPers) personal += deb;
+            outflowList.push({
+              date: t.date || '',
+              name: t.name || 'Expense Payee',
+              details: t.details || (isPers ? 'Personal' : 'General'),
+              category: isPers ? 'Personal Drawing' : 'Business Expense',
+              amount: deb,
+              isPersonal: isPers
+            });
           }
         }
       });
 
-      // User Invoices
+      // 2. User Invoices
       userInvoices.forEach(inv => {
         if (inv.monthHeader === monthStr && !inv.historicalTxId) {
           invCount++;
@@ -1887,7 +1950,32 @@
             income += tot;
             const n = (inv.client?.name || 'Client').trim();
             clientMap[n] = (clientMap[n] || 0) + tot;
+            inflowList.push({
+              date: inv.date || '',
+              name: n,
+              details: `Invoice ${inv.invoiceNumber || ''} payment`,
+              amount: tot
+            });
           }
+        }
+      });
+
+      // 3. User Expenses
+      expenses.forEach(e => {
+        if (e.monthHeader === monthStr) {
+          invCount++;
+          const amt = Number(e.amount || 0);
+          const isPers = e.type === 'PERSONAL';
+          expense += amt;
+          if (isPers) personal += amt;
+          outflowList.push({
+            date: e.date || '',
+            name: e.name || 'Expense',
+            details: e.details || e.category || '',
+            category: isPers ? 'Personal Drawing' : (e.category || 'Business Expense'),
+            amount: amt,
+            isPersonal: isPers
+          });
         }
       });
 
@@ -1897,63 +1985,704 @@
         if (!hasClient) return;
       }
 
+      // Aggregate for period summary
+      periodIncome += income;
+      periodExpense += expense;
+      periodPersonal += personal;
+      periodTxCount += invCount;
+      Object.keys(clientMap).forEach(k => periodClientsSet.add(normalizeClientName(k)));
+
+      const businessExpense = Math.max(0, expense - personal);
       const net = income - expense;
       const sortedClients = Object.entries(clientMap).sort((a, b) => b[1] - a[1]);
       const clientCount = Object.keys(clientMap).length;
+      const monthId = monthStr.replace(/[^a-zA-Z0-9]/g, '_');
+
+      // Cash flow ratio percentage
+      const totalTurnover = income + expense;
+      const incomeRatio = totalTurnover > 0 ? Math.round((income / totalTurnover) * 100) : 50;
+      const expenseRatio = totalTurnover > 0 ? (100 - incomeRatio) : 50;
+
+      // Net margin percentage
+      const netMarginPct = income > 0 ? Math.round((net / income) * 100) : 0;
 
       html += `
-        <div class="monthly-report-card">
+        <div class="monthly-report-card ${net >= 0 ? 'net-positive' : 'net-negative'}" id="card_${monthId}">
           <div class="monthly-report-header">
             <div class="monthly-report-title">
-              <i class="fa-solid fa-calendar-check" style="color:#38bdf8;"></i> ${escapeHtml(monthStr)}
+              <i class="fa-solid fa-calendar-check" style="color:#38bdf8;"></i>
+              <span>${escapeHtml(monthStr)}</span>
             </div>
-            <div style="font-size:0.86rem; color:#94a3b8;">
-              ${invCount} Records &bull; ${clientCount} Paying Clients
+
+            <div class="monthly-header-badges">
+              <span class="monthly-badge-records">
+                <i class="fa-solid fa-list-check" style="margin-right:4px;"></i> ${invCount} Records &bull; ${clientCount} Clients
+              </span>
+              <span class="monthly-badge-net ${net >= 0 ? 'cr' : 'dr'}">
+                <i class="fa-solid ${net >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}" style="margin-right:4px;"></i>
+                Net ${formatCurrency(Math.abs(net))} ${net >= 0 ? 'Cr' : 'Dr'} ${income > 0 ? `(${netMarginPct >= 0 ? '+' : ''}${netMarginPct}%)` : ''}
+              </span>
+            </div>
+
+            <div class="monthly-header-actions">
+              <button type="button" class="btn-month-pdf" onclick="window.downloadMonthPdf('${escapeHtml(monthStr)}')" title="Download comprehensive PDF statement for ${escapeHtml(monthStr)}">
+                <i class="fa-solid fa-file-arrow-down"></i> <span>Download PDF</span>
+              </button>
+              <button type="button" class="btn-month-toggle" id="btnToggle_${monthId}" onclick="window.toggleMonthDrawer('${monthId}')" title="View Inflow & Outflow details">
+                <i class="fa-solid fa-chevron-down"></i> <span>Breakdown</span>
+              </button>
             </div>
           </div>
 
+          <!-- Cash Flow Ratio Bar -->
+          <div class="monthly-cashflow-container">
+            <div class="monthly-cashflow-label-row">
+              <span style="color:#059669;"><i class="fa-solid fa-circle" style="font-size:7px; vertical-align:middle; margin-right:4px;"></i> Inflow: ${formatCurrency(income)} (${incomeRatio}%)</span>
+              <span style="color:#dc2626;"><i class="fa-solid fa-circle" style="font-size:7px; vertical-align:middle; margin-right:4px;"></i> Outflow: ${formatCurrency(expense)} (${expenseRatio}%)</span>
+            </div>
+            <div class="monthly-cashflow-bar" title="Inflow vs Outflow Ratio">
+              <div class="cashflow-fill-income" style="width: ${incomeRatio}%;"></div>
+              <div class="cashflow-fill-expense" style="width: ${expenseRatio}%;"></div>
+            </div>
+          </div>
+
+          <!-- Key Financial Metric Tiles -->
           <div class="monthly-report-metrics">
-            <div class="monthly-report-metric-box">
-              <span class="monthly-report-metric-label">Total Income / വരവ്</span>
+            <div class="monthly-report-metric-box" style="border-left: 3px solid #059669;">
+              <span class="monthly-report-metric-label">
+                <i class="fa-solid fa-arrow-down-left" style="color:#059669;"></i> Total Income / വരവ്
+              </span>
               <span class="monthly-report-metric-val" style="color:#059669;">${formatCurrency(income)}</span>
+              <span class="monthly-report-metric-sub">Client revenue collected</span>
             </div>
-            <div class="monthly-report-metric-box">
-              <span class="monthly-report-metric-label">Total Expense / ചെലവ്</span>
-              <span class="monthly-report-metric-val" style="color:#dc2626;">${formatCurrency(expense)}</span>
+
+            <div class="monthly-report-metric-box" style="border-left: 3px solid #64748b;">
+              <span class="monthly-report-metric-label">
+                <i class="fa-solid fa-briefcase" style="color:#64748b;"></i> Business Expense
+              </span>
+              <span class="monthly-report-metric-val" style="color:#334155;">${formatCurrency(businessExpense)}</span>
+              <span class="monthly-report-metric-sub">Operations &amp; vendors</span>
             </div>
-            <div class="monthly-report-metric-box">
-              <span class="monthly-report-metric-label">Personal Expense</span>
+
+            <div class="monthly-report-metric-box" style="border-left: 3px solid #ea580c;">
+              <span class="monthly-report-metric-label">
+                <i class="fa-solid fa-user-tag" style="color:#ea580c;"></i> Personal Drawings
+              </span>
               <span class="monthly-report-metric-val" style="color:#ea580c;">${formatCurrency(personal)}</span>
+              <span class="monthly-report-metric-sub">Personal spend &amp; food</span>
             </div>
-            <div class="monthly-report-metric-box">
-              <span class="monthly-report-metric-label">Net Balance</span>
+
+            <div class="monthly-report-metric-box" style="border-left: 3px solid ${net >= 0 ? 'var(--brand-maroon)' : '#dc2626'};">
+              <span class="monthly-report-metric-label">
+                <i class="fa-solid fa-vault" style="color:${net >= 0 ? 'var(--brand-maroon)' : '#dc2626'};"></i> Net Balance / ബാക്കി
+              </span>
               <span class="monthly-report-metric-val" style="color:${net >= 0 ? 'var(--brand-maroon)' : '#dc2626'};">
                 ${formatCurrency(Math.abs(net))} ${net >= 0 ? 'Cr' : 'Dr'}
               </span>
+              <span class="monthly-report-metric-sub">${net >= 0 ? 'Net profit surplus' : 'Operating deficit'}</span>
             </div>
           </div>
 
+          <!-- Client-Wise Collections Showcase -->
           ${sortedClients.length > 0 ? `
             <div class="monthly-collection-table-wrap">
-              <div style="font-size:0.82rem; font-weight:800; color:var(--slate-700); text-transform:uppercase; margin-bottom:10px; letter-spacing:0.5px;">
-                Client-Wise Collection (${sortedClients.length} clients):
+              <div class="monthly-collection-title-row">
+                <div class="monthly-collection-heading">
+                  <i class="fa-solid fa-users" style="color:var(--brand-maroon);"></i>
+                  <span>Client Collections (${sortedClients.length} clients)</span>
+                </div>
+                <span style="font-size:0.75rem; color:var(--slate-500); font-weight:600;">
+                  Total ${formatCurrency(income)}
+                </span>
               </div>
-              <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:8px;">
-                ${sortedClients.map(([cName, cAmt]) => `
-                  <div style="display:flex; justify-content:space-between; padding:8px 12px; background:#ffffff; border:1px solid var(--slate-200); border-radius:6px; font-size:0.86rem;">
-                    <span style="font-weight:700; color:var(--slate-800);">${escapeHtml(cName)}</span>
-                    <span style="font-weight:800; color:#059669;">${formatCurrency(cAmt)}</span>
-                  </div>
-                `).join('')}
+              <div class="client-collection-cards-grid">
+                ${sortedClients.map(([cName, cAmt]) => {
+                  const sharePct = income > 0 ? ((cAmt / income) * 100).toFixed(1) : '0.0';
+                  return `
+                    <div class="client-collection-card">
+                      <div class="client-collection-info">
+                        <span class="client-collection-name" title="${escapeHtml(cName)}">${escapeHtml(cName)}</span>
+                        <span class="client-collection-share">${sharePct}% of month's collection</span>
+                      </div>
+                      <div class="client-collection-amount-group">
+                        <span class="client-collection-amount">${formatCurrency(cAmt)}</span>
+                        <button type="button" class="btn-client-mini-wa" title="Open WhatsApp chat with ${escapeHtml(cName)}" onclick="window.openClientWhatsAppByName('${escapeHtml(cName)}')">
+                          <i class="fa-brands fa-whatsapp"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
           ` : ''}
+
+          <!-- Expandable Breakdown Drawer (Detailed Inflow & Outflow Itemization) -->
+          <div class="monthly-breakdown-drawer" id="drawer_${monthId}">
+            <div class="breakdown-tables-split">
+              <!-- Inflows Table -->
+              <div>
+                <div class="breakdown-col-header inflow">
+                  <span><i class="fa-solid fa-arrow-down-left"></i> INFLOWS (${inflowList.length})</span>
+                  <span>${formatCurrency(income)}</span>
+                </div>
+                ${inflowList.length > 0 ? `
+                  <div style="max-height: 260px; overflow-y:auto; border:1px solid var(--slate-200); border-radius:6px;">
+                    <table class="breakdown-mini-table">
+                      <thead>
+                        <tr>
+                          <th style="width:75px;">Date</th>
+                          <th>Client / Details</th>
+                          <th style="text-align:right; width:90px;">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${inflowList.map(item => `
+                          <tr>
+                            <td style="color:var(--slate-500); font-size:0.78rem;">${escapeHtml(item.date)}</td>
+                            <td>
+                              <div style="font-weight:700; color:var(--slate-800);">${escapeHtml(item.name)}</div>
+                              <div style="font-size:0.74rem; color:var(--slate-500);">${escapeHtml(item.details)}</div>
+                            </td>
+                            <td style="text-align:right; font-weight:700; color:#059669;">
+                              +${formatCurrency(item.amount)}
+                            </td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                ` : '<div style="font-size:0.82rem; color:var(--slate-400); padding:10px;">No client inflows recorded.</div>'}
+              </div>
+
+              <!-- Outflows Table -->
+              <div>
+                <div class="breakdown-col-header outflow">
+                  <span><i class="fa-solid fa-arrow-up-right"></i> OUTFLOWS (${outflowList.length})</span>
+                  <span>${formatCurrency(expense)}</span>
+                </div>
+                ${outflowList.length > 0 ? `
+                  <div style="max-height: 260px; overflow-y:auto; border:1px solid var(--slate-200); border-radius:6px;">
+                    <table class="breakdown-mini-table">
+                      <thead>
+                        <tr>
+                          <th style="width:75px;">Date</th>
+                          <th>Payee / Purpose</th>
+                          <th style="text-align:right; width:90px;">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${outflowList.map(item => `
+                          <tr>
+                            <td style="color:var(--slate-500); font-size:0.78rem;">${escapeHtml(item.date)}</td>
+                            <td>
+                              <div style="font-weight:700; color:var(--slate-800);">${escapeHtml(item.name)}</div>
+                              <div style="font-size:0.74rem; color:${item.isPersonal ? '#ea580c' : 'var(--slate-500)'};">
+                                ${escapeHtml(item.category)} &bull; ${escapeHtml(item.details)}
+                              </div>
+                            </td>
+                            <td style="text-align:right; font-weight:700; color:#dc2626;">
+                              -${formatCurrency(item.amount)}
+                            </td>
+                          </tr>
+                        `).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                ` : '<div style="font-size:0.82rem; color:var(--slate-400); padding:10px;">No expense outflows recorded.</div>'}
+              </div>
+            </div>
+          </div>
         </div>
       `;
     });
 
-    reportsView.container.innerHTML = html || '<div style="padding:40px; text-align:center; color:var(--slate-500);">No monthly report records match your filters.</div>';
+    reportsView.container.innerHTML = html || '<div style="padding:40px; text-align:center; color:var(--slate-500); background:#fff; border-radius:8px; border:1px solid var(--slate-200);">No monthly report records match your selected filters.</div>';
+
+    // Update Executive Period Summary KPIs
+    const periodNet = periodIncome - periodExpense;
+    if (reportsView.periodIncome) reportsView.periodIncome.textContent = formatCurrency(periodIncome);
+    if (reportsView.periodExpense) reportsView.periodExpense.textContent = formatCurrency(periodExpense);
+    if (reportsView.periodPersonal) reportsView.periodPersonal.textContent = formatCurrency(periodPersonal);
+    if (reportsView.periodNet) {
+      reportsView.periodNet.textContent = `${formatCurrency(Math.abs(periodNet))} ${periodNet >= 0 ? 'Cr' : 'Dr'}`;
+      reportsView.periodNet.style.color = periodNet >= 0 ? 'var(--brand-maroon)' : '#dc2626';
+    }
   }
+
+  // Global helper to toggle accordion breakdown drawer
+  window.toggleMonthDrawer = function(monthId) {
+    const drawer = document.getElementById('drawer_' + monthId);
+    const btn = document.getElementById('btnToggle_' + monthId);
+    if (!drawer) return;
+    drawer.classList.toggle('open');
+    if (btn) {
+      const isOpen = drawer.classList.contains('open');
+      btn.innerHTML = isOpen 
+        ? '<i class="fa-solid fa-chevron-up"></i> <span>Hide Details</span>' 
+        : '<i class="fa-solid fa-chevron-down"></i> <span>Breakdown</span>';
+    }
+  };
+
+  // Global helper to direct WhatsApp client
+  window.openClientWhatsAppByName = function(clientName) {
+    const norm = normalizeClientName(clientName);
+    let targetPhone = '';
+    for (const [key, profile] of Object.entries(clientProfiles)) {
+      if (normalizeClientName(key) === norm || normalizeClientName(profile.name || '') === norm) {
+        targetPhone = profile.phone || profile.whatsapp || '';
+        break;
+      }
+    }
+    if (!targetPhone) {
+      targetPhone = prompt(`Enter WhatsApp number for ${clientName}:`, '+91 ');
+    }
+    if (targetPhone && targetPhone.trim()) {
+      const cleanPhone = targetPhone.replace(/[^0-9]/g, '');
+      const msg = encodeURIComponent(`Hello ${clientName}, greetings from BE CREATIVES! Sharing your financial account update.`);
+      window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+    }
+  };
+
+  // High-Quality Single-Month A4 PDF Statement Generator
+  window.downloadMonthPdf = async function(monthStr) {
+    const container = document.getElementById('monthPdfExportContainer');
+    if (!container) {
+      window.print();
+      return;
+    }
+
+    showToast(`Generating statement for ${monthStr}...`, 'info');
+
+    let income = 0;
+    let expense = 0;
+    let personal = 0;
+    const clientMap = {};
+    const inflowList = [];
+    const outflowList = [];
+
+    // Collect data for monthStr
+    historicalTransactions.forEach(t => {
+      if (t.monthHeader === monthStr) {
+        const cr = Number(t.credit || 0);
+        const deb = Number(t.debit || 0);
+        const isPers = isPersonalExpense(t.name, t.details);
+        if (cr > 0) {
+          income += cr;
+          const n = (t.name || 'Client').trim();
+          clientMap[n] = (clientMap[n] || 0) + cr;
+          inflowList.push({ date: t.date || '', name: n, details: t.details || '', amount: cr });
+        }
+        if (deb > 0) {
+          expense += deb;
+          if (isPers) personal += deb;
+          outflowList.push({ date: t.date || '', name: t.name || 'Expense', details: t.details || '', category: isPers ? 'Personal' : 'Business', amount: deb });
+        }
+      }
+    });
+
+    userInvoices.forEach(inv => {
+      if (inv.monthHeader === monthStr && !inv.historicalTxId && inv.status === 'PAID') {
+        const tot = Number(inv.total || 0);
+        income += tot;
+        const n = (inv.client?.name || 'Client').trim();
+        clientMap[n] = (clientMap[n] || 0) + tot;
+        inflowList.push({ date: inv.date || '', name: n, details: `Inv #${inv.invoiceNumber}`, amount: tot });
+      }
+    });
+
+    expenses.forEach(e => {
+      if (e.monthHeader === monthStr) {
+        const amt = Number(e.amount || 0);
+        const isPers = e.type === 'PERSONAL';
+        expense += amt;
+        if (isPers) personal += amt;
+        outflowList.push({ date: e.date || '', name: e.name || 'Expense', details: e.details || '', category: isPers ? 'Personal' : 'Business', amount: amt });
+      }
+    });
+
+    const businessExpense = Math.max(0, expense - personal);
+    const net = income - expense;
+    const sortedClients = Object.entries(clientMap).sort((a, b) => b[1] - a[1]);
+    const generatedOn = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
+
+    // Render A4 Printable Statement Structure
+    container.innerHTML = `
+      <div style="width: 210mm; min-height: 297mm; padding: 16mm 18mm 20mm; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; background: #ffffff; box-sizing: border-box; line-height: 1.4;">
+        <!-- Header Banner -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #641A1D; padding-bottom: 14px; margin-bottom: 18px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <img src="${escapeHtml(businessSettings.logoUrl || 'be creatives agency.png')}" alt="BE CREATIVES" style="height: 52px; width: auto; object-fit: contain;" onerror="this.src='B BADGE.png'">
+            <div>
+              <h1 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: #641A1D; letter-spacing: 0.5px;">${escapeHtml(businessSettings.name || 'BE CREATIVES')}</h1>
+              <p style="margin: 2px 0 0; font-size: 11px; color: #64748b; font-weight: 600;">${escapeHtml(businessSettings.tagline || 'Creative Solutions, Limitless Possibilities')}</p>
+              <p style="margin: 2px 0 0; font-size: 10px; color: #94a3b8;">${escapeHtml(businessSettings.address || 'Kozhikode, Kerala, India')} &bull; ${escapeHtml(businessSettings.phone || '+91 8547931509')}</p>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 16px; font-weight: 900; color: #0f172a; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">MONTHLY FINANCIAL STATEMENT</div>
+            <div style="display: inline-block; background: #641A1D; color: #ffffff; padding: 4px 10px; border-radius: 4px; font-weight: 800; font-size: 12px; margin-top: 4px;">
+              ${escapeHtml(monthStr.toUpperCase())}
+            </div>
+            <div style="font-size: 9px; color: #64748b; margin-top: 4px;">Generated on: ${escapeHtml(generatedOn)}</div>
+          </div>
+        </div>
+
+        <!-- Executive Financial Breakdown Box -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 18px;">
+          <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Executive Financial Overview</div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            <div style="background: #ffffff; border: 1px solid #d1fae5; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; font-weight: 700; color: #059669; text-transform: uppercase;">Total Collections (വരവ്)</div>
+              <div style="font-size: 16px; font-weight: 900; color: #059669; font-family: 'Outfit', sans-serif; margin-top: 2px;">${formatCurrency(income)}</div>
+              <div style="font-size: 8px; color: #64748b;">${inflowList.length} Inflow transactions</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase;">Business Expenses</div>
+              <div style="font-size: 16px; font-weight: 900; color: #334155; font-family: 'Outfit', sans-serif; margin-top: 2px;">${formatCurrency(businessExpense)}</div>
+              <div style="font-size: 8px; color: #64748b;">Operational / Vendor</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid #ffedd5; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; font-weight: 700; color: #ea580c; text-transform: uppercase;">Personal Drawings</div>
+              <div style="font-size: 16px; font-weight: 900; color: #ea580c; font-family: 'Outfit', sans-serif; margin-top: 2px;">${formatCurrency(personal)}</div>
+              <div style="font-size: 8px; color: #64748b;">Food &amp; personal spend</div>
+            </div>
+            <div style="background: #ffffff; border: 1px solid ${net >= 0 ? '#bbf7d0' : '#fecaca'}; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; font-weight: 700; color: ${net >= 0 ? '#641A1D' : '#dc2626'}; text-transform: uppercase;">Net Operating Balance</div>
+              <div style="font-size: 16px; font-weight: 900; color: ${net >= 0 ? '#641A1D' : '#dc2626'}; font-family: 'Outfit', sans-serif; margin-top: 2px;">
+                ${formatCurrency(Math.abs(net))} ${net >= 0 ? 'Cr' : 'Dr'}
+              </div>
+              <div style="font-size: 8px; color: ${net >= 0 ? '#059669' : '#dc2626'}; font-weight: 700;">${net >= 0 ? 'Surplus / Profit' : 'Operating Deficit'}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Client Collections Table -->
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+            Client-Wise Revenue Collections (${sortedClients.length} Clients)
+          </div>
+          ${sortedClients.length > 0 ? `
+            <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+              <thead>
+                <tr style="background: #f1f5f9; color: #475569; text-transform: uppercase; font-weight: 700;">
+                  <th style="padding: 6px 8px; text-align: left; width: 35px;">#</th>
+                  <th style="padding: 6px 8px; text-align: left;">Client Account Name</th>
+                  <th style="padding: 6px 8px; text-align: right; width: 100px;">Share %</th>
+                  <th style="padding: 6px 8px; text-align: right; width: 120px;">Collected (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sortedClients.map(([cName, cAmt], idx) => {
+                  const pct = income > 0 ? ((cAmt / income) * 100).toFixed(1) : '0.0';
+                  return `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                      <td style="padding: 5px 8px; color: #94a3b8;">${idx + 1}</td>
+                      <td style="padding: 5px 8px; font-weight: 700; color: #1e293b;">${escapeHtml(cName)}</td>
+                      <td style="padding: 5px 8px; text-align: right; color: #64748b;">${pct}%</td>
+                      <td style="padding: 5px 8px; text-align: right; font-weight: 800; color: #059669;">${formatCurrency(cAmt)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+                <tr style="background: #f8fafc; font-weight: 800; border-top: 2px solid #e2e8f0;">
+                  <td colspan="3" style="padding: 6px 8px; text-align: right;">Total Client Collections:</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #059669;">${formatCurrency(income)}</td>
+                </tr>
+              </tbody>
+            </table>
+          ` : '<div style="font-size: 10px; color: #94a3b8; padding: 6px 0;">No client collections in this period.</div>'}
+        </div>
+
+        <!-- Outflow / Expense Itemized Summary -->
+        <div style="margin-bottom: 22px;">
+          <div style="font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+            Expenditure &amp; Disbursements Summary (${outflowList.length} Items)
+          </div>
+          ${outflowList.length > 0 ? `
+            <table style="width: 100%; border-collapse: collapse; font-size: 9.5px;">
+              <thead>
+                <tr style="background: #f1f5f9; color: #475569; text-transform: uppercase; font-weight: 700;">
+                  <th style="padding: 5px 8px; text-align: left; width: 70px;">Date</th>
+                  <th style="padding: 5px 8px; text-align: left;">Payee / Description</th>
+                  <th style="padding: 5px 8px; text-align: left; width: 100px;">Classification</th>
+                  <th style="padding: 5px 8px; text-align: right; width: 100px;">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${outflowList.slice(0, 40).map(item => `
+                  <tr style="border-bottom: 1px solid #f8fafc;">
+                    <td style="padding: 4px 8px; color: #64748b;">${escapeHtml(item.date)}</td>
+                    <td style="padding: 4px 8px; font-weight: 600; color: #1e293b;">
+                      ${escapeHtml(item.name)}
+                      ${item.details ? `<span style="color:#94a3b8; font-weight:400;"> &bull; ${escapeHtml(item.details)}</span>` : ''}
+                    </td>
+                    <td style="padding: 4px 8px; color: ${item.category === 'Personal' ? '#ea580c' : '#64748b'}; font-weight: 600;">
+                      ${escapeHtml(item.category)}
+                    </td>
+                    <td style="padding: 4px 8px; text-align: right; font-weight: 700; color: #dc2626;">
+                      -${formatCurrency(item.amount)}
+                    </td>
+                  </tr>
+                `).join('')}
+                ${outflowList.length > 40 ? `
+                  <tr>
+                    <td colspan="4" style="padding: 4px 8px; text-align: center; color: #64748b; font-style: italic;">
+                      ... and ${outflowList.length - 40} more expense items accounted in ledger.
+                    </td>
+                  </tr>
+                ` : ''}
+                <tr style="background: #f8fafc; font-weight: 800; border-top: 2px solid #e2e8f0;">
+                  <td colspan="3" style="padding: 6px 8px; text-align: right;">Total Outflow (Business + Personal):</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #dc2626;">${formatCurrency(expense)}</td>
+                </tr>
+              </tbody>
+            </table>
+          ` : '<div style="font-size: 10px; color: #94a3b8; padding: 6px 0;">No expense records in this period.</div>'}
+        </div>
+
+        <!-- Verification Signature & Disclaimer Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: auto;">
+          <div style="font-size: 9px; color: #94a3b8; max-width: 320px;">
+            <strong>BE CREATIVES Financial Ledger System</strong><br>
+            This document is a certified system record reflecting all verified client credits, business expenditures, and drawings.
+          </div>
+          <div style="text-align: center;">
+            <img src="${escapeHtml(businessSettings.signatureUrl || 'assets/signature-be-creatives.svg')}" alt="Signature" style="height: 38px; width: auto; object-fit: contain; margin-bottom: 2px;">
+            <div style="font-size: 10px; font-weight: 800; color: #0f172a;">${escapeHtml(businessSettings.accountName || 'BASIM ASLAM P')}</div>
+            <div style="font-size: 8px; color: #64748b; text-transform: uppercase;">${escapeHtml(businessSettings.signatoryCaption || 'Authorized Signatory')}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const cleanFilename = `BE-Creatives-Monthly-Statement-${monthStr.replace(/\s+/g, '-')}.pdf`;
+    const opt = {
+      margin: 0,
+      filename: cleanFilename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        scrollX: 0,
+        scrollY: 0
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      }
+    };
+
+    try {
+      if (window.html2pdf) {
+        await html2pdf().set(opt).from(container.firstElementChild).save();
+        showToast(`Downloaded ${cleanFilename}!`, 'success');
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error('PDF error:', err);
+      showToast('Error generating PDF statement. Launching print...', 'warning');
+      window.print();
+    } finally {
+      container.innerHTML = '';
+    }
+  };
+
+  // High-Quality Consolidated Statement PDF Generator
+  window.downloadFilteredReportsPdf = async function() {
+    const container = document.getElementById('monthPdfExportContainer');
+    if (!container) {
+      window.print();
+      return;
+    }
+
+    showToast('Compiling executive consolidated statements...', 'info');
+
+    let targetMonths = [...ALL_MONTHS_LATEST_FIRST];
+    if (reportFilterYear !== 'ALL') targetMonths = targetMonths.filter(m => m.includes(reportFilterYear));
+    if (reportFilterMonth !== 'ALL') targetMonths = targetMonths.filter(m => m === reportFilterMonth);
+
+    const periodLabel = reportFilterYear !== 'ALL' ? (reportFilterMonth !== 'ALL' ? `${reportFilterMonth}` : `YEAR ${reportFilterYear}`) : 'ALL TIME (2025–2026)';
+    const generatedOn = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
+
+    let grandIncome = 0;
+    let grandExpense = 0;
+    let grandPersonal = 0;
+    const monthlySummary = [];
+
+    targetMonths.forEach(mStr => {
+      let mInc = 0;
+      let mExp = 0;
+      let mPers = 0;
+      let cCount = new Set();
+
+      historicalTransactions.forEach(t => {
+        if (t.monthHeader === mStr) {
+          const cr = Number(t.credit || 0);
+          const deb = Number(t.debit || 0);
+          if (cr > 0) { mInc += cr; cCount.add((t.name || '').trim()); }
+          if (deb > 0) {
+            mExp += deb;
+            if (isPersonalExpense(t.name, t.details)) mPers += deb;
+          }
+        }
+      });
+
+      userInvoices.forEach(inv => {
+        if (inv.monthHeader === mStr && !inv.historicalTxId && inv.status === 'PAID') {
+          const tot = Number(inv.total || 0);
+          mInc += tot;
+          cCount.add((inv.client?.name || '').trim());
+        }
+      });
+
+      expenses.forEach(e => {
+        if (e.monthHeader === mStr) {
+          const amt = Number(e.amount || 0);
+          mExp += amt;
+          if (e.type === 'PERSONAL') mPers += amt;
+        }
+      });
+
+      grandIncome += mInc;
+      grandExpense += mExp;
+      grandPersonal += mPers;
+
+      monthlySummary.push({
+        month: mStr,
+        income: mInc,
+        expense: mExp,
+        personal: mPers,
+        net: mInc - mExp,
+        clients: cCount.size
+      });
+    });
+
+    const grandNet = grandIncome - grandExpense;
+
+    container.innerHTML = `
+      <div style="width: 210mm; min-height: 297mm; padding: 16mm 18mm 20mm; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; background: #ffffff; box-sizing: border-box; line-height: 1.4;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #641A1D; padding-bottom: 14px; margin-bottom: 18px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <img src="${escapeHtml(businessSettings.logoUrl || 'be creatives agency.png')}" alt="Logo" style="height: 50px; width: auto;" onerror="this.src='B BADGE.png'">
+            <div>
+              <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #641A1D;">${escapeHtml(businessSettings.name || 'BE CREATIVES')}</h1>
+              <p style="margin: 2px 0 0; font-size: 11px; color: #64748b;">${escapeHtml(businessSettings.tagline || '')}</p>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 15px; font-weight: 900; color: #0f172a;">CONSOLIDATED FINANCIAL STATEMENT</div>
+            <div style="background: #641A1D; color: #fff; padding: 3px 8px; border-radius: 4px; font-weight: 800; font-size: 11px; display: inline-block; margin-top: 3px;">
+              ${escapeHtml(periodLabel)}
+            </div>
+            <div style="font-size: 9px; color: #64748b; margin-top: 4px;">Generated: ${escapeHtml(generatedOn)}</div>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 18px;">
+          <div style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Consolidated Period Totals</div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            <div style="background: #fff; border: 1px solid #d1fae5; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; color: #059669; font-weight: 700;">TOTAL INFLOW</div>
+              <div style="font-size: 16px; font-weight: 900; color: #059669;">${formatCurrency(grandIncome)}</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; color: #475569; font-weight: 700;">TOTAL OUTFLOW</div>
+              <div style="font-size: 16px; font-weight: 900; color: #dc2626;">${formatCurrency(grandExpense)}</div>
+            </div>
+            <div style="background: #fff; border: 1px solid #ffedd5; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; color: #ea580c; font-weight: 700;">PERSONAL DRAWINGS</div>
+              <div style="font-size: 16px; font-weight: 900; color: #ea580c;">${formatCurrency(grandPersonal)}</div>
+            </div>
+            <div style="background: #fff; border: 1px solid ${grandNet >= 0 ? '#bbf7d0' : '#fecaca'}; border-radius: 4px; padding: 8px 10px;">
+              <div style="font-size: 9px; color: ${grandNet >= 0 ? '#641A1D' : '#dc2626'}; font-weight: 700;">NET BALANCE</div>
+              <div style="font-size: 16px; font-weight: 900; color: ${grandNet >= 0 ? '#641A1D' : '#dc2626'};">
+                ${formatCurrency(Math.abs(grandNet))} ${grandNet >= 0 ? 'Cr' : 'Dr'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+          Chronological Month-by-Month Statement Summary
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; margin-bottom: 20px;">
+          <thead>
+            <tr style="background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase;">
+              <th style="padding: 6px 8px; text-align: left;">Month Period</th>
+              <th style="padding: 6px 8px; text-align: center;">Paying Clients</th>
+              <th style="padding: 6px 8px; text-align: right;">Total Inflow</th>
+              <th style="padding: 6px 8px; text-align: right;">Total Outflow</th>
+              <th style="padding: 6px 8px; text-align: right;">Personal</th>
+              <th style="padding: 6px 8px; text-align: right;">Net Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${monthlySummary.map(m => `
+              <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 6px 8px; font-weight: 700; color: #1e293b;">${escapeHtml(m.month)}</td>
+                <td style="padding: 6px 8px; text-align: center; color: #64748b;">${m.clients}</td>
+                <td style="padding: 6px 8px; text-align: right; color: #059669; font-weight: 700;">${formatCurrency(m.income)}</td>
+                <td style="padding: 6px 8px; text-align: right; color: #dc2626; font-weight: 700;">${formatCurrency(m.expense)}</td>
+                <td style="padding: 6px 8px; text-align: right; color: #ea580c;">${formatCurrency(m.personal)}</td>
+                <td style="padding: 6px 8px; text-align: right; font-weight: 800; color: ${m.net >= 0 ? '#641A1D' : '#dc2626'};">
+                  ${formatCurrency(Math.abs(m.net))} ${m.net >= 0 ? 'Cr' : 'Dr'}
+                </td>
+              </tr>
+            `).join('')}
+            <tr style="background: #f8fafc; font-weight: 800; border-top: 2px solid #e2e8f0;">
+              <td style="padding: 8px;">GRAND TOTAL:</td>
+              <td style="padding: 8px; text-align: center;">${periodClientsSet.size} Distinct</td>
+              <td style="padding: 8px; text-align: right; color: #059669;">${formatCurrency(grandIncome)}</td>
+              <td style="padding: 8px; text-align: right; color: #dc2626;">${formatCurrency(grandExpense)}</td>
+              <td style="padding: 8px; text-align: right; color: #ea580c;">${formatCurrency(grandPersonal)}</td>
+              <td style="padding: 8px; text-align: right; color: ${grandNet >= 0 ? '#641A1D' : '#dc2626'};">
+                ${formatCurrency(Math.abs(grandNet))} ${grandNet >= 0 ? 'Cr' : 'Dr'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: auto;">
+          <div style="font-size: 9px; color: #94a3b8; max-width: 320px;">
+            <strong>BE CREATIVES Financial Ledger System</strong><br>
+            Consolidated statement for official agency auditing and record keeping.
+          </div>
+          <div style="text-align: center;">
+            <img src="${escapeHtml(businessSettings.signatureUrl || 'assets/signature-be-creatives.svg')}" alt="Signature" style="height: 38px; width: auto; object-fit: contain;">
+            <div style="font-size: 10px; font-weight: 800; color: #0f172a;">${escapeHtml(businessSettings.accountName || 'BASIM ASLAM P')}</div>
+            <div style="font-size: 8px; color: #64748b; text-transform: uppercase;">${escapeHtml(businessSettings.signatoryCaption || 'Authorized Signatory')}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const cleanFilename = `BE-Creatives-Consolidated-Statement-${reportFilterYear}.pdf`;
+    const opt = {
+      margin: 0,
+      filename: cleanFilename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      if (window.html2pdf) {
+        await html2pdf().set(opt).from(container.firstElementChild).save();
+        showToast(`Downloaded ${cleanFilename}!`, 'success');
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error('PDF error:', err);
+      showToast('Error exporting consolidated PDF.', 'warning');
+      window.print();
+    } finally {
+      container.innerHTML = '';
+    }
+  };
 
   // Navigation Routing
   function hideAllViews() {
@@ -3300,7 +4029,7 @@
       });
     }
 
-    // Reports Filters
+    // Reports Filters & Actions
     if (reportsView.yearSelect) {
       reportsView.yearSelect.addEventListener('change', e => {
         reportFilterYear = e.target.value;
@@ -3317,6 +4046,25 @@
       reportsView.clientSelect.addEventListener('change', e => {
         reportFilterClient = e.target.value;
         renderReports();
+      });
+    }
+    if (reportsView.btnResetFilters) {
+      reportsView.btnResetFilters.addEventListener('click', () => {
+        reportFilterYear = 'ALL';
+        reportFilterMonth = 'ALL';
+        reportFilterClient = 'ALL';
+        if (reportsView.yearSelect) reportsView.yearSelect.value = 'ALL';
+        if (reportsView.monthSelect) reportsView.monthSelect.value = 'ALL';
+        if (reportsView.clientSelect) reportsView.clientSelect.value = 'ALL';
+        renderReports();
+        showToast('Report filters reset to All Time.', 'info');
+      });
+    }
+    if (reportsView.btnExportPdf) {
+      reportsView.btnExportPdf.addEventListener('click', () => {
+        if (window.downloadFilteredReportsPdf) {
+          window.downloadFilteredReportsPdf();
+        }
       });
     }
 
@@ -3583,21 +4331,65 @@
       });
     }
 
-    // Settings Modal
+    // Settings Modal Controller & Tab Switching
     if (nav.settingsBtn && settingsModal.overlay) {
+      // Tab switching
+      if (settingsModal.tabBtns && settingsModal.tabBtns.length > 0) {
+        settingsModal.tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-tab');
+            settingsModal.tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if (settingsModal.tabPanes) {
+              settingsModal.tabPanes.forEach(pane => {
+                if (pane.id === targetId) {
+                  pane.style.display = 'block';
+                  pane.classList.add('active');
+                } else {
+                  pane.style.display = 'none';
+                  pane.classList.remove('active');
+                }
+              });
+            }
+          });
+        });
+      }
+
+      // Open Settings Modal
       nav.settingsBtn.addEventListener('click', () => {
-        settingsModal.inputName.value = businessSettings.name || '';
-        settingsModal.inputTagline.value = businessSettings.tagline || '';
-        settingsModal.inputInstagram.value = businessSettings.instagram || '';
-        settingsModal.inputInstagramUrl.value = businessSettings.instagramUrl || '';
-        settingsModal.inputPayeeName.value = businessSettings.accountName || '';
-        settingsModal.inputBankName.value = businessSettings.bankName || '';
-        settingsModal.inputAccountNo.value = businessSettings.accountNumber || '';
-        settingsModal.inputIfsc.value = businessSettings.ifsc || '';
-        settingsModal.inputGpay.value = businessSettings.gpay || '';
-        settingsModal.inputPrimaryUpi.value = businessSettings.primaryUpi || '';
-        settingsModal.inputSecondaryUpi.value = businessSettings.secondaryUpi || '';
-        settingsModal.inputPaymentNote.value = businessSettings.paymentNote || '';
+        // Agency Profile
+        if (settingsModal.inputName) settingsModal.inputName.value = businessSettings.name || '';
+        if (settingsModal.inputTagline) settingsModal.inputTagline.value = businessSettings.tagline || '';
+        if (settingsModal.inputPhone) settingsModal.inputPhone.value = businessSettings.phone || '';
+        if (settingsModal.inputEmail) settingsModal.inputEmail.value = businessSettings.email || '';
+        if (settingsModal.inputAddress) settingsModal.inputAddress.value = businessSettings.address || '';
+        if (settingsModal.inputInstagram) settingsModal.inputInstagram.value = businessSettings.instagram || '';
+        if (settingsModal.inputInstagramUrl) settingsModal.inputInstagramUrl.value = businessSettings.instagramUrl || '';
+
+        // Banking & UPI
+        if (settingsModal.inputPayeeName) settingsModal.inputPayeeName.value = businessSettings.accountName || '';
+        if (settingsModal.inputBankName) settingsModal.inputBankName.value = businessSettings.bankName || '';
+        if (settingsModal.inputAccountNo) settingsModal.inputAccountNo.value = businessSettings.accountNumber || '';
+        if (settingsModal.inputIfsc) settingsModal.inputIfsc.value = businessSettings.ifsc || '';
+        if (settingsModal.inputGpay) settingsModal.inputGpay.value = businessSettings.gpay || '';
+        if (settingsModal.inputPrimaryUpi) settingsModal.inputPrimaryUpi.value = businessSettings.primaryUpi || '';
+        if (settingsModal.inputSecondaryUpi) settingsModal.inputSecondaryUpi.value = businessSettings.secondaryUpi || '';
+        if (settingsModal.inputPaymentNote) settingsModal.inputPaymentNote.value = businessSettings.paymentNote || '';
+
+        // Invoicing Defaults
+        if (settingsModal.inputInvoicePrefix) settingsModal.inputInvoicePrefix.value = businessSettings.invoicePrefix || 'BC-';
+        if (settingsModal.inputCurrency) settingsModal.inputCurrency.value = businessSettings.currencySymbol || '₹';
+        if (settingsModal.inputPaymentTerms) settingsModal.inputPaymentTerms.value = businessSettings.paymentTerms || 'Due on Receipt';
+        if (settingsModal.inputSignatoryCaption) settingsModal.inputSignatoryCaption.value = businessSettings.signatoryCaption || 'Authorized Signature';
+
+        // Previews
+        if (settingsModal.logoPreview && businessSettings.logoUrl) settingsModal.logoPreview.src = businessSettings.logoUrl;
+        if (settingsModal.stampPreview && businessSettings.stampUrl) settingsModal.stampPreview.src = businessSettings.stampUrl;
+        if (settingsModal.sigPreview && businessSettings.signatureUrl) settingsModal.sigPreview.src = businessSettings.signatureUrl;
+
+        // Reset to First Tab
+        if (settingsModal.tabBtns && settingsModal.tabBtns[0]) settingsModal.tabBtns[0].click();
+
         settingsModal.overlay.style.display = 'flex';
       });
 
@@ -3605,36 +4397,107 @@
       if (settingsModal.btnClose) settingsModal.btnClose.addEventListener('click', closeSettings);
       if (settingsModal.btnCancel) settingsModal.btnCancel.addEventListener('click', closeSettings);
 
-      if (settingsModal.btnSave) {
-        settingsModal.btnSave.addEventListener('click', () => {
-          businessSettings.name = settingsModal.inputName.value.trim();
-          businessSettings.tagline = settingsModal.inputTagline.value.trim();
-          businessSettings.instagram = settingsModal.inputInstagram.value.trim();
-          businessSettings.instagramUrl = settingsModal.inputInstagramUrl.value.trim();
-          businessSettings.accountName = settingsModal.inputPayeeName.value.trim();
-          businessSettings.bankName = settingsModal.inputBankName.value.trim();
-          businessSettings.accountNumber = settingsModal.inputAccountNo.value.trim();
-          businessSettings.ifsc = settingsModal.inputIfsc.value.trim();
-          businessSettings.gpay = settingsModal.inputGpay.value.trim();
-          businessSettings.primaryUpi = settingsModal.inputPrimaryUpi.value.trim();
-          businessSettings.secondaryUpi = settingsModal.inputSecondaryUpi.value.trim();
-          businessSettings.paymentNote = settingsModal.inputPaymentNote.value.trim();
+      // Asset Upload Helpers
+      const bindAssetUpload = (inputEl, previewEl, settingKey) => {
+        if (!inputEl) return;
+        inputEl.addEventListener('change', e => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = ev => {
+            businessSettings[settingKey] = ev.target.result;
+            if (previewEl) previewEl.src = ev.target.result;
+            saveSettings();
+            syncLivePreview();
+            showToast('Asset updated & saved!', 'success');
+          };
+          reader.readAsDataURL(file);
+        });
+      };
 
-          saveSettings();
-          syncLivePreview();
-          closeSettings();
-          showToast('Business defaults saved!', 'success');
+      bindAssetUpload(settingsModal.logoUpload, settingsModal.logoPreview, 'logoUrl');
+      bindAssetUpload(settingsModal.stampUpload, settingsModal.stampPreview, 'stampUrl');
+      bindAssetUpload(settingsModal.sigUpload, settingsModal.sigPreview, 'signatureUrl');
+
+      // Data Tools Inside Settings
+      if (settingsModal.btnExportJson) {
+        settingsModal.btnExportJson.addEventListener('click', () => {
+          const exportBtn = document.getElementById('exportBackupBtn');
+          if (exportBtn) exportBtn.click();
+        });
+      }
+      if (settingsModal.inputImportJson) {
+        settingsModal.inputImportJson.addEventListener('change', e => {
+          const importInput = document.getElementById('importBackupInput');
+          if (importInput && e.target.files.length > 0) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(e.target.files[0]);
+            importInput.files = dataTransfer.files;
+            importInput.dispatchEvent(new Event('change'));
+          }
+        });
+      }
+      if (settingsModal.btnRestoreLedger) {
+        settingsModal.btnRestoreLedger.addEventListener('click', () => {
+          const btnRestore = document.getElementById('btnRestoreHistoricalData');
+          if (btnRestore) btnRestore.click();
+        });
+      }
+      if (settingsModal.btnResetAll) {
+        settingsModal.btnResetAll.addEventListener('click', () => {
+          const btnReset = document.getElementById('resetSampleDataBtn');
+          if (btnReset) btnReset.click();
         });
       }
 
+      // Save Settings Handler
+      if (settingsModal.btnSave) {
+        settingsModal.btnSave.addEventListener('click', () => {
+          if (settingsModal.inputName) businessSettings.name = settingsModal.inputName.value.trim() || 'BE CREATIVES';
+          if (settingsModal.inputTagline) businessSettings.tagline = settingsModal.inputTagline.value.trim();
+          if (settingsModal.inputPhone) businessSettings.phone = settingsModal.inputPhone.value.trim();
+          if (settingsModal.inputEmail) businessSettings.email = settingsModal.inputEmail.value.trim();
+          if (settingsModal.inputAddress) businessSettings.address = settingsModal.inputAddress.value.trim();
+          if (settingsModal.inputInstagram) businessSettings.instagram = settingsModal.inputInstagram.value.trim();
+          if (settingsModal.inputInstagramUrl) businessSettings.instagramUrl = settingsModal.inputInstagramUrl.value.trim();
+
+          if (settingsModal.inputPayeeName) businessSettings.accountName = settingsModal.inputPayeeName.value.trim();
+          if (settingsModal.inputBankName) businessSettings.bankName = settingsModal.inputBankName.value.trim();
+          if (settingsModal.inputAccountNo) businessSettings.accountNumber = settingsModal.inputAccountNo.value.trim();
+          if (settingsModal.inputIfsc) businessSettings.ifsc = settingsModal.inputIfsc.value.trim();
+          if (settingsModal.inputGpay) businessSettings.gpay = settingsModal.inputGpay.value.trim();
+          if (settingsModal.inputPrimaryUpi) businessSettings.primaryUpi = settingsModal.inputPrimaryUpi.value.trim();
+          if (settingsModal.inputSecondaryUpi) businessSettings.secondaryUpi = settingsModal.inputSecondaryUpi.value.trim();
+          if (settingsModal.inputPaymentNote) businessSettings.paymentNote = settingsModal.inputPaymentNote.value.trim();
+
+          if (settingsModal.inputInvoicePrefix) businessSettings.invoicePrefix = settingsModal.inputInvoicePrefix.value.trim() || 'BC-';
+          if (settingsModal.inputCurrency) businessSettings.currencySymbol = settingsModal.inputCurrency.value.trim() || '₹';
+          if (settingsModal.inputPaymentTerms) businessSettings.paymentTerms = settingsModal.inputPaymentTerms.value.trim();
+          if (settingsModal.inputSignatoryCaption) businessSettings.signatoryCaption = settingsModal.inputSignatoryCaption.value.trim();
+
+          saveSettings();
+          syncLivePreview();
+
+          // Sync top header
+          const brandNameEl = document.querySelector('.brand-name');
+          if (brandNameEl && businessSettings.name) brandNameEl.textContent = businessSettings.name;
+          const headerLogoEl = document.querySelector('.header-logo');
+          if (headerLogoEl && businessSettings.logoUrl) headerLogoEl.src = businessSettings.logoUrl;
+
+          closeSettings();
+          showToast('Business & System settings saved successfully!', 'success');
+        });
+      }
+
+      // Reset Settings Handler
       if (settingsModal.btnReset) {
         settingsModal.btnReset.addEventListener('click', () => {
-          if (confirm('Reset settings to default BE CREATIVES reference?')) {
+          if (confirm('Reset settings to default BE CREATIVES reference values?')) {
             businessSettings = { ...DEFAULT_SETTINGS };
             saveSettings();
-            closeSettings();
             syncLivePreview();
-            showToast('Settings reset to defaults.', 'info');
+            closeSettings();
+            showToast('Settings reset to BE CREATIVES defaults.', 'info');
           }
         });
       }
