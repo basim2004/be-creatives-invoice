@@ -1960,12 +1960,12 @@
         }
       });
 
-      // 3. User Expenses
+      // 3. User Expenses (skip historical entries to prevent duplicate counting)
       expenses.forEach(e => {
-        if (e.monthHeader === monthStr) {
+        if (e.monthHeader === monthStr && !e.id.startsWith('exp_hist_')) {
           invCount++;
           const amt = Number(e.amount || 0);
-          const isPers = e.type === 'PERSONAL';
+          const isPers = e.type === 'PERSONAL' || isPersonalExpense(e.name, e.details);
           expense += amt;
           if (isPers) personal += amt;
           outflowList.push({
@@ -2292,9 +2292,9 @@
     });
 
     expenses.forEach(e => {
-      if (e.monthHeader === monthStr) {
+      if (e.monthHeader === monthStr && !e.id.startsWith('exp_hist_')) {
         const amt = Number(e.amount || 0);
-        const isPers = e.type === 'PERSONAL';
+        const isPers = e.type === 'PERSONAL' || isPersonalExpense(e.name, e.details);
         expense += amt;
         if (isPers) personal += amt;
         outflowList.push({ date: e.date || '', name: e.name || 'Expense', details: e.details || '', category: isPers ? 'Personal' : 'Business', amount: amt });
@@ -2539,10 +2539,10 @@
       });
 
       expenses.forEach(e => {
-        if (e.monthHeader === mStr) {
+        if (e.monthHeader === mStr && !e.id.startsWith('exp_hist_')) {
           const amt = Number(e.amount || 0);
           mExp += amt;
-          if (e.type === 'PERSONAL') mPers += amt;
+          if (e.type === 'PERSONAL' || isPersonalExpense(e.name, e.details)) mPers += amt;
         }
       });
 
