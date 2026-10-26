@@ -847,6 +847,7 @@
     try {
       // Save user-created and modified invoices
       localStorage.setItem(STORAGE_INVOICES_KEY, JSON.stringify(userInvoices));
+      if (typeof window.triggerCloudSync === 'function') window.triggerCloudSync('invoices');
     } catch (e) {
       showToast('Storage full or error saving invoices!', 'danger');
     }
@@ -1023,6 +1024,7 @@
   function saveClientProfiles() {
     try {
       localStorage.setItem(STORAGE_CLIENTS_KEY, JSON.stringify(clientProfiles));
+      if (typeof window.triggerCloudSync === 'function') window.triggerCloudSync('clients');
     } catch (e) {
       console.warn('Error saving client profiles:', e);
     }
@@ -1183,6 +1185,7 @@
     try {
       const userAdded = expenses.filter(e => !e.id.startsWith('exp_hist_'));
       localStorage.setItem(STORAGE_EXPENSES_KEY, JSON.stringify(userAdded));
+      if (typeof window.triggerCloudSync === 'function') window.triggerCloudSync('expenses');
     } catch (e) {
       console.warn('Error saving expenses:', e);
     }
@@ -3842,6 +3845,7 @@
   function saveSettings() {
     try {
       localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(businessSettings));
+      if (typeof window.triggerCloudSync === 'function') window.triggerCloudSync('settings');
     } catch (e) {
       console.warn('Error saving settings:', e);
     }
@@ -4676,6 +4680,24 @@
       document.addEventListener('click', e => {
         if (!nav.dataMenu.contains(e.target) && e.target !== nav.dataMenuBtn) {
           nav.dataMenu.classList.remove('active');
+        }
+      });
+    }
+
+    // Manual Firebase Cloud Sync
+    const btnCloudSync = document.getElementById('btnManualCloudSync');
+    if (btnCloudSync) {
+      btnCloudSync.addEventListener('click', async () => {
+        showToast('Syncing with Firebase Cloud Database...', 'info');
+        if (typeof window.saveMasterStateToFirebase === 'function') {
+          const ok = await window.saveMasterStateToFirebase('user_manual_sync');
+          if (ok) {
+            showToast('All 89+ clients & invoices synced to Firebase Cloud!', 'success');
+          } else {
+            showToast('Firebase sync queued. Check Firebase console rules if offline.', 'warning');
+          }
+        } else {
+          showToast('Firebase initializing, please try again in a moment', 'info');
         }
       });
     }

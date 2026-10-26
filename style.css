@@ -3848,3 +3848,85 @@ body:not(.in-editor) .mobile-bottom-bar {
   box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35) !important;
 }
 
+
+
+/* ==========================================================================
+   FIREBASE REALTIME CLOUD SYNC BADGE
+   ========================================================================== */
+.cloud-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: var(--slate-100);
+  color: var(--slate-600);
+  border: 1px solid var(--slate-200);
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: default;
+}
+
+.cloud-sync-badge .sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--slate-400);
+  transition: all 0.2s ease;
+}
+
+.cloud-sync-badge.connected {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.cloud-sync-badge.connected .sync-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: pulse-dot 2s infinite;
+}
+
+.cloud-sync-badge.syncing {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.cloud-sync-badge.syncing .sync-dot {
+  background: #f59e0b;
+  animation: pulse-dot 0.8s infinite;
+}
+
+.cloud-sync-badge.warning {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.cloud-sync-badge.warning .sync-dot {
+  background: #ea580c;
+}
+
+.cloud-sync-badge.offline {
+  background: var(--slate-100);
+  color: var(--slate-500);
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+@media (max-width: 480px) {
+  .cloud-sync-badge .sync-text {
+    display: none;
+  }
+  .cloud-sync-badge {
+    padding: 6px;
+  }
+}

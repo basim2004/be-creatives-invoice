@@ -28,11 +28,11 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Master Stylesheet with Fresh Version Hash -->
-  <link rel="stylesheet" href="style.css?v=20261026_08">
+  <link rel="stylesheet" href="style.css?v=20261026_09">
   
   <script>
     // Force clear any legacy PWA service worker and Cache Storage
-    const APP_BUILD_REV = '20261026_08';
+    const APP_BUILD_REV = '20261026_09';
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
@@ -74,6 +74,12 @@
           <span class="brand-name">BE CREATIVES</span>
           <span class="brand-subtitle">BE Invoice</span>
         </div>
+      </div>
+
+      <!-- Realtime Firebase Cloud Sync Status Badge -->
+      <div class="cloud-sync-badge standby" id="cloudSyncStatusBadge" title="Firebase Cloud Database Status">
+        <span class="sync-dot"></span>
+        <span class="sync-text">Cloud Sync</span>
       </div>
 
       <nav class="header-nav">
@@ -124,6 +130,9 @@
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
           <div class="nav-dropdown" id="navDataMenu">
+            <button type="button" class="dropdown-item" id="btnManualCloudSync" title="Sync all data with Firebase Cloud">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Sync with Firebase Cloud
+            </button>
             <button type="button" class="dropdown-item" id="exportBackupBtn">
               <i class="fa-solid fa-cloud-arrow-down"></i> Export JSON Backup
             </button>
@@ -2199,10 +2208,17 @@
   <!-- Toast Feedback Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Firebase App & Google Analytics -->
+  <!-- Firebase App, Analytics & Realtime Cloud Firestore 2-Way Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc, 
+      setDoc, 
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA0uYPx6VdhOblhlg00UpbfETNZVst23lM",
@@ -2217,14 +2233,89 @@
     try {
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
+      const db = getFirestore(app);
       window.firebaseApp = app;
       window.firebaseAnalytics = analytics;
+      window.firebaseDb = db;
+
+      const docRef = doc(db, 'be_creatives_agency', 'live_data');
+
+      // Update UI Cloud Sync Status indicator
+      function updateSyncStatus(status, text) {
+        const el = document.getElementById('cloudSyncStatusBadge');
+        if (el) {
+          el.className = 'cloud-sync-badge ' + status;
+          el.title = 'Firebase Cloud Sync: ' + text;
+          const textEl = el.querySelector('.sync-text');
+          if (textEl) textEl.textContent = text;
+        }
+      }
+
+      // Save Local Master State to Firebase Firestore
+      window.saveMasterStateToFirebase = async function(reason) {
+        try {
+          updateSyncStatus('syncing', 'Syncing...');
+          const userInvoices = JSON.parse(localStorage.getItem('be_creatives_master_invoices_v4') || '[]');
+          const clientProfiles = JSON.parse(localStorage.getItem('be_creatives_clients_v2') || '{}');
+          const expenses = JSON.parse(localStorage.getItem('be_creatives_expenses_v2') || '[]');
+          const settings = JSON.parse(localStorage.getItem('be_creatives_master_settings_v1') || '{}');
+
+          const payload = {
+            updatedAt: Date.now(),
+            updatedAtISO: new Date().toISOString(),
+            reason: reason || 'auto_save',
+            invoices: userInvoices,
+            clients: clientProfiles,
+            expenses: expenses,
+            settings: settings
+          };
+
+          await setDoc(docRef, payload, { merge: true });
+          updateSyncStatus('connected', 'Cloud Synced');
+          console.log('Firebase Cloud synced successfully (' + reason + ')');
+          return true;
+        } catch (err) {
+          console.warn('Firebase Cloud write notice:', err);
+          if (err && (err.code === 'permission-denied' || (err.message && err.message.includes('permission')))) {
+            updateSyncStatus('warning', 'Rules Needed');
+          } else {
+            updateSyncStatus('offline', 'Offline');
+          }
+          return false;
+        }
+      };
+
+      // Realtime listener for cross-device updates (PC <-> Phone)
+      onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const remoteData = docSnap.data();
+          updateSyncStatus('connected', 'Cloud Synced');
+          if (typeof window.applyRemoteFirebaseData === 'function') {
+            window.applyRemoteFirebaseData(remoteData);
+          }
+        } else {
+          // Document does not exist yet; if local has custom clients or invoices, auto-seed remote
+          const localClients = JSON.parse(localStorage.getItem('be_creatives_clients_v2') || '{}');
+          if (Object.keys(localClients).length > 0) {
+            window.saveMasterStateToFirebase('initial_seed');
+          }
+          updateSyncStatus('connected', 'Cloud Ready');
+        }
+      }, (err) => {
+        console.warn('Firebase Firestore Snapshot notice:', err);
+        if (err && (err.code === 'permission-denied' || (err.message && err.message.includes('permission')))) {
+          updateSyncStatus('warning', 'Rules Needed');
+        } else {
+          updateSyncStatus('offline', 'Standby');
+        }
+      });
+
     } catch (err) {
       console.warn('Firebase initialization notice:', err);
     }
   </script>
 
   <!-- Master Application Logic with Cache-Busting Version Hash -->
-  <script src="script.js?v=20261026_08"></script>
+  <script src="script.js?v=20261026_09"></script>
 </body>
 </html>
