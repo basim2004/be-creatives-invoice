@@ -3867,7 +3867,8 @@ body:not(.in-editor) .mobile-bottom-bar {
   border: 1px solid var(--slate-200);
   transition: all 0.2s ease;
   user-select: none;
-  cursor: default;
+  cursor: pointer;
+  user-select: none;
 }
 
 .cloud-sync-badge .sync-dot {
@@ -3929,4 +3930,12 @@ body:not(.in-editor) .mobile-bottom-bar {
   .cloud-sync-badge {
     padding: 6px;
   }
+}
+
+.cloud-sync-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.cloud-sync-badge:active {
+  transform: translateY(0);
 }

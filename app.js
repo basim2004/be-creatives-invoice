@@ -4780,6 +4780,22 @@
       });
     }
 
+    // Cloud Sync Badge 1-Click Sync
+    const badgeCloud = document.getElementById('cloudSyncStatusBadge');
+    if (badgeCloud) {
+      badgeCloud.addEventListener('click', async () => {
+        showToast('☁️ Syncing with Firebase Cloud Database...', 'info');
+        if (typeof window.saveMasterStateToFirebase === 'function') {
+          const success = await window.saveMasterStateToFirebase('badge_click');
+          if (success) {
+            showToast('All data successfully synced to Firebase Cloud!', 'success');
+          } else {
+            showToast('Firebase sync queued. Check Firebase console rules if offline.', 'warning');
+          }
+        }
+      });
+    }
+
     // Reset to Sample (BC-489)
     const resetBtn = document.getElementById('resetSampleDataBtn');
     if (resetBtn) {
@@ -4988,6 +5004,17 @@
     }
 
     showDashboard();
+
+    // Auto-sync local state with Firebase Cloud on launch
+    setTimeout(() => {
+      const localClients = JSON.parse(localStorage.getItem(STORAGE_CLIENTS_KEY) || '{}');
+      const localInvoices = JSON.parse(localStorage.getItem(STORAGE_INVOICES_KEY) || '[]');
+      if (Object.keys(localClients).length >= 87 || localInvoices.length > 0) {
+        if (typeof window.saveMasterStateToFirebase === 'function') {
+          window.saveMasterStateToFirebase('app_init_auto');
+        }
+      }
+    }, 1500);
   }
 
   if (document.readyState === 'loading') {

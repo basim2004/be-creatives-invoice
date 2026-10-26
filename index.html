@@ -28,11 +28,11 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Master Stylesheet with Fresh Version Hash -->
-  <link rel="stylesheet" href="style.css?v=20261026_09">
+  <link rel="stylesheet" href="style.css?v=20261026_10">
   
   <script>
     // Force clear any legacy PWA service worker and Cache Storage
-    const APP_BUILD_REV = '20261026_09';
+    const APP_BUILD_REV = '20261026_10';
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
@@ -77,7 +77,7 @@
       </div>
 
       <!-- Realtime Firebase Cloud Sync Status Badge -->
-      <div class="cloud-sync-badge standby" id="cloudSyncStatusBadge" title="Firebase Cloud Database Status">
+      <div class="cloud-sync-badge standby" id="cloudSyncStatusBadge" title="Click to Sync with Firebase Cloud" style="cursor:pointer;">
         <span class="sync-dot"></span>
         <span class="sync-text">Cloud Sync</span>
       </div>
@@ -2316,6 +2316,6 @@
   </script>
 
   <!-- Master Application Logic with Cache-Busting Version Hash -->
-  <script src="script.js?v=20261026_09"></script>
+  <script src="script.js?v=20261026_10"></script>
 </body>
 </html>
