@@ -40,92 +40,238 @@
   };
 
   // Master Reference Seed Invoice: ALAM ENGAZ renumbered to BC-489
-  const ALAM_ENGAZ_INVOICE = {
-    id: 'inv_seed_bc489',
-    invoiceNumber: 'BC-489',
-    date: '16-09-2026',
-    isoDate: '2026-09-16',
-    monthHeader: 'September 2026',
-    year: 2026,
-    dueDate: '',
-    showDueDate: false,
-    status: 'PAID',
-    amountReceived: 3500,
-    balanceDue: 0,
-    showPaymentStatusBox: true,
-    currency: '₹',
-    client: {
-      name: 'ALAM ENGAZ',
-      whatsapp: '+91 8547931509',
-      phone: '+91 8547931509',
-      email: 'contact@alamengaz.com',
-      address: 'Commercial Center, Riyadh'
-    },
-    items: [
-      {
-        id: 'item_1',
-        title: 'ALAM ENGAZ',
-        subtitle: 'Staff Web Portal – Email Signature Hub',
-        url: 'https://alam-engaz-email-signature-hub.netlify.app/',
-        showUrl: true,
-        quantity: 1,
-        rate: 1750,
-        amount: 1750
+  const MASTER_SEED_USER_INVOICES = [
+    {
+      id: 'inv_bc494',
+      invoiceNumber: 'BC-494',
+      date: '07-10-2026',
+      isoDate: '2026-10-07',
+      monthHeader: 'October 2026',
+      year: 2026,
+      dueDate: '',
+      showDueDate: false,
+      status: 'PAID',
+      amountReceived: 5000,
+      balanceDue: 0,
+      showPaymentStatusBox: true,
+      currency: '₹',
+      client: {
+        name: 'Velolog',
+        whatsapp: '',
+        phone: '',
+        email: '',
+        address: 'Marketing Project'
       },
-      {
-        id: 'item_2',
-        title: 'ALAM ENGAZ PORT SERVICES',
-        subtitle: 'Staff Web Portal – Email Signature Hub',
-        url: 'https://alam-engaz-port-email-signature-hub.netlify.app/',
-        showUrl: true,
-        quantity: 1,
-        rate: 1750,
-        amount: 1750
-      }
-    ],
-    subtotal: 3500,
-    discount: 0,
-    total: 3500,
-    deliverables: [
-      'Staff Web Portal Development',
-      'Email Signature Management System',
-      'Employee Portal Setup',
-      'Firebase / System Integration',
-      'Website Deployment & Configuration',
-      'Final Website Setup'
-    ],
-    websiteLinks: [
-      {
-        id: 'link_1',
-        title: 'ALAM ENGAZ Staff Portal',
-        url: 'https://alam-engaz-email-signature-hub.netlify.app/'
-      },
-      {
-        id: 'link_2',
-        title: 'ALAM ENGAZ Port Services Staff Portal',
-        url: 'https://alam-engaz-port-email-signature-hub.netlify.app/'
-      }
-    ],
-    payment: {
-      accountName: 'BASIM ASLAM P',
-      bankName: 'Indian Post Payment Bank',
-      accountNumber: '026210067305',
-      ifsc: 'IPOS0000001',
-      gpay: '+91 8547931509',
-      primaryUpi: '8547931509@ibl',
-      secondaryUpi: 'basimaslam419@okaxis',
-      note: 'Kindly share the payment screenshot after the transfer.',
-      showQr: true,
-      qrMode: 'generate',
-      customQrUrl: '',
-      showUpiId: true,
-      showGpay: true,
-      showBank: true,
-      showAccountNo: true,
-      showIfsc: true
+      items: [
+        {
+          id: 'it_494_1',
+          title: 'Instagram Marketing Service',
+          subtitle: 'Mallus Marketing Team Campaign',
+          url: '',
+          showUrl: false,
+          quantity: 1,
+          rate: 5000,
+          amount: 5000
+        }
+      ],
+      notes: 'Instagram Marketing Service – Mallus Marketing Team',
+      terms: 'Payment received in full. Thank you for partnering with BE CREATIVES.'
     },
-    business: { ...DEFAULT_SETTINGS }
-  };
+    {
+      id: 'inv_bc493',
+      invoiceNumber: 'BC-493',
+      date: '02-10-2026',
+      isoDate: '2026-10-02',
+      monthHeader: 'October 2026',
+      year: 2026,
+      dueDate: '',
+      showDueDate: false,
+      status: 'PAID',
+      amountReceived: 22999,
+      balanceDue: 0,
+      showPaymentStatusBox: true,
+      currency: '₹',
+      client: {
+        name: 'Velolog',
+        whatsapp: '',
+        phone: '',
+        email: '',
+        address: 'SEO & Performance'
+      },
+      items: [
+        {
+          id: 'it_493_1',
+          title: '1. SEO — PRO',
+          subtitle: 'Comprehensive Search Engine Optimization, Technical Audit & Growth Strategy',
+          url: '',
+          showUrl: false,
+          quantity: 1,
+          rate: 22999,
+          amount: 22999
+        }
+      ],
+      notes: '1. SEO — PRO',
+      terms: 'Payment received in full. Thank you for partnering with BE CREATIVES.'
+    },
+    {
+      id: 'inv_bc492',
+      invoiceNumber: 'BC-492',
+      date: '02-10-2026',
+      isoDate: '2026-10-02',
+      monthHeader: 'October 2026',
+      year: 2026,
+      dueDate: '',
+      showDueDate: false,
+      status: 'PAID',
+      amountReceived: 8000,
+      balanceDue: 0,
+      showPaymentStatusBox: true,
+      currency: '₹',
+      client: {
+        name: 'alamengaz_logistics Saudia Arabia',
+        whatsapp: '5456336910',
+        phone: '5456336910',
+        email: 'contact@alamengaz.com',
+        address: 'Saudi Arabia'
+      },
+      items: [
+        {
+          id: 'it_492_1',
+          title: 'OCTOBER PACKAGE',
+          subtitle: 'Monthly Creative, Social Media & Portal Retainer',
+          url: '',
+          showUrl: false,
+          quantity: 1,
+          rate: 8000,
+          amount: 8000
+        }
+      ],
+      notes: 'OCTOBER PACKAGE',
+      terms: 'Payment received in full. Thank you for partnering with BE CREATIVES.'
+    },
+    {
+      id: 'inv_bc491',
+      invoiceNumber: 'BC-491',
+      date: '02-10-2026',
+      isoDate: '2026-10-02',
+      monthHeader: 'October 2026',
+      year: 2026,
+      dueDate: '10-10-2026',
+      showDueDate: true,
+      status: 'PENDING',
+      amountReceived: 0,
+      balanceDue: 7000,
+      showPaymentStatusBox: true,
+      currency: '₹',
+      client: {
+        name: 'EZA Automation',
+        whatsapp: '',
+        phone: '',
+        email: '',
+        address: 'Automation & Tech'
+      },
+      items: [
+        {
+          id: 'it_491_1',
+          title: 'Carousel Posts',
+          subtitle: 'High-Conversion Social Media Creative Slides',
+          url: '',
+          showUrl: false,
+          quantity: 1,
+          rate: 7000,
+          amount: 7000
+        }
+      ],
+      notes: 'Carousel Posts',
+      terms: 'Invoice pending settlement. Please remit payment via bank/UPI by due date.'
+    },
+    {
+      id: 'inv_bc490',
+      invoiceNumber: 'BC-490',
+      date: '02-10-2026',
+      isoDate: '2026-10-02',
+      monthHeader: 'October 2026',
+      year: 2026,
+      dueDate: '',
+      showDueDate: false,
+      status: 'PAID',
+      amountReceived: 4650,
+      balanceDue: 0,
+      showPaymentStatusBox: true,
+      currency: '₹',
+      client: {
+        name: 'Eza Coperate UAE',
+        whatsapp: '',
+        phone: '',
+        email: '',
+        address: 'United Arab Emirates'
+      },
+      items: [
+        {
+          id: 'it_490_1',
+          title: 'Carousel Posts',
+          subtitle: 'Corporate Branding & Engagement Graphics',
+          url: '',
+          showUrl: false,
+          quantity: 1,
+          rate: 4650,
+          amount: 4650
+        }
+      ],
+      notes: 'Carousel Posts',
+      terms: 'Payment received in full. Thank you for partnering with BE CREATIVES.'
+    },
+    {
+      id: 'inv_seed_bc489',
+      invoiceNumber: 'BC-489',
+      date: '16-09-2026',
+      isoDate: '2026-09-16',
+      monthHeader: 'September 2026',
+      year: 2026,
+      dueDate: '',
+      showDueDate: false,
+      status: 'PAID',
+      amountReceived: 3500,
+      balanceDue: 0,
+      showPaymentStatusBox: true,
+      currency: '₹',
+      client: {
+        name: 'ALAM ENGAZ',
+        whatsapp: '+91 8547931509',
+        phone: '+91 8547931509',
+        email: 'contact@alamengaz.com',
+        address: 'Commercial Center, Riyadh'
+      },
+      items: [
+        {
+          id: 'item_1',
+          title: 'ALAM ENGAZ',
+          subtitle: 'Staff Web Portal – Email Signature Hub',
+          url: 'https://alam-engaz-email-signature-hub.netlify.app/',
+          showUrl: true,
+          quantity: 1,
+          rate: 1750,
+          amount: 1750
+        },
+        {
+          id: 'item_2',
+          title: 'ALAM ENGAZ PORT SERVICES',
+          subtitle: 'Staff Web Portal – Email Signature Hub',
+          url: 'https://alam-engaz-port-email-signature-hub.netlify.app/',
+          showUrl: true,
+          quantity: 1,
+          rate: 1750,
+          amount: 1750
+        }
+      ],
+      notes: 'ALAM ENGAZ',
+      terms: 'Payment received in full. Thank you for partnering with BE CREATIVES.'
+    }
+  ];
+
+  const ALAM_ENGAZ_INVOICE = MASTER_SEED_USER_INVOICES[5];
+
+
 
   // Application State
   let invoices = [];
@@ -820,11 +966,13 @@
       console.warn('Error reading stored user invoices:', e);
     }
 
-    // Ensure BC-489 ALAM ENGAZ exists
-    let hasAlamEngaz = loadedUserInvoices.some(i => i.invoiceNumber === 'BC-489');
-    if (!hasAlamEngaz) {
-      loadedUserInvoices.unshift(JSON.parse(JSON.stringify(ALAM_ENGAZ_INVOICE)));
-    }
+    // Ensure all master user invoices (BC-489 to BC-494) exist
+    MASTER_SEED_USER_INVOICES.forEach(masterInv => {
+      const exists = loadedUserInvoices.some(i => i.invoiceNumber === masterInv.invoiceNumber);
+      if (!exists) {
+        loadedUserInvoices.unshift(JSON.parse(JSON.stringify(masterInv)));
+      }
+    });
 
     userInvoices = loadedUserInvoices;
 
@@ -855,6 +1003,9 @@
 
   // Master Verified Clients Seed (73 clients extracted from Khatabook Customer List Report PDF)
   const KHATABOOK_CLIENTS_SEED = [
+    { name: 'Velolog', phone: '', whatsapp: '', email: '', address: 'Marketing & SEO Client', notes: 'SEO Pro Package & Instagram Marketing' },
+    { name: 'EZA Automation', phone: '', whatsapp: '', email: '', address: 'Automation Client', notes: 'Social Media Carousel Posts' },
+    { name: 'Eza Coperate UAE', phone: '', whatsapp: '', email: '', address: 'United Arab Emirates', notes: 'UAE Corporate Client' },
     { name: 'ALAM ENGAZ', phone: '+91 8547931509', whatsapp: '+91 8547931509', email: 'contact@alamengaz.com', address: 'Commercial Center, Riyadh', notes: 'Corporate Portal & Email Signature Hub client' },
     { name: 'Badrudeen Kabaka', phone: '8310783057', whatsapp: '8310783057', address: 'Karnataka / Kerala' },
     { name: 'kidasexpresscargo', phone: '9539004488', whatsapp: '9539004488', address: 'Cargo & Logistics' },
