@@ -424,11 +424,20 @@
     inputInvoiceNumber: document.getElementById('inputInvoiceNumber'),
     inputInvoiceDate: document.getElementById('inputInvoiceDate'),
     selectInvoiceStatus: document.getElementById('selectInvoiceStatus'),
+    editorTotalAmountDisplay: document.getElementById('editorTotalAmountDisplay'),
     inputAmountReceived: document.getElementById('inputAmountReceived'),
     editorBalanceDueDisplay: document.getElementById('editorBalanceDueDisplay'),
+    btnQuickPayFull: document.getElementById('btnQuickPayFull'),
+    btnQuickPayHalf: document.getElementById('btnQuickPayHalf'),
+    btnQuickPayZero: document.getElementById('btnQuickPayZero'),
     toggleShowPaymentStatusBox: document.getElementById('toggleShowPaymentStatusBox'),
     toggleShowBalanceDue: document.getElementById('toggleShowBalanceDue'),
     toggleShowAmountReceived: document.getElementById('toggleShowAmountReceived'),
+    toggleShowDeliveryCard: document.getElementById('toggleShowDeliveryCard'),
+    inputDeliveryTitle: document.getElementById('inputDeliveryTitle'),
+    selectDeliveryIcon: document.getElementById('selectDeliveryIcon'),
+    inputDeliveryDate: document.getElementById('inputDeliveryDate'),
+    inputDeliveryNote: document.getElementById('inputDeliveryNote'),
     toggleDueDate: document.getElementById('toggleDueDate'),
     inputInvoiceDueDate: document.getElementById('inputInvoiceDueDate'),
     inputCurrencySymbol: document.getElementById('inputCurrencySymbol'),
@@ -488,6 +497,13 @@
     grandTotal: document.getElementById('sheetTotalPayable') || document.getElementById('sheetGrandTotal'),
     deliverablesCol: document.getElementById('sheetDeliverablesCol'),
     deliverablesList: document.getElementById('sheetDeliverablesList'),
+    deliveryCard: document.getElementById('sheetDeliveryCard'),
+    deliveryIconBox: document.getElementById('sheetDeliveryIconBox'),
+    deliveryIcon: document.getElementById('sheetDeliveryIcon'),
+    deliveryTitle: document.getElementById('sheetDeliveryTitle'),
+    deliveryLabel: document.getElementById('sheetDeliveryLabel'),
+    deliveryDateText: document.getElementById('sheetDeliveryDateText'),
+    deliveryNote: document.getElementById('sheetDeliveryNote'),
     middleGrid: document.getElementById('sheetMiddleGrid') || document.querySelector('.master-middle-grid'),
     middleRightCol: document.getElementById('sheetMiddleRightCol'),
     paymentStatusCard: document.getElementById('sheetPaymentStatusCard'),
@@ -2840,6 +2856,11 @@
       amountReceived: 2500,
       balanceDue: 0,
       showPaymentStatusBox: true,
+      showDeliveryCard: true,
+      deliveryTitle: 'Final Project Delivery',
+      deliveryIcon: 'fa-box-archive',
+      deliveryDate: formattedDate,
+      deliveryNote: 'Work is final and set as per discussion.',
       currency: '₹',
       client: { ...clientData },
       items: [
@@ -2980,9 +3001,31 @@
       projSubEl.textContent = pSub;
     }
 
-    const delivDateEl = document.getElementById('sheetDeliveryDateText');
-    if (delivDateEl) {
-      delivDateEl.textContent = dueVal || date || '26 October 2026';
+    // Dynamic Delivery Details Card
+    const showDelivery = ed.toggleShowDeliveryCard ? ed.toggleShowDeliveryCard.checked : true;
+    const delivCardEl = document.getElementById('sheetDeliveryCard');
+    if (delivCardEl) {
+      if (showDelivery) {
+        delivCardEl.style.display = 'flex';
+        const dTitle = (ed.inputDeliveryTitle && ed.inputDeliveryTitle.value.trim()) ? ed.inputDeliveryTitle.value.trim() : 'Final Project Delivery';
+        const dDate = (ed.inputDeliveryDate && ed.inputDeliveryDate.value.trim()) ? ed.inputDeliveryDate.value.trim() : (dueVal || date || '26 October 2026');
+        const dNote = (ed.inputDeliveryNote && ed.inputDeliveryNote.value.trim()) ? ed.inputDeliveryNote.value.trim() : 'Work is final and set as per discussion.';
+        const dIcon = ed.selectDeliveryIcon ? ed.selectDeliveryIcon.value : 'fa-box-archive';
+
+        const dLabelEl = document.getElementById('sheetDeliveryLabel');
+        if (dLabelEl) dLabelEl.textContent = dTitle + ': ';
+
+        const dDateEl = document.getElementById('sheetDeliveryDateText');
+        if (dDateEl) dDateEl.textContent = dDate;
+
+        const dNoteEl = document.getElementById('sheetDeliveryNote');
+        if (dNoteEl) dNoteEl.textContent = dNote;
+
+        const dIconEl = document.getElementById('sheetDeliveryIcon');
+        if (dIconEl) dIconEl.className = 'fa-solid ' + dIcon;
+      } else {
+        delivCardEl.style.display = 'none';
+      }
     }
 
     if (sheet.clientSubdetails) {
@@ -3043,6 +3086,10 @@
 
     const balanceDue = Math.max(0, grandTotal - amtReceived);
 
+    if (ed.editorTotalAmountDisplay) {
+      ed.editorTotalAmountDisplay.textContent = formatCurrency(grandTotal, curr);
+    }
+
     if (ed.editorBalanceDueDisplay) {
       ed.editorBalanceDueDisplay.textContent = formatCurrency(balanceDue, curr);
       if (status === 'PAID' || balanceDue === 0) {
@@ -3066,7 +3113,13 @@
       if (showPayBox) {
         payCardEl.style.display = 'block';
         payCardEl.className = 'sheet-payment-status-card ' + status.toLowerCase();
-        if (payStatusNameEl) payStatusNameEl.textContent = status;
+        if (payStatusNameEl) {
+          if (status === 'PENDING' && amtReceived > 0) {
+            payStatusNameEl.textContent = 'PARTIAL PAID';
+          } else {
+            payStatusNameEl.textContent = status;
+          }
+        }
         if (payStatusIconEl) {
           if (status === 'PAID') {
             payStatusIconEl.className = 'fa-solid fa-circle-check pay-status-icon';
@@ -3292,8 +3345,26 @@
       ed.inputAmountReceived.value = rec;
     }
     const initBal = Math.max(0, invTot - rec);
+    if (ed.editorTotalAmountDisplay) {
+      ed.editorTotalAmountDisplay.textContent = formatCurrency(invTot, inv.currency || '₹');
+    }
     if (ed.editorBalanceDueDisplay) {
       ed.editorBalanceDueDisplay.textContent = formatCurrency(initBal, inv.currency || '₹');
+    }
+    if (ed.toggleShowDeliveryCard) {
+      ed.toggleShowDeliveryCard.checked = inv.showDeliveryCard !== false;
+    }
+    if (ed.inputDeliveryTitle) {
+      ed.inputDeliveryTitle.value = inv.deliveryTitle || 'Final Project Delivery';
+    }
+    if (ed.selectDeliveryIcon) {
+      ed.selectDeliveryIcon.value = inv.deliveryIcon || 'fa-box-archive';
+    }
+    if (ed.inputDeliveryDate) {
+      ed.inputDeliveryDate.value = inv.deliveryDate || inv.dueDate || inv.date || '';
+    }
+    if (ed.inputDeliveryNote) {
+      ed.inputDeliveryNote.value = inv.deliveryNote || 'Work is final and set as per discussion.';
     }
     ed.toggleDueDate.checked = Boolean(inv.showDueDate);
     ed.inputInvoiceDueDate.value = inv.dueDate || '';
@@ -3400,6 +3471,13 @@
       const q = parseFloat(qtyInp.value) || 0;
       const r = parseFloat(rateInp.value) || 0;
       amtDisp.value = formatCurrency(q * r);
+      if (ed.selectInvoiceStatus && ed.selectInvoiceStatus.value === 'PAID') {
+        const items = collectItems();
+        let sub = 0; items.forEach(i => sub += (Number(i.amount) || 0));
+        const disc = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
+        const tot = Math.max(0, sub - disc);
+        if (ed.inputAmountReceived) ed.inputAmountReceived.value = tot;
+      }
       syncLivePreview();
     }
 
@@ -3409,6 +3487,13 @@
 
     delBtn.addEventListener('click', () => {
       row.remove();
+      if (ed.selectInvoiceStatus && ed.selectInvoiceStatus.value === 'PAID') {
+        const items = collectItems();
+        let sub = 0; items.forEach(i => sub += (Number(i.amount) || 0));
+        const disc = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
+        const tot = Math.max(0, sub - disc);
+        if (ed.inputAmountReceived) ed.inputAmountReceived.value = tot;
+      }
       syncLivePreview();
     });
 
@@ -3514,6 +3599,11 @@
       total,
       deliverables,
       websiteLinks,
+      showDeliveryCard: ed.toggleShowDeliveryCard ? ed.toggleShowDeliveryCard.checked : true,
+      deliveryTitle: ed.inputDeliveryTitle ? ed.inputDeliveryTitle.value.trim() : 'Final Project Delivery',
+      deliveryIcon: ed.selectDeliveryIcon ? ed.selectDeliveryIcon.value : 'fa-box-archive',
+      deliveryDate: ed.inputDeliveryDate ? ed.inputDeliveryDate.value.trim() : '',
+      deliveryNote: ed.inputDeliveryNote ? ed.inputDeliveryNote.value.trim() : 'Work is final and set as per discussion.',
       payment: {
         accountName: ed.inputPayeeName.value.trim(),
         bankName: ed.inputBankName.value.trim(),
@@ -4338,10 +4428,55 @@
           if (ed.inputAmountReceived) ed.inputAmountReceived.value = tot;
         } else if (st === 'UNPAID') {
           if (ed.inputAmountReceived) ed.inputAmountReceived.value = 0;
+        } else if (st === 'PENDING') {
+          const currentRec = Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0);
+          if (currentRec === tot || currentRec === 0) {
+            if (ed.inputAmountReceived) ed.inputAmountReceived.value = Math.round(tot / 2);
+          }
         }
         syncLivePreview();
       });
     }
+
+    // Quick Payment Presets (100% Full, 50% Advance, 0 Unpaid)
+    if (ed.btnQuickPayFull) {
+      ed.btnQuickPayFull.addEventListener('click', () => {
+        const items = collectItems();
+        let sub = 0; items.forEach(i => sub += (Number(i.amount) || 0));
+        const disc = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
+        const tot = Math.max(0, sub - disc);
+        if (ed.inputAmountReceived) ed.inputAmountReceived.value = tot;
+        if (ed.selectInvoiceStatus) ed.selectInvoiceStatus.value = 'PAID';
+        syncLivePreview();
+      });
+    }
+
+    if (ed.btnQuickPayHalf) {
+      ed.btnQuickPayHalf.addEventListener('click', () => {
+        const items = collectItems();
+        let sub = 0; items.forEach(i => sub += (Number(i.amount) || 0));
+        const disc = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
+        const tot = Math.max(0, sub - disc);
+        if (ed.inputAmountReceived) ed.inputAmountReceived.value = Math.round(tot / 2);
+        if (ed.selectInvoiceStatus) ed.selectInvoiceStatus.value = 'PENDING';
+        syncLivePreview();
+      });
+    }
+
+    if (ed.btnQuickPayZero) {
+      ed.btnQuickPayZero.addEventListener('click', () => {
+        if (ed.inputAmountReceived) ed.inputAmountReceived.value = 0;
+        if (ed.selectInvoiceStatus) ed.selectInvoiceStatus.value = 'UNPAID';
+        syncLivePreview();
+      });
+    }
+
+    // Delivery Details Card Listeners
+    if (ed.toggleShowDeliveryCard) ed.toggleShowDeliveryCard.addEventListener('change', syncLivePreview);
+    if (ed.inputDeliveryTitle) ed.inputDeliveryTitle.addEventListener('input', syncLivePreview);
+    if (ed.selectDeliveryIcon) ed.selectDeliveryIcon.addEventListener('change', syncLivePreview);
+    if (ed.inputDeliveryDate) ed.inputDeliveryDate.addEventListener('input', syncLivePreview);
+    if (ed.inputDeliveryNote) ed.inputDeliveryNote.addEventListener('input', syncLivePreview);
 
     if (ed.inputAmountReceived) {
       ed.inputAmountReceived.addEventListener('input', () => {

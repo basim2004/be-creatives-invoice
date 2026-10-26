@@ -886,28 +886,49 @@
                 <div class="form-group">
                   <label for="selectInvoiceStatus">Payment Status</label>
                   <select id="selectInvoiceStatus">
-                    <option value="PAID">PAID</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="UNPAID">UNPAID</option>
+                    <option value="PAID">PAID (Fully Paid)</option>
+                    <option value="PENDING">PENDING (Partially Paid / Advance)</option>
+                    <option value="UNPAID">UNPAID (Pending Payment)</option>
                   </select>
                 </div>
               </div>
 
-              <div class="form-grid-2" style="margin-top: 10px;">
-                <div class="form-group">
-                  <label for="inputAmountReceived">Amount Received (₹)</label>
-                  <input type="number" id="inputAmountReceived" min="0" placeholder="e.g. 3500">
+              <!-- Payment Breakdown Grid (Total, Amount Received, Balance Due) -->
+              <div class="form-grid-3" style="margin-top: 12px; background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--slate-200);">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Total Amount</label>
+                  <div id="editorTotalAmountDisplay" style="font-family: var(--font-brand); font-size: 1.15rem; font-weight: 800; color: #0f172a; padding: 4px 0;">
+                    ₹2,500
+                  </div>
                 </div>
 
-                <div class="form-group">
-                  <label>Balance Due</label>
-                  <div id="editorBalanceDueDisplay" style="font-family: var(--font-brand); font-size: 1.15rem; font-weight: 800; color: #127236; padding: 7px 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="inputAmountReceived" style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Amount Received (₹)</label>
+                  <input type="number" id="inputAmountReceived" min="0" placeholder="e.g. 500" style="padding: 5px 8px; font-weight: 700;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: #64748b;">Balance Due</label>
+                  <div id="editorBalanceDueDisplay" style="font-family: var(--font-brand); font-size: 1.15rem; font-weight: 800; color: #127236; padding: 4px 0;">
                     ₹0
                   </div>
                 </div>
               </div>
 
-              <div class="form-grid-2" style="margin-top: 10px;">
+              <!-- Quick Payment Preset Buttons -->
+              <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-sm btn-outline" id="btnQuickPayFull" style="padding: 4px 10px; font-size: 0.74rem;">
+                  <i class="fa-solid fa-check-double" style="color: #16a34a;"></i> Full Paid (100%)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline" id="btnQuickPayHalf" style="padding: 4px 10px; font-size: 0.74rem;">
+                  <i class="fa-solid fa-percent" style="color: #d97706;"></i> 50% Advance
+                </button>
+                <button type="button" class="btn btn-sm btn-outline" id="btnQuickPayZero" style="padding: 4px 10px; font-size: 0.74rem;">
+                  <i class="fa-solid fa-xmark" style="color: #dc2626;"></i> 0 Paid (Unpaid)
+                </button>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 12px;">
                 <div class="form-group">
                   <label class="toggle-switch-label">
                     <input type="checkbox" id="toggleShowPaymentStatusBox" checked>
@@ -1039,6 +1060,66 @@
 
               <div class="deliverables-editor-list" id="deliverablesEditorList">
                 <!-- Deliverable items dynamically rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4B: Delivery Details Manager -->
+          <div class="form-card collapsible" data-section="delivery-details">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-truck-ramp-box card-icon"></i>
+                <h3>Delivery Details Card</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label class="toggle-switch-label" style="font-weight: 700;">
+                  <input type="checkbox" id="toggleShowDeliveryCard" checked>
+                  <span>Show Delivery Details Card on Invoice</span>
+                </label>
+              </div>
+
+              <div id="deliveryCardControlsContainer">
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label for="inputDeliveryTitle">Delivery Label / Title</label>
+                    <input type="text" id="inputDeliveryTitle" list="deliveryTitlePresets" value="Final Project Delivery" placeholder="e.g. Final Video Delivery, Final Design Delivery">
+                    <datalist id="deliveryTitlePresets">
+                      <option value="Final Project Delivery">
+                      <option value="Final Video Delivery">
+                      <option value="Final Design Delivery">
+                      <option value="Branding Delivery">
+                      <option value="Social Media Content Delivery">
+                      <option value="Website Development Delivery">
+                    </datalist>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="selectDeliveryIcon">Work Category Icon</label>
+                    <select id="selectDeliveryIcon">
+                      <option value="fa-box-archive" selected>📦 General Project Delivery (Box)</option>
+                      <option value="fa-clapperboard">🎬 Video / Motion (Clapperboard)</option>
+                      <option value="fa-palette">🎨 Graphic Design / Branding (Palette)</option>
+                      <option value="fa-laptop-code">💻 Web Development (Laptop)</option>
+                      <option value="fa-bullhorn">📢 Marketing / Promotion (Bullhorn)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: 10px;">
+                  <div class="form-group">
+                    <label for="inputDeliveryDate">Delivery Date</label>
+                    <input type="text" id="inputDeliveryDate" placeholder="e.g. 26 October 2026">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="inputDeliveryNote">Status / Confirmation Note</label>
+                    <input type="text" id="inputDeliveryNote" value="Work is final and set as per discussion." placeholder="e.g. Work is final and set as per discussion.">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1375,20 +1456,20 @@
                     </ul>
                   </div>
 
-                  <!-- Delivery Details Card (with Clapperboard icon) -->
+                  <!-- Delivery Details Card (Dynamic & Fully Customizable) -->
                   <div class="ref-delivery-card" id="sheetDeliveryCard">
-                    <div class="ref-delivery-icon-box">
-                      <i class="fa-solid fa-clapperboard"></i>
+                    <div class="ref-delivery-icon-box" id="sheetDeliveryIconBox">
+                      <i class="fa-solid fa-box-archive" id="sheetDeliveryIcon"></i>
                     </div>
                     <div class="ref-delivery-content">
-                      <div class="ref-delivery-title">DELIVERY DETAILS</div>
+                      <div class="ref-delivery-title" id="sheetDeliveryTitle">DELIVERY DETAILS</div>
                       <div class="ref-delivery-row">
                         <i class="fa-regular fa-calendar"></i>
-                        <span>Final Video Delivery: <strong id="sheetDeliveryDateText">26 October 2026</strong></span>
+                        <span><span id="sheetDeliveryLabel">Final Project Delivery:</span> <strong id="sheetDeliveryDateText">26 October 2026</strong></span>
                       </div>
                       <div class="ref-delivery-sub">
                         <i class="fa-solid fa-circle-check"></i>
-                        <span>Video is final and set as per discussion.</span>
+                        <span id="sheetDeliveryNote">Work is final and set as per discussion.</span>
                       </div>
                     </div>
                   </div>
