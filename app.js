@@ -162,15 +162,54 @@
   let reportFilterMonth = 'ALL';
   let reportFilterClient = 'ALL';
 
-  let dashSelectedMonth = 'September 2026';
+  const MONTH_NAMES_LIST = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const nowInitDate = new Date();
+  const curMonthInitStr = `${MONTH_NAMES_LIST[nowInitDate.getMonth()]} ${nowInitDate.getFullYear()}`;
+  let dashSelectedMonth = curMonthInitStr; // Dynamically defaults to current month (e.g. October 2026)
 
-  // All Available Months List in Chronological Order (Latest First: 2026 Sep down to 2025 May)
-  const ALL_MONTHS_LATEST_FIRST = [
-    'September 2026', 'August 2026', 'July 2026', 'June 2026', 'May 2026',
+  // All Available Months List in Chronological Order (Latest First)
+  let ALL_MONTHS_LATEST_FIRST = [
+    'October 2026', 'September 2026', 'August 2026', 'July 2026', 'June 2026', 'May 2026',
     'April 2026', 'March 2026', 'February 2026', 'January 2026',
     'December 2025', 'November 2025', 'October 2025', 'September 2025',
     'August 2025', 'July 2025', 'June 2025', 'May 2025'
   ];
+
+  function refreshAllMonthsList() {
+    const monthsSet = new Set();
+    const now = new Date();
+    const cur = `${MONTH_NAMES_LIST[now.getMonth()]} ${now.getFullYear()}`;
+    monthsSet.add(cur);
+
+    ALL_MONTHS_LATEST_FIRST.forEach(m => monthsSet.add(m));
+
+    userInvoices.forEach(inv => {
+      const mh = getInvoiceMonthHeader(inv);
+      if (mh) monthsSet.add(mh);
+    });
+
+    historicalTransactions.forEach(tx => {
+      if (tx.monthHeader) monthsSet.add(tx.monthHeader);
+    });
+
+    const monthOrder = {
+      'January': 0, 'February': 1, 'March': 2, 'April': 3, 'May': 4, 'June': 5,
+      'July': 6, 'August': 7, 'September': 8, 'October': 9, 'November': 10, 'December': 11
+    };
+
+    ALL_MONTHS_LATEST_FIRST = Array.from(monthsSet).sort((a, b) => {
+      const [mA, yA] = a.split(' ');
+      const [mB, yB] = b.split(' ');
+      const yrDiff = Number(yB) - Number(yA);
+      if (yrDiff !== 0) return yrDiff;
+      return (monthOrder[mB] || 0) - (monthOrder[mA] || 0);
+    });
+
+    return ALL_MONTHS_LATEST_FIRST;
+  }
 
   // DOM Elements
   const views = {
@@ -388,6 +427,8 @@
     inputAmountReceived: document.getElementById('inputAmountReceived'),
     editorBalanceDueDisplay: document.getElementById('editorBalanceDueDisplay'),
     toggleShowPaymentStatusBox: document.getElementById('toggleShowPaymentStatusBox'),
+    toggleShowBalanceDue: document.getElementById('toggleShowBalanceDue'),
+    toggleShowAmountReceived: document.getElementById('toggleShowAmountReceived'),
     toggleDueDate: document.getElementById('toggleDueDate'),
     inputInvoiceDueDate: document.getElementById('inputInvoiceDueDate'),
     inputCurrencySymbol: document.getElementById('inputCurrencySymbol'),
@@ -453,7 +494,9 @@
     payStatusBadge: document.getElementById('sheetPayStatusBadge'),
     payStatusName: document.getElementById('sheetPayStatusName'),
     payStatusIcon: document.getElementById('sheetPayStatusIcon'),
+    amountReceivedCol: document.getElementById('sheetAmountReceivedCol'),
     amountReceivedVal: document.getElementById('sheetAmountReceivedVal'),
+    balanceDueRow: document.getElementById('sheetBalanceDueRow'),
     balanceDueVal: document.getElementById('sheetBalanceDueVal'),
     websitesBlock: document.getElementById('sheetWebsitesBlock') || document.querySelector('.middle-col-links'),
     websitesList: document.getElementById('sheetWebsiteLinksList') || document.getElementById('sheetWebsitesList'),
@@ -1155,6 +1198,8 @@
   }
 
   function populateMonthDropdowns() {
+    refreshAllMonthsList();
+
     const invMonthSelect = document.getElementById('invoiceMonthFilterSelect');
     const expMonthSelect = document.getElementById('expenseMonthSelect');
     const repMonthSelect = document.getElementById('reportMonthSelect');
@@ -1163,14 +1208,30 @@
     const optionsHtml = '<option value="ALL">All Months</option>' +
       ALL_MONTHS_LATEST_FIRST.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
 
-    if (invMonthSelect) invMonthSelect.innerHTML = optionsHtml;
-    if (expMonthSelect) expMonthSelect.innerHTML = optionsHtml;
-    if (repMonthSelect) repMonthSelect.innerHTML = optionsHtml;
+    if (invMonthSelect) {
+      const cur = invMonthSelect.value || 'ALL';
+      invMonthSelect.innerHTML = optionsHtml;
+      invMonthSelect.value = cur;
+    }
+    if (expMonthSelect) {
+      const cur = expMonthSelect.value || 'ALL';
+      expMonthSelect.innerHTML = optionsHtml;
+      expMonthSelect.value = cur;
+    }
+    if (repMonthSelect) {
+      const cur = repMonthSelect.value || 'ALL';
+      repMonthSelect.innerHTML = optionsHtml;
+      repMonthSelect.value = cur;
+    }
 
     if (dashMonthSelect) {
+      if (!dashSelectedMonth || !ALL_MONTHS_LATEST_FIRST.includes(dashSelectedMonth)) {
+        dashSelectedMonth = ALL_MONTHS_LATEST_FIRST[0];
+      }
       dashMonthSelect.innerHTML = ALL_MONTHS_LATEST_FIRST.map(m =>
         `<option value="${escapeHtml(m)}" ${m === dashSelectedMonth ? 'selected' : ''}>${escapeHtml(m)}</option>`
       ).join('');
+      dashMonthSelect.value = dashSelectedMonth;
     }
   }
 
@@ -1276,11 +1337,11 @@
     renderMonthlyClientCollection();
   }
 
-  // Monthly Client Collection Module
+    // Monthly Client Collection Module
   function renderMonthlyClientCollection() {
     if (!dash.clientCollectionList) return;
 
-    const monthTarget = dash.collectionMonthSelect ? dash.collectionMonthSelect.value : dashSelectedMonth;
+    const monthTarget = (dash.collectionMonthSelect && dash.collectionMonthSelect.value) ? dash.collectionMonthSelect.value : dashSelectedMonth;
     const clientSums = {};
     const clientTxCounts = {};
 
@@ -1295,10 +1356,15 @@
 
     userInvoices.forEach(inv => {
       const invMonth = getInvoiceMonthHeader(inv);
-      if (invMonth === monthTarget && inv.status === 'PAID' && !inv.historicalTxId) {
-        const name = (inv.client?.name || 'Client').trim();
-        clientSums[name] = (clientSums[name] || 0) + Number(inv.total || 0);
-        clientTxCounts[name] = (clientTxCounts[name] || 0) + 1;
+      if (invMonth === monthTarget && !inv.historicalTxId) {
+        const amt = (inv.status === 'PAID')
+          ? Number(inv.total || inv.amount || 0)
+          : Number(inv.amountReceived || 0);
+        if (amt > 0) {
+          const name = (inv.client?.name || 'Client').trim();
+          clientSums[name] = (clientSums[name] || 0) + amt;
+          clientTxCounts[name] = (clientTxCounts[name] || 0) + 1;
+        }
       }
     });
 
@@ -2940,6 +3006,9 @@
 
     // Payment Status Card on Live A4 Sheet
     const showPayBox = ed.toggleShowPaymentStatusBox ? ed.toggleShowPaymentStatusBox.checked : true;
+    const showBalanceDue = ed.toggleShowBalanceDue ? ed.toggleShowBalanceDue.checked : true;
+    const showAmountRec = ed.toggleShowAmountReceived ? ed.toggleShowAmountReceived.checked : true;
+
     let amtReceivedRaw = ed.inputAmountReceived ? ed.inputAmountReceived.value : '';
     let amtReceived = 0;
     if (amtReceivedRaw !== '') {
@@ -2968,6 +3037,8 @@
     const payStatusIconEl = document.getElementById('sheetPayStatusIcon') || sheet.payStatusIcon;
     const amtReceivedEl = document.getElementById('sheetAmountReceivedVal') || sheet.amountReceivedVal;
     const balanceDueEl = document.getElementById('sheetBalanceDueVal') || sheet.balanceDueVal;
+    const balanceDueRowEl = document.getElementById('sheetBalanceDueRow') || sheet.balanceDueRow;
+    const amountRecColEl = document.getElementById('sheetAmountReceivedCol') || sheet.amountReceivedCol;
 
     if (payCardEl) {
       if (showPayBox) {
@@ -2985,6 +3056,13 @@
         }
         if (amtReceivedEl) amtReceivedEl.textContent = formatCurrency(amtReceived, curr);
         if (balanceDueEl) balanceDueEl.textContent = formatCurrency(balanceDue, curr);
+
+        if (balanceDueRowEl) {
+          balanceDueRowEl.style.display = showBalanceDue ? 'flex' : 'none';
+        }
+        if (amountRecColEl) {
+          amountRecColEl.style.display = showAmountRec ? 'flex' : 'none';
+        }
       } else {
         payCardEl.style.display = 'none';
       }
@@ -3176,6 +3254,12 @@
     ed.selectInvoiceStatus.value = inv.status || 'PAID';
     if (ed.toggleShowPaymentStatusBox) {
       ed.toggleShowPaymentStatusBox.checked = inv.showPaymentStatusBox !== false;
+    }
+    if (ed.toggleShowBalanceDue) {
+      ed.toggleShowBalanceDue.checked = inv.showBalanceDue !== false;
+    }
+    if (ed.toggleShowAmountReceived) {
+      ed.toggleShowAmountReceived.checked = inv.showAmountReceived !== false;
     }
     const invTot = inv.total || 0;
     let rec = inv.amountReceived;
@@ -3390,6 +3474,8 @@
       amountReceived: Math.max(0, Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0)),
       balanceDue: Math.max(0, total - Math.max(0, Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0))),
       showPaymentStatusBox: ed.toggleShowPaymentStatusBox ? ed.toggleShowPaymentStatusBox.checked : true,
+      showBalanceDue: ed.toggleShowBalanceDue ? ed.toggleShowBalanceDue.checked : true,
+      showAmountReceived: ed.toggleShowAmountReceived ? ed.toggleShowAmountReceived.checked : true,
       showDueDate: ed.toggleDueDate.checked,
       dueDate: ed.inputInvoiceDueDate.value.trim(),
       currency: ed.inputCurrencySymbol.value.trim() || '₹',
@@ -4255,6 +4341,12 @@
 
     if (ed.toggleShowPaymentStatusBox) {
       ed.toggleShowPaymentStatusBox.addEventListener('change', syncLivePreview);
+    }
+    if (ed.toggleShowBalanceDue) {
+      ed.toggleShowBalanceDue.addEventListener('change', syncLivePreview);
+    }
+    if (ed.toggleShowAmountReceived) {
+      ed.toggleShowAmountReceived.addEventListener('change', syncLivePreview);
     }
     if (ed.toggleDueDate) {
       ed.toggleDueDate.addEventListener('change', () => {

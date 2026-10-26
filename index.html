@@ -926,6 +926,22 @@
 
                 <div class="form-group">
                   <label class="toggle-switch-label">
+                    <input type="checkbox" id="toggleShowBalanceDue" checked>
+                    <span>Show Balance Due on Invoice</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label class="toggle-switch-label">
+                    <input type="checkbox" id="toggleShowAmountReceived" checked>
+                    <span>Show Amount Received on Invoice</span>
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label class="toggle-switch-label">
                     <input type="checkbox" id="toggleDueDate">
                     <span>Show Due Date on Invoice</span>
                   </label>
@@ -1402,12 +1418,12 @@
                           <i class="fa-solid fa-circle-check pay-status-icon" id="sheetPayStatusIcon"></i>
                         </div>
                       </div>
-                      <div class="pay-card-col pay-card-col-received">
+                      <div class="pay-card-col pay-card-col-received" id="sheetAmountReceivedCol">
                         <span class="pay-card-label">Amount Received</span>
                         <div class="pay-card-val" id="sheetAmountReceivedVal">₹3,500</div>
                       </div>
                     </div>
-                    <div class="pay-card-bottom-row">
+                    <div class="pay-card-bottom-row" id="sheetBalanceDueRow">
                       <span class="pay-card-due-label">Balance Due</span>
                       <span class="pay-card-due-val" id="sheetBalanceDueVal">₹0</span>
                     </div>
