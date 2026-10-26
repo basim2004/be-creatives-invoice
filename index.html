@@ -1293,121 +1293,141 @@
 
           <div class="preview-sheet-wrapper" id="previewSheetWrapper">
             
-            <!-- MASTER A4 INVOICE SHEET -->
+            <!-- MASTER A4 INVOICE SHEET (Modern Reference Design) -->
             <div class="a4-invoice-sheet invoice-page" id="a4InvoiceSheet">
               
               <!-- 1. TOP HEADER SECTION -->
-              <div class="master-header-row">
-                <!-- Slanted Maroon Polygon with BE CREATIVES Logo & Tag Stack (SVG for 100% PDF Fidelity) -->
-                <div class="master-header-polygon">
-                  <svg class="polygon-bg-svg" viewBox="0 0 385 116" preserveAspectRatio="none">
-                    <polygon points="0,0 385,0 300,116 0,116" fill="#641A1D" />
-                  </svg>
-                  <div class="polygon-content-wrap">
-                    <img src="be creatives agency.png" alt="BE CREATIVES" class="polygon-logo-img" id="sheetPolygonLogo" style="height: 74px; width: auto; max-width: 165px; object-fit: contain;">
-                    <div class="polygon-v-divider"></div>
-                    <div class="polygon-tag-stack">
-                      <span>DESIGN</span>
-                      <span>BRAND</span>
-                      <span>DIGITAL</span>
-                      <span>SOLUTIONS</span>
-                    </div>
-                  </div>
+              <div class="ref-header-row">
+                <div class="ref-header-left">
+                  <img src="be creatives agency.png" alt="BE CREATIVES" class="ref-brand-logo" id="sheetPolygonLogo" onerror="this.src='B BADGE.png'">
+                  <div class="ref-header-vsep"></div>
+                  <div class="ref-header-tagline">IDEAS &nbsp;|&nbsp; DESIGNS &nbsp;|&nbsp; GROWTH</div>
                 </div>
-
-                <!-- Top Right Brand Info -->
-                <div class="master-header-right">
-                  <h1 class="master-agency-name" id="sheetAgencyName">BE CREATIVES</h1>
-                  <p class="master-agency-tagline" id="sheetAgencyTagline">Creative Solutions, Limitless Possibilities</p>
-                  
-                  <a href="https://instagram.com/be_creatives__" target="_blank" class="master-instagram-badge" id="sheetInstagramBadge">
+                <div class="ref-header-right">
+                  <div class="ref-contact-line">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>www.becreatives.in</span>
+                  </div>
+                  <a href="https://instagram.com/be_creatives__" target="_blank" class="ref-contact-line" id="sheetInstagramBadge">
                     <i class="fa-brands fa-instagram"></i>
-                    <div class="insta-text-group">
-                      <span class="insta-label">FOLLOW US ON INSTAGRAM</span>
-                      <span class="insta-handle" id="sheetInstagramHandle">@be_creatives__</span>
-                    </div>
+                    <span id="sheetInstagramHandle">@be_creatives__</span>
                   </a>
+                </div>
+              </div>
 
-                  <div class="master-ideas-block">
-                    <span class="ideas-text">I D E A S</span>
-                    <span class="ideas-text">B R A N D S</span>
-                    <span class="ideas-text">E X P E R I E N C E S</span>
-                    <div class="ideas-underline"></div>
+              <!-- 2. INVOICE TITLE & HIGHLIGHTED METADATA CARDS -->
+              <div class="ref-title-meta-row">
+                <div class="ref-headline-wrap">
+                  <h1 class="ref-main-invoice-title">INVOICE</h1>
+                  <div class="ref-title-underline"></div>
+                </div>
+
+                <div class="ref-meta-cards">
+                  <div class="ref-meta-card">
+                    <span class="ref-card-label">INVOICE NO.</span>
+                    <span class="ref-card-val-accent" id="sheetInvoiceNumber">BC - 495</span>
+                  </div>
+                  <div class="ref-meta-card">
+                    <span class="ref-card-label">DATE</span>
+                    <span class="ref-card-val" id="sheetInvoiceDate">26 OCT 2026</span>
+                    <span class="ref-card-sub" id="sheetDateSubText">(Today)</span>
                   </div>
                 </div>
               </div>
 
-              <!-- 2. INVOICE META & CLIENT SECTION -->
-              <div class="master-meta-client-section">
-                <div class="invoice-title-row">
-                  <div class="invoice-title-block">
-                    <div class="master-invoice-headline">INVOICE</div>
-                    <div class="master-creative-services-tag">C R E A T I V E &nbsp; S E R V I C E S</div>
-                    
-                    <table class="meta-details-table">
-                      <tr>
-                        <td class="meta-key">INVOICE NO</td>
-                        <td class="meta-colon">:</td>
-                        <td class="meta-val" id="sheetInvoiceNumber">BC-78</td>
-                      </tr>
-                      <tr>
-                        <td class="meta-key">DATE</td>
-                        <td class="meta-colon">:</td>
-                        <td class="meta-val" id="sheetInvoiceDate">16-09-2026</td>
-                      </tr>
-                      <tr id="sheetDueDateRow" style="display:none;">
-                        <td class="meta-key">DUE DATE</td>
-                        <td class="meta-colon">:</td>
-                        <td class="meta-val" id="sheetInvoiceDueDate">26-09-2026</td>
-                      </tr>
-                    </table>
+              <!-- 3. BILL TO & PROJECT ROW -->
+              <div class="ref-client-project-row">
+                <div class="ref-bill-to-col">
+                  <span class="ref-col-label">BILL TO</span>
+                  <div class="ref-client-name" id="sheetClientName">ALAM ENGAZ</div>
+                  <div class="ref-client-location" id="sheetClientSubdetails">
+                    <i class="fa-solid fa-location-dot" style="color:var(--brand-maroon);"></i>
+                    <span id="sheetClientLocationText">UAE</span>
                   </div>
                 </div>
-
-                <div class="meta-divider-line"></div>
-
-                <div class="bill-to-block">
-                  <span class="bill-to-label">BILL TO:</span>
-                  <div class="bill-to-client-name" id="sheetClientName">ALAM ENGAZ</div>
-                  <div class="bill-to-subdetails" id="sheetClientSubdetails" style="display:none;"></div>
+                <div class="ref-project-col">
+                  <span class="ref-col-label">PROJECT</span>
+                  <div class="ref-project-name" id="sheetProjectTitle">AI PROMOTIONAL VIDEO</div>
+                  <div class="ref-project-sub" id="sheetProjectSubtitle">Monthly Social Media Marketing Support</div>
                 </div>
               </div>
 
-              <!-- 3. SERVICE ITEMS TABLE -->
-              <div class="master-table-section">
-                <table class="master-invoice-table">
+              <!-- 4. SERVICE ITEMS TABLE -->
+              <div class="ref-table-wrap">
+                <table class="ref-invoice-table">
                   <thead>
                     <tr>
-                      <th>DESCRIPTION</th>
-                      <th class="td-qty">QTY</th>
-                      <th class="td-rate">RATE (₹)</th>
-                      <th class="td-amount">AMOUNT (₹)</th>
+                      <th class="th-sl">SL NO.</th>
+                      <th class="th-desc">DESCRIPTION</th>
+                      <th class="th-qty">QTY</th>
+                      <th class="th-rate">RATE (₹)</th>
+                      <th class="th-amount">AMOUNT (₹)</th>
                     </tr>
                   </thead>
                   <tbody id="sheetItemsTableBody">
                     <!-- Dynamic service items -->
                   </tbody>
                 </table>
-
-                <!-- TOTAL AMOUNT PAYABLE BAR -->
-                <div class="master-payable-bar">
-                  <span class="payable-label">TOTAL AMOUNT PAYABLE</span>
-                  <span class="payable-value" id="sheetTotalPayable">₹3,500/-</span>
-                </div>
               </div>
 
-              <!-- 4. DELIVERABLES & PAYMENT STATUS / WEBSITE LINKS (TWO COLUMNS) -->
-              <div class="master-middle-grid" id="sheetMiddleGrid">
-                <!-- Left: Deliverables -->
-                <div class="middle-col-deliverables" id="sheetDeliverablesCol">
-                  <div class="pill-section-badge">DELIVERABLES</div>
-                  <div class="deliverables-sheet-list" id="sheetDeliverablesList">
-                    <!-- Dynamic checkmark items -->
+              <!-- 5. MIDDLE SECTION: NOTES / DELIVERY (LEFT) & SUMMARY / PAYMENT STATUS (RIGHT) -->
+              <div class="ref-middle-grid" id="sheetMiddleGrid">
+                <!-- Left Column: Notes & Delivery Details -->
+                <div class="ref-col-left" id="sheetDeliverablesCol">
+                  <div class="ref-notes-section">
+                    <div class="ref-section-heading">
+                      <span class="ref-heading-bar"></span>
+                      <span>NOTES</span>
+                    </div>
+                    <ul class="ref-notes-list" id="sheetDeliverablesList">
+                      <!-- Bullet points -->
+                    </ul>
+                  </div>
+
+                  <!-- Delivery Details Card (with Clapperboard icon) -->
+                  <div class="ref-delivery-card" id="sheetDeliveryCard">
+                    <div class="ref-delivery-icon-box">
+                      <i class="fa-solid fa-clapperboard"></i>
+                    </div>
+                    <div class="ref-delivery-content">
+                      <div class="ref-delivery-title">DELIVERY DETAILS</div>
+                      <div class="ref-delivery-row">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>Final Video Delivery: <strong id="sheetDeliveryDateText">26 October 2026</strong></span>
+                      </div>
+                      <div class="ref-delivery-sub">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Video is final and set as per discussion.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Website Links (if present) -->
+                  <div class="middle-col-links-wrap" id="sheetWebsitesBlock" style="display:none; margin-top: 10px;">
+                    <div class="pill-section-badge" style="font-size: 8.5px; padding: 2px 10px; margin-bottom: 6px;">WEBSITE LINKS</div>
+                    <div class="website-links-sheet-list" id="sheetWebsiteLinksList"></div>
                   </div>
                 </div>
 
-                <!-- Right: Payment Status & Website Links -->
-                <div class="middle-col-right" id="sheetMiddleRightCol">
+                <!-- Right Column: Calculation Summary Card & Payment Status Card -->
+                <div class="ref-col-right" id="sheetMiddleRightCol">
+                  <!-- Calculation Card -->
+                  <div class="ref-summary-card">
+                    <div class="ref-summary-row">
+                      <span class="ref-sum-label">Subtotal</span>
+                      <span class="ref-sum-val" id="sheetSubtotal">₹1,000</span>
+                    </div>
+                    <div class="ref-summary-row" id="sheetDiscountRow" style="display:none;">
+                      <span class="ref-sum-label">Discount</span>
+                      <span class="ref-sum-val" id="sheetDiscountAmount">-₹0</span>
+                    </div>
+                    <div class="ref-summary-divider"></div>
+                    <div class="ref-summary-total-row">
+                      <span class="ref-total-label">Total Amount</span>
+                      <span class="ref-total-val" id="sheetTotalPayable">₹1,000</span>
+                    </div>
+                  </div>
+
                   <!-- Dynamic Payment Status Box (Paid / Pending / Unpaid) -->
                   <div class="sheet-payment-status-card paid" id="sheetPaymentStatusCard">
                     <div class="pay-card-top-row">
@@ -1420,7 +1440,7 @@
                       </div>
                       <div class="pay-card-col pay-card-col-received" id="sheetAmountReceivedCol">
                         <span class="pay-card-label">Amount Received</span>
-                        <div class="pay-card-val" id="sheetAmountReceivedVal">₹3,500</div>
+                        <div class="pay-card-val" id="sheetAmountReceivedVal">₹1,000</div>
                       </div>
                     </div>
                     <div class="pay-card-bottom-row" id="sheetBalanceDueRow">
@@ -1428,104 +1448,54 @@
                       <span class="pay-card-due-val" id="sheetBalanceDueVal">₹0</span>
                     </div>
                   </div>
-
-                  <!-- Website Links -->
-                  <div class="middle-col-links" id="sheetWebsitesBlock">
-                    <div class="pill-section-badge">WEBSITE LINKS</div>
-                    <div class="website-links-sheet-list" id="sheetWebsiteLinksList">
-                      <!-- Dynamic clickable website cards -->
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              <!-- 5. PAYMENT DETAILS SECTION -->
-              <div class="master-payment-section">
-                <div class="master-payment-card" id="sheetPaymentCard">
-                  
-                  <!-- Left Details -->
-                  <div class="payment-left-col">
-                    <div class="pill-section-badge" style="margin-bottom:6px;">PAYMENT DETAILS</div>
-                    <table class="payment-info-table">
-                      <tr id="rowAccountName">
-                        <td class="p-key">Account Name</td>
-                        <td class="p-colon">:</td>
-                        <td class="p-val" id="sheetAccountName">BASIM ASLAM P</td>
-                      </tr>
-                      <tr id="rowBankName">
-                        <td class="p-key">Bank Name</td>
-                        <td class="p-colon">:</td>
-                        <td class="p-val" id="sheetBankName">Indian Post Payment Bank</td>
-                      </tr>
-                      <tr id="rowAccountNumber">
-                        <td class="p-key">Account Number</td>
-                        <td class="p-colon">:</td>
-                        <td class="p-val" id="sheetAccountNumber">026210067305</td>
-                      </tr>
-                      <tr id="rowIfsc">
-                        <td class="p-key">IFSC Code</td>
-                        <td class="p-colon">:</td>
-                        <td class="p-val" id="sheetIfscCode">IPOS0000001</td>
-                      </tr>
-                      <tr id="rowGpay">
-                        <td class="p-key" style="padding-top:6px;">GPay Number</td>
-                        <td class="p-colon" style="padding-top:6px;">:</td>
-                        <td class="p-val" style="padding-top:6px;" id="sheetGpayNumber">+91 8547931509</td>
-                      </tr>
-                      <tr id="rowUpi">
-                        <td class="p-key">UPI ID</td>
-                        <td class="p-colon">:</td>
-                        <td class="p-val">
-                          <div id="sheetPrimaryUpi">8547931509@ibl</div>
-                          <div id="sheetSecondaryUpi">basimaslam419@okaxis</div>
-                        </td>
-                      </tr>
-                    </table>
+              <!-- 6. PAYMENT DETAILS & QR CODE BAR -->
+              <div class="ref-payment-section" id="sheetPaymentCard">
+                <div class="ref-payment-details-box">
+                  <div class="ref-payment-title">PAYMENT DETAILS</div>
+                  <table class="ref-pay-table">
+                    <tr id="rowAccountName"><td class="rk">Account Name</td><td class="rc">:</td><td class="rv" id="sheetAccountName">BASIM ASLAM P</td></tr>
+                    <tr id="rowBankName"><td class="rk">Bank Name</td><td class="rc">:</td><td class="rv" id="sheetBankName">Indian Post Payment Bank</td></tr>
+                    <tr id="rowAccountNumber"><td class="rk">Account Number</td><td class="rc">:</td><td class="rv" id="sheetAccountNumber">026210067305</td></tr>
+                    <tr id="rowIfsc"><td class="rk">IFSC Code</td><td class="rc">:</td><td class="rv" id="sheetIfscCode">IPOS0000001</td></tr>
+                    <tr id="rowGpay"><td class="rk">GPay</td><td class="rc">:</td><td class="rv" id="sheetGpayNumber">+91 8547931509</td></tr>
+                    <tr id="rowUpi"><td class="rk">UPI ID</td><td class="rc">:</td><td class="rv"><span id="sheetPrimaryUpi">8547931509@ibl</span> | <span id="sheetSecondaryUpi">basimaslam419@okaxis</span></td></tr>
+                  </table>
+                  <div class="ref-pay-note" id="sheetPaymentNoteRow">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span id="sheetPaymentNoteText">Kindly share the payment screenshot after the transfer.</span>
+                  </div>
+                </div>
 
-                    <div class="payment-note-row" id="sheetPaymentNoteRow">
-                      <i class="fa-solid fa-circle-info"></i>
-                      <span id="sheetPaymentNoteText">Kindly share the payment screenshot after the transfer.</span>
+                <div class="ref-qr-box-wrap" id="sheetQrCol">
+                  <div class="ref-qr-frame">
+                    <div class="master-qr-box" id="sheetDynamicQrBox"></div>
+                    <div class="qr-center-gpay-badge" id="sheetQrCenterBadge">
+                      <img src="assets/gpay-logo.svg" alt="GPay">
                     </div>
                   </div>
-
-                  <!-- Right QR Column -->
-                  <div class="payment-qr-col" id="sheetQrCol">
-                    <div class="qr-white-frame">
-                      <div class="master-qr-box" id="sheetDynamicQrBox">
-                        <!-- Dynamic SVG QR or Uploaded Image rendered here -->
-                      </div>
-                      <div class="qr-center-gpay-badge" id="sheetQrCenterBadge">
-                        <img src="assets/gpay-logo.svg" alt="GPay">
-                      </div>
-                    </div>
-                    <div class="qr-caption-upi-id" id="sheetQrCaption">UPI ID: basimaslam419@okaxis</div>
-                  </div>
-
+                  <div class="ref-qr-caption" id="sheetQrCaption">UPI: basimaslam419@okaxis</div>
                 </div>
               </div>
 
-              <!-- 6. FOOTER: THANK YOU, B BADGE, SIGNATURE -->
-              <div class="master-footer-row">
-                <!-- Left: Thank You -->
-                <div class="footer-thankyou-block">
-                  <div class="thankyou-script">Thank You!</div>
-                  <div class="thankyou-sub">for choosing BE Creatives.</div>
-                  <div class="thankyou-appreciate">We appreciate your trust and support.</div>
+              <!-- 7. FOOTER: THANK YOU SCRIPT, STAMP, SIGNATURE -->
+              <div class="ref-footer-row">
+                <div class="ref-footer-thankyou">
+                  <div class="ref-thankyou-script">Thank You</div>
+                  <div class="ref-thankyou-sub">for choosing BE Creatives. We appreciate your trust and support.</div>
                 </div>
 
-                <!-- Center: Circular B BADGE (Exact Asset) -->
-                <div class="footer-stamp-block">
-                  <img src="B BADGE.png" alt="BE CREATIVES Badge" class="master-stamp-img" id="sheetStampImg" onerror="this.src='be badge.png'" style="width: 116px; height: 116px; max-width: 120px; max-height: 120px; object-fit: contain;">
+                <div class="ref-footer-stamp">
+                  <img src="B BADGE.png" alt="BE CREATIVES Badge" class="ref-stamp-img" id="sheetStampImg" onerror="this.src='be badge.png'">
                 </div>
 
-                <!-- Right: Authorized Signature -->
-                <div class="footer-signature-block">
-                  <div class="sig-for-agency">For BE Creatives</div>
-                  <div class="sig-image-wrap">
-                    <img src="assets/signature-be-creatives.svg" alt="Signature" class="master-sig-img" id="sheetSigImg" style="max-width: 160px; max-height: 48px; object-fit: contain;">
-                  </div>
-                  <div class="sig-line-rule"></div>
-                  <div class="sig-auth-caption" id="sheetSigCaption">Authorized Signature</div>
+                <div class="ref-footer-sig">
+                  <div class="ref-sig-agency">For BE Creatives</div>
+                  <img src="assets/signature-be-creatives.svg" alt="Signature" class="ref-sig-img" id="sheetSigImg">
+                  <div class="ref-sig-line"></div>
+                  <div class="ref-sig-caption" id="sheetSigCaption">Authorized Signature</div>
                 </div>
               </div>
 

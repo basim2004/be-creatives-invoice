@@ -1134,502 +1134,593 @@ a {
   position: relative;
 }
 
-/* The A4 Canvas Sheet */
+/* ==========================================================================
+   A4 INVOICE SHEET - MASTER REDESIGN (Premium Agency Reference Finish)
+   ========================================================================== */
+
+.invoice-preview-pane {
+  background: #0f172a;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 8px 36px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.preview-sheet-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Strict A4 Canvas Dimensions (210mm x 297mm at 96 DPI: 794px x 1122px) */
 .invoice-page,
 .a4-invoice-sheet {
-  width: 794px; /* Standard A4 at 96dpi (210mm) */
-  height: 1122px; /* Exact single-page A4 height, zero pagination overflow */
+  width: 794px;
+  height: 1122px;
   max-height: 1122px;
+  min-height: 1122px;
   background: #ffffff;
-  box-shadow: var(--shadow-a4);
-  color: #111827;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  color: #0f172a;
   position: relative;
-  font-family: var(--font-body);
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
   box-sizing: border-box;
-  transform-origin: top center;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 34px 40px 24px 40px;
   flex-shrink: 0;
+  transform-origin: top center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Top Master Header Bar */
-.master-header-row {
+/* 1. TOP HEADER SECTION */
+.ref-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: stretch;
-  position: relative;
-  min-height: 116px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-/* Slanted Maroon Polygon on Left */
-.master-header-polygon {
-  position: relative;
-  width: 385px;
-  min-height: 116px;
-  height: 116px;
-  color: var(--white);
-  box-sizing: border-box;
-  background: transparent;
-}
-
-.polygon-bg-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.polygon-content-wrap {
-  position: relative;
-  z-index: 2;
+.ref-header-left {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 14px 28px 14px 24px;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
 }
 
-/* Enlarged BE CREATIVES Header Logo with pure original aspect ratio */
-.polygon-logo-img {
-  height: 74px;
-  max-width: 165px;
+.ref-brand-logo {
+  height: 40px;
+  max-width: 175px;
   width: auto;
   object-fit: contain;
   display: block;
 }
 
-.polygon-v-divider {
+.ref-header-vsep {
   width: 1.5px;
-  height: 64px;
-  background: rgba(255, 255, 255, 0.45);
+  height: 24px;
+  background: #cbd5e1;
 }
 
-.polygon-tag-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-family: var(--font-brand);
-  font-size: 8.5px;
+.ref-header-tagline {
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.95);
-  line-height: 1.4;
-}
-
-/* Top Right Brand Block */
-.master-header-right {
-  padding: 18px 36px 12px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  flex: 1;
-}
-
-.master-agency-name {
-  font-family: var(--font-brand);
-  font-size: 27px;
-  font-weight: 900;
-  color: var(--brand-maroon);
-  letter-spacing: 0.8px;
-  line-height: 1;
-}
-
-.master-agency-tagline {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #374151;
-  margin-top: 3px;
-  letter-spacing: 0.2px;
-}
-
-.master-instagram-badge {
-  background: var(--brand-maroon);
-  color: var(--white);
-  border-radius: 8px;
-  padding: 6px 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-  text-decoration: none;
-  transition: var(--transition);
-}
-
-.master-instagram-badge:hover {
-  background: var(--brand-maroon-dark);
-}
-
-.master-instagram-badge i {
-  font-size: 18px;
-  color: var(--white);
-}
-
-.insta-text-group {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.insta-label {
-  font-size: 7.5px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  opacity: 0.85;
+  color: #1e293b;
   text-transform: uppercase;
-  line-height: 1;
 }
 
-.insta-handle {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.3px;
-  line-height: 1.2;
-}
-
-.master-ideas-block {
+.ref-header-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  margin-top: 14px;
-  gap: 2px;
+  gap: 3px;
 }
 
-.ideas-text {
-  font-family: var(--font-brand);
-  font-size: 8.5px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: #4b5563;
-  line-height: 1.35;
+.ref-contact-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
 
-.ideas-underline {
-  width: 42px;
-  height: 2.5px;
-  background: var(--brand-maroon);
-  margin-top: 3px;
+.ref-contact-line:hover {
+  color: var(--brand-maroon, #7A1719);
 }
 
-/* Master Invoice Meta & Client Section */
-.master-meta-client-section {
-  padding: 10px 36px 0;
+.ref-contact-line i {
+  color: var(--brand-maroon, #7A1719);
+  font-size: 11.5px;
 }
 
-.invoice-title-row {
+/* 2. INVOICE TITLE & HIGHLIGHTED METADATA CARDS */
+.ref-title-meta-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
+  margin-top: 14px;
+  margin-bottom: 14px;
 }
 
-.invoice-title-block {
+.ref-headline-wrap {
   display: flex;
   flex-direction: column;
 }
 
-.master-invoice-headline {
-  font-family: var(--font-brand);
-  font-size: 34px;
+.ref-main-invoice-title {
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 38px;
   font-weight: 900;
-  color: var(--brand-maroon);
-  letter-spacing: 1.2px;
+  letter-spacing: 2px;
+  color: #0f172a;
   line-height: 1;
+  margin: 0;
+  text-transform: uppercase;
 }
 
-.master-creative-services-tag {
-  font-family: var(--font-brand);
-  font-size: 8px;
+.ref-title-underline {
+  width: 54px;
+  height: 4px;
+  background: var(--brand-maroon, #7A1719);
+  border-radius: 2px;
+  margin-top: 6px;
+}
+
+.ref-meta-cards {
+  display: flex;
+  gap: 12px;
+}
+
+.ref-meta-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 16px;
+  min-width: 125px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.ref-card-label {
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: 3px;
-  color: #4b5563;
-  margin-top: 4px;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
-.meta-details-table {
-  margin-top: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #111827;
-  border-collapse: collapse;
-}
-
-.meta-details-table td {
-  padding: 1px 0;
-}
-
-.meta-key {
-  width: 105px;
+.ref-card-val-accent {
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--brand-maroon, #7A1719);
   letter-spacing: 0.5px;
 }
 
-.meta-colon {
-  width: 20px;
-  text-align: center;
-}
-
-.meta-val {
+.ref-card-val {
+  font-size: 14px;
   font-weight: 800;
+  color: #0f172a;
 }
 
-.meta-divider-line {
-  height: 1.5px;
-  background: #d1d5db;
-  margin: 12px 0 10px;
-  width: 100%;
-}
-
-.bill-to-block {
-  display: flex;
-  flex-direction: column;
-}
-
-.bill-to-label {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: var(--brand-maroon);
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-}
-
-.bill-to-client-name {
-  font-family: var(--font-brand);
-  font-size: 20px;
-  font-weight: 900;
-  color: #111827;
-  letter-spacing: 0.3px;
+.ref-card-sub {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #94a3b8;
   margin-top: 1px;
 }
 
-.bill-to-subdetails {
-  font-size: 10px;
-  color: #4b5563;
+/* 3. BILL TO & PROJECT ROW */
+.ref-client-project-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 14px;
+  gap: 20px;
+}
+
+.ref-bill-to-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-col-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.ref-client-name {
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 16px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.ref-client-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 3px;
+}
+
+.ref-project-col {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  align-items: flex-end;
+}
+
+.ref-project-name {
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+.ref-project-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #64748b;
   margin-top: 2px;
   line-height: 1.35;
+  max-width: 320px;
 }
 
-/* Master Service Table */
-.master-table-section {
-  padding: 14px 36px 0;
-}
-
-.master-invoice-table {
+/* 4. SERVICE ITEMS TABLE */
+.ref-table-wrap {
   width: 100%;
-  border-collapse: collapse;
+  margin-bottom: 12px;
 }
 
-.master-invoice-table thead th {
-  background: var(--brand-maroon);
-  color: var(--white);
-  padding: 9px 14px;
-  font-size: 10.5px;
+.ref-invoice-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.ref-invoice-table thead tr {
+  background: linear-gradient(135deg, #7A1719, #540e10);
+}
+
+.ref-invoice-table th {
+  padding: 9px 12px;
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.8px;
   text-transform: uppercase;
+  color: #ffffff;
   border: none;
-}
-
-.master-invoice-table thead th:first-child {
-  border-top-left-radius: 4px;
-  text-align: left;
-}
-
-.master-invoice-table thead th:last-child {
-  border-top-right-radius: 4px;
-}
-
-.master-invoice-table tbody td {
-  padding: 11px 14px;
-  border: 1px solid var(--invoice-border);
-  font-size: 11.5px;
-  vertical-align: middle;
-}
-
-.item-main-title {
-  font-weight: 800;
-  color: #111827;
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  text-transform: uppercase;
-}
-
-.item-sub-desc {
-  color: #374151;
-  font-size: 11px;
-  font-weight: 500;
-  margin-top: 2px;
-}
-
-.item-link-wrap {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 4px;
-}
-
-.item-link-wrap i {
-  color: var(--brand-maroon);
-  font-size: 10px;
-}
-
-.item-link-wrap a {
-  font-size: 9.5px;
-  color: #1d4ed8;
-  word-break: break-all;
-}
-
-.td-qty { text-align: center; width: 64px; font-weight: 600; font-size: 11.5px; }
-.td-rate { text-align: center; width: 100px; font-weight: 600; font-size: 11.5px; }
-.td-amount { text-align: center; width: 120px; font-weight: 600; font-size: 11.5px; }
-
-/* Total Amount Payable Bar */
-.master-payable-bar {
-  background: var(--brand-maroon);
-  color: var(--white);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 18px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.payable-label {
-  font-family: var(--font-brand);
-  font-size: 12.5px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.payable-value {
-  font-family: var(--font-brand);
-  font-size: 21px;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-}
-
-/* Master Middle Two Columns: Deliverables & Website Links */
-.master-middle-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 16px 36px 0;
-  position: relative;
-}
-
-.master-middle-grid.single-col,
-.master-middle-grid.no-links-no-pay {
-  grid-template-columns: 1fr;
-}
-
-.middle-col-deliverables {
-  padding-right: 20px;
-  border-right: 1.5px solid #d1d5db;
-}
-
-.master-middle-grid.single-col .middle-col-deliverables,
-.master-middle-grid.no-links-no-pay .middle-col-deliverables {
-  padding-right: 0;
-  border-right: none;
-}
-
-.middle-col-right {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-left: 20px;
-}
-
-.middle-col-links {
-  padding-left: 0;
-}
-
-/* Master Invoice Live Payment Status Box */
-.sheet-payment-status-card {
-  border-radius: 8px;
-  padding: 10px 14px;
-  transition: all 0.2s ease;
-  font-family: var(--font-data, 'Inter', sans-serif);
   box-sizing: border-box;
 }
 
-/* PAID THEME (GREEN) */
-.sheet-payment-status-card.paid {
-  background: #edfbf2;
-  border: 1.5px solid #84d4a4;
-}
-.sheet-payment-status-card.paid .pay-card-label {
-  color: #3b6d4b;
-}
-.sheet-payment-status-card.paid .pay-status-name,
-.sheet-payment-status-card.paid .pay-status-icon,
-.sheet-payment-status-card.paid .pay-card-val {
-  color: #127236;
-}
-.sheet-payment-status-card.paid .pay-card-bottom-row {
-  border-top: 1px solid rgba(18, 114, 54, 0.16);
-}
-.sheet-payment-status-card.paid .pay-card-due-label {
-  color: #245b37;
-}
-.sheet-payment-status-card.paid .pay-card-due-val {
-  color: #127236;
+.ref-invoice-table th:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
 }
 
-/* PENDING THEME (ORANGE) */
-.sheet-payment-status-card.pending {
-  background: #fff8ee;
-  border: 1.5px solid #f6c075;
-}
-.sheet-payment-status-card.pending .pay-card-label {
-  color: #8c4c15;
-}
-.sheet-payment-status-card.pending .pay-status-name,
-.sheet-payment-status-card.pending .pay-status-icon,
-.sheet-payment-status-card.pending .pay-card-val {
-  color: #c25e00;
-}
-.sheet-payment-status-card.pending .pay-card-bottom-row {
-  border-top: 1px solid rgba(194, 94, 0, 0.16);
-}
-.sheet-payment-status-card.pending .pay-card-due-label {
-  color: #7c3a07;
-}
-.sheet-payment-status-card.pending .pay-card-due-val {
-  color: #c25e00;
+.ref-invoice-table th:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
-/* UNPAID THEME (RED) */
-.sheet-payment-status-card.unpaid {
+.ref-invoice-table th.th-sl {
+  width: 58px;
+  text-align: center;
+}
+
+.ref-invoice-table th.th-desc {
+  text-align: left;
+}
+
+.ref-invoice-table th.th-qty {
+  width: 60px;
+  text-align: center;
+}
+
+.ref-invoice-table th.th-rate {
+  width: 110px;
+  text-align: right;
+}
+
+.ref-invoice-table th.th-amount {
+  width: 120px;
+  text-align: right;
+}
+
+.ref-invoice-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ref-invoice-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.ref-invoice-table td {
+  padding: 9px 12px;
+  font-size: 11px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.ref-invoice-table td.td-sl {
+  text-align: center;
+  font-weight: 700;
+  color: #64748b;
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+}
+
+.ref-invoice-table td.td-desc {
+  text-align: left;
+}
+
+.td-desc-title {
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.td-desc-sub {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.ref-invoice-table td.td-qty {
+  text-align: center;
+  font-weight: 700;
+  color: #334155;
+}
+
+.ref-invoice-table td.td-rate {
+  text-align: right;
+  font-weight: 600;
+  color: #334155;
+  font-family: var(--font-body, monospace);
+}
+
+.ref-invoice-table td.td-amount {
+  text-align: right;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: var(--font-body, monospace);
+}
+
+/* 5. MIDDLE SECTION: NOTES / DELIVERY & SUMMARY / PAYMENT STATUS */
+.ref-middle-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+  margin-bottom: 10px;
+  align-items: start;
+}
+
+.ref-col-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #0f172a;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.ref-heading-bar {
+  width: 3px;
+  height: 13px;
+  background: var(--brand-maroon, #7A1719);
+  border-radius: 2px;
+}
+
+.ref-notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ref-notes-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.35;
+}
+
+.ref-notes-list li::before {
+  content: "•";
+  color: var(--brand-maroon, #7A1719);
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Delivery Details Card */
+.ref-delivery-card {
+  margin-top: 8px;
   background: #fdf2f2;
-  border: 1.5px solid #f8a5a5;
-}
-.sheet-payment-status-card.unpaid .pay-card-label {
-  color: #991b1b;
-}
-.sheet-payment-status-card.unpaid .pay-status-name,
-.sheet-payment-status-card.unpaid .pay-status-icon,
-.sheet-payment-status-card.unpaid .pay-card-val {
-  color: #c53030;
-}
-.sheet-payment-status-card.unpaid .pay-card-bottom-row {
-  border-top: 1px solid rgba(197, 48, 48, 0.16);
-}
-.sheet-payment-status-card.unpaid .pay-card-due-label {
-  color: #7f1d1d;
-}
-.sheet-payment-status-card.unpaid .pay-card-due-val {
-  color: #c53030;
+  border: 1px solid #fee2e2;
+  border-radius: 9px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Common Card Typography & Layout */
+.ref-delivery-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--brand-maroon, #7A1719);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.ref-delivery-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ref-delivery-title {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--brand-maroon, #7A1719);
+  text-transform: uppercase;
+}
+
+.ref-delivery-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.ref-delivery-row i {
+  color: var(--brand-maroon, #7A1719);
+  font-size: 10px;
+}
+
+.ref-delivery-row strong {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ref-delivery-sub {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.ref-delivery-sub i {
+  color: #16a34a;
+  font-size: 9.5px;
+}
+
+/* Right Column: Calculation Summary Card & Payment Status */
+.ref-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ref-summary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 10px 14px;
+}
+
+.ref-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 5px;
+}
+
+.ref-summary-divider {
+  height: 1px;
+  background: #cbd5e1;
+  margin: 6px 0;
+}
+
+.ref-summary-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.ref-total-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ref-total-val {
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--brand-maroon, #7A1719);
+}
+
+/* Sheet Payment Status Card */
+.sheet-payment-status-card {
+  border-radius: 9px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.sheet-payment-status-card.paid {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.sheet-payment-status-card.pending {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.sheet-payment-status-card.unpaid {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
 .pay-card-top-row {
   display: flex;
   justify-content: space-between;
@@ -1640,368 +1731,278 @@ a {
 .pay-card-col {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.pay-card-col-received {
-  text-align: right;
-  align-items: flex-end;
 }
 
 .pay-card-label {
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 8.5px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  margin-bottom: 2px;
 }
 
 .pay-card-status {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
-.pay-status-name {
-  font-family: var(--font-brand, 'Outfit', sans-serif);
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 0.6px;
-  line-height: 1.1;
+.sheet-payment-status-card.paid .pay-card-status {
+  color: #15803d;
+}
+
+.sheet-payment-status-card.pending .pay-card-status {
+  color: #b45309;
+}
+
+.sheet-payment-status-card.unpaid .pay-card-status {
+  color: #b91c1c;
 }
 
 .pay-status-icon {
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .pay-card-val {
-  font-family: var(--font-brand, 'Outfit', sans-serif);
-  font-size: 16px;
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 13.5px;
   font-weight: 800;
-  line-height: 1.1;
+  color: #0f172a;
 }
 
 .pay-card-bottom-row {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 6px;
-  margin-top: 6px;
 }
 
 .pay-card-due-label {
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
 }
 
 .pay-card-due-val {
-  font-family: var(--font-brand, 'Outfit', sans-serif);
-  font-size: 14.5px;
+  font-family: var(--font-brand, 'Space Grotesk', sans-serif);
+  font-size: 13.5px;
   font-weight: 900;
 }
 
-.pill-section-badge {
-  background: var(--brand-maroon);
-  color: var(--white);
-  border-radius: var(--radius-pill);
-  padding: 3.5px 16px;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  display: inline-block;
+.sheet-payment-status-card.paid .pay-card-due-val {
+  color: #15803d;
+}
+
+.sheet-payment-status-card.pending .pay-card-due-val {
+  color: #b45309;
+}
+
+.sheet-payment-status-card.unpaid .pay-card-due-val {
+  color: #b91c1c;
+}
+
+/* 6. PAYMENT DETAILS & QR CODE BAR */
+.ref-payment-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 10px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
   margin-bottom: 10px;
 }
 
-/* Deliverables checklist */
-.deliverables-sheet-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.deliverable-sheet-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.deliverable-check-icon {
-  color: var(--brand-maroon);
-  font-size: 11px;
-  flex-shrink: 0;
-}
-
-/* Website Links Cards */
-.website-links-sheet-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.link-sheet-card {
-  background: var(--invoice-card-bg);
-  border-radius: 8px;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.link-square-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--brand-maroon);
-  color: var(--white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.link-details-stack {
+.ref-payment-details-box {
   display: flex;
   flex-direction: column;
 }
 
-.link-portal-title {
-  font-size: 11px;
+.ref-payment-title {
+  font-size: 9px;
   font-weight: 800;
-  color: #111827;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 5px;
 }
 
-.link-portal-url {
-  font-size: 9.5px;
-  color: #1d4ed8;
-  text-decoration: underline;
-  word-break: break-all;
-}
-
-/* Master Payment Details Section */
-.master-payment-section {
-  padding: 14px 36px 0;
-}
-
-.master-payment-card {
-  background: var(--invoice-card-bg);
-  border-radius: 12px;
-  padding: 14px 18px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 18px;
-  align-items: center;
-  box-sizing: border-box;
-}
-
-.master-payment-card.no-qr {
-  grid-template-columns: 1fr;
-}
-
-.payment-left-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.payment-info-table {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #1f2937;
+.ref-pay-table {
   border-collapse: collapse;
+  font-size: 9.8px;
+  font-weight: 600;
+  color: #334155;
 }
 
-.payment-info-table td {
+.ref-pay-table td {
   padding: 1.5px 0;
 }
 
-.p-key {
-  width: 125px;
-  color: #374151;
+.ref-pay-table .rk {
+  width: 100px;
+  color: #64748b;
+  font-weight: 600;
 }
 
-.p-colon {
-  width: 18px;
+.ref-pay-table .rc {
+  width: 14px;
   text-align: center;
+  color: #94a3b8;
 }
 
-.p-val {
+.ref-pay-table .rv {
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
 }
 
-.payment-note-row {
+.ref-pay-note {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  font-size: 9.8px;
+  gap: 6px;
+  font-size: 9px;
   font-weight: 600;
-  color: #1f2937;
+  color: #475569;
+  margin-top: 5px;
 }
 
-.payment-note-row i {
-  color: var(--brand-maroon);
-  font-size: 13px;
+.ref-pay-note i {
+  color: var(--brand-maroon, #7A1719);
+  font-size: 10.5px;
 }
 
-/* Payment QR Column */
-.payment-qr-col {
+.ref-qr-box-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border-left: 1px solid #d1d5db;
-  padding-left: 18px;
+  border-left: 1px dashed #cbd5e1;
+  padding-left: 14px;
 }
 
-.qr-white-frame {
-  background: var(--white);
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.ref-qr-frame {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  padding: 4px;
   position: relative;
-}
-
-.master-qr-box {
-  width: 125px;
-  height: 125px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.master-qr-box svg, .master-qr-box img {
-  max-width: 100%;
-  max-height: 100%;
+.ref-qr-frame .master-qr-box {
+  width: 86px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-qr-frame .master-qr-box svg,
+.ref-qr-frame .master-qr-box img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
 }
 
-.qr-center-gpay-badge {
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--white);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.qr-center-gpay-badge img {
-  width: 18px;
-  height: 18px;
-}
-
-.qr-caption-upi-id {
-  font-size: 9.5px;
+.ref-qr-caption {
+  font-size: 8px;
   font-weight: 700;
-  color: #111827;
-  margin-top: 5px;
+  color: #64748b;
+  margin-top: 3px;
   text-align: center;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Master Footer Section */
-.master-footer-row {
+/* 7. FOOTER: THANK YOU, STAMP, SIGNATURE */
+.ref-footer-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 16px 36px 24px;
-  position: relative;
+  padding-top: 4px;
 }
 
-/* Left: Thank You block */
-.footer-thankyou-block {
+.ref-footer-thankyou {
   display: flex;
   flex-direction: column;
 }
 
-.thankyou-script {
-  font-family: var(--font-script);
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--brand-maroon);
+.ref-thankyou-script {
+  font-family: var(--font-script, 'Great Vibes', cursive);
+  font-size: 34px;
+  font-weight: 400;
+  color: var(--brand-maroon, #7A1719);
   line-height: 1;
 }
 
-.thankyou-sub {
-  font-weight: 800;
-  font-size: 12px;
-  color: #111827;
-  margin-top: 3px;
-}
-
-.thankyou-appreciate {
+.ref-thankyou-sub {
   font-size: 9.5px;
-  color: #6b7280;
-  margin-top: 5px;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+  max-width: 250px;
+  line-height: 1.3;
 }
 
-/* Center: Circular B BADGE */
-.footer-stamp-block {
+.ref-footer-stamp {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.master-stamp-img {
-  width: 116px;
-  height: 116px;
-  max-width: 120px;
-  max-height: 120px;
+.ref-stamp-img {
+  width: 92px;
+  height: 92px;
   object-fit: contain;
   display: block;
 }
 
-/* Right: Authorized Signature */
-.footer-signature-block {
+.ref-footer-sig {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  width: 160px;
-}
-
-.sig-for-agency {
-  font-size: 11px;
-  font-weight: 800;
-  color: #111827;
-}
-
-.sig-image-wrap {
   width: 140px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.master-sig-img {
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-}
-
-.sig-line-rule {
-  width: 140px;
-  height: 1px;
-  background: #9ca3af;
-  margin: 2px 0 4px;
-}
-
-.sig-auth-caption {
+.ref-sig-agency {
   font-size: 9.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.ref-sig-img {
+  height: 38px;
+  max-width: 130px;
+  object-fit: contain;
+  display: block;
+}
+
+.ref-sig-line {
+  width: 125px;
+  height: 1px;
+  background: #94a3b8;
+  margin: 2px 0 3px;
+}
+
+.ref-sig-caption {
+  font-size: 8.5px;
   font-weight: 600;
-  color: #4b5563;
+  color: #64748b;
 }
 
 /* ==========================================================================

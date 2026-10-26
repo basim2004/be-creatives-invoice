@@ -2963,6 +2963,28 @@
 
     if (sheet.clientName) sheet.clientName.textContent = clientName;
 
+    // Location & Project Details for Reference Design
+    const clientLocEl = document.getElementById('sheetClientLocationText');
+    if (clientLocEl) {
+      clientLocEl.textContent = clientAddr || 'UAE';
+    }
+
+    const projTitleEl = document.getElementById('sheetProjectTitle');
+    const projSubEl = document.getElementById('sheetProjectSubtitle');
+    if (projTitleEl) {
+      const pTitle = (currentInvoice && currentInvoice.details) ? currentInvoice.details : (items[0] && items[0].title ? items[0].title : 'AI PROMOTIONAL VIDEO');
+      projTitleEl.textContent = pTitle;
+    }
+    if (projSubEl) {
+      const pSub = (items[0] && items[0].subtitle) ? items[0].subtitle : (deliverables[0] || 'Monthly Social Media Marketing Support');
+      projSubEl.textContent = pSub;
+    }
+
+    const delivDateEl = document.getElementById('sheetDeliveryDateText');
+    if (delivDateEl) {
+      delivDateEl.textContent = dueVal || date || '26 October 2026';
+    }
+
     if (sheet.clientSubdetails) {
       const parts = [];
       if (clientAddr) parts.push(`<div>${escapeHtml(clientAddr)}</div>`);
@@ -2979,11 +3001,12 @@
       }
     }
 
-    // Render Items
+    // Render Items (5 columns: SL NO., DESCRIPTION, QTY, RATE, AMOUNT)
     if (sheet.itemsTableBody) {
-      sheet.itemsTableBody.innerHTML = items.map(item => `
+      sheet.itemsTableBody.innerHTML = items.map((item, idx) => `
         <tr>
-          <td>
+          <td class="td-sl">${String(idx + 1).padStart(2, '0')}</td>
+          <td class="td-desc">
             <div class="td-desc-title">${escapeHtml(item.title)}</div>
             ${item.subtitle ? `<div class="td-desc-sub">${escapeHtml(item.subtitle)}</div>` : ''}
           </td>
@@ -2994,11 +3017,10 @@
       `).join('');
     }
 
-    // Deliverables
+    // Deliverables / Notes
     if (sheet.deliverablesList) {
       sheet.deliverablesList.innerHTML = deliverables.map(d => `
-        <li class="deliverable-item">
-          <i class="fa-solid fa-circle-check"></i>
+        <li>
           <span>${escapeHtml(d)}</span>
         </li>
       `).join('');
