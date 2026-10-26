@@ -165,12 +165,13 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 15px;
-  border-radius: var(--radius-md);
-  font-size: 0.86rem;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--slate-600);
   border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-btn:hover {
@@ -179,9 +180,11 @@ a {
 }
 
 .nav-btn.active {
-  background: var(--brand-maroon-subtle);
+  background: #fdf2f2;
   color: var(--brand-maroon);
-  border-color: rgba(86, 19, 24, 0.15);
+  border-color: rgba(122, 23, 25, 0.2);
+  box-shadow: 0 2px 8px rgba(122, 23, 25, 0.08);
+  font-weight: 700;
 }
 
 .nav-btn.primary-btn {
@@ -438,12 +441,26 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  background: linear-gradient(135deg, #3e0c10 0%, #561318 60%, #7a1c23 100%);
+  background: linear-gradient(135deg, #380a0d 0%, #561318 45%, #7a1c23 100%);
   color: var(--white);
   border-radius: var(--radius-xl);
-  padding: 32px 38px;
+  padding: 30px 38px;
   margin-bottom: 24px;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 12px 32px -4px rgba(86, 19, 24, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-hero::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .hero-tag {

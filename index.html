@@ -22,11 +22,17 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <!-- Master Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2026091801">
+  <!-- Cache Prevention Meta for Immediate Live Updates on Mobile & Desktop -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- Master Stylesheet with Fresh Version Hash -->
+  <link rel="stylesheet" href="style.css?v=20261026_06">
   
   <script>
     // Force clear any legacy PWA service worker and Cache Storage
+    const APP_BUILD_REV = '20261026_06';
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
@@ -40,6 +46,13 @@
           caches.delete(name);
         }
       });
+    }
+    const currentCachedRev = localStorage.getItem('be_app_build_rev');
+    if (currentCachedRev !== APP_BUILD_REV) {
+      localStorage.setItem('be_app_build_rev', APP_BUILD_REV);
+      if (currentCachedRev) {
+        window.location.reload(true);
+      }
     }
   </script>
   
@@ -102,10 +115,6 @@
           <i class="fa-solid fa-chart-column"></i>
           <span>Monthly Reports</span>
         </button>
-        <button type="button" class="nav-btn primary-btn" id="navNewInvoiceBtn">
-          <i class="fa-solid fa-plus"></i>
-          <span>NEW INVOICE</span>
-        </button>
         <button type="button" class="nav-btn" id="navSettingsBtn" title="Business Defaults">
           <i class="fa-solid fa-gear"></i>
           <span class="nav-settings-text">Settings</span>
@@ -147,24 +156,6 @@
           </div>
           <h1 class="hero-title">FINANCIAL OVERVIEW</h1>
           <p class="hero-description">Executive financial intelligence, real-time cash flow, client collections, and net balance from 2025 to present.</p>
-        </div>
-        <div class="hero-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-hero-cta" id="btnDashHeroNewInvoice">
-            <i class="fa-solid fa-plus"></i>
-            <span>New Invoice</span>
-          </button>
-          <button type="button" class="btn btn-secondary" id="btnDashHeroAddClient" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
-            <i class="fa-solid fa-user-plus"></i>
-            <span>Add Client</span>
-          </button>
-          <button type="button" class="btn btn-secondary" id="btnDashHeroAddExpense" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
-            <i class="fa-solid fa-receipt"></i>
-            <span>Add Expense</span>
-          </button>
-          <button type="button" class="btn btn-secondary" id="btnDashHeroReports" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25);">
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Monthly Reports</span>
-          </button>
         </div>
       </div>
 
@@ -2116,7 +2107,7 @@
     }
   </script>
 
-  <!-- Master Application Logic -->
-  <script src="script.js?v=2026091801"></script>
+  <!-- Master Application Logic with Cache-Busting Version Hash -->
+  <script src="script.js?v=20261026_06"></script>
 </body>
 </html>
