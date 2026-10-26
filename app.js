@@ -2779,8 +2779,29 @@
     }
   };
 
+  // Mobile Editor Mode Switcher (Form vs A4 Sheet)
+  function setMobileEditorMode(mode) {
+    const container = document.querySelector('.editor-split-container');
+    const btnForm = document.getElementById('btnSegmentForm');
+    const btnPrev = document.getElementById('btnSegmentPreview');
+    if (mode === 'preview') {
+      if (container) container.classList.add('show-preview');
+      if (btnForm) btnForm.classList.remove('active');
+      if (btnPrev) btnPrev.classList.add('active');
+      setTimeout(() => {
+        if (typeof applyZoom === 'function') applyZoom('fit');
+      }, 60);
+    } else {
+      if (container) container.classList.remove('show-preview');
+      if (btnForm) btnForm.classList.add('active');
+      if (btnPrev) btnPrev.classList.remove('active');
+    }
+  }
+
   // Navigation Routing
   function hideAllViews() {
+    document.body.classList.remove('in-editor');
+    document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
     Object.values(views).forEach(v => {
       if (v) v.classList.remove('active');
     });
@@ -2793,6 +2814,8 @@
     hideAllViews();
     if (views.dashboard) views.dashboard.classList.add('active');
     if (nav.dashboardBtn) nav.dashboardBtn.classList.add('active');
+    const mob = document.getElementById('mobNavDashboard');
+    if (mob) mob.classList.add('active');
     updateDashboard();
   }
 
@@ -2800,6 +2823,8 @@
     hideAllViews();
     if (views.invoices) views.invoices.classList.add('active');
     if (nav.invoicesBtn) nav.invoicesBtn.classList.add('active');
+    const mob = document.getElementById('mobNavInvoices');
+    if (mob) mob.classList.add('active');
     renderInvoices();
   }
 
@@ -2807,6 +2832,8 @@
     hideAllViews();
     if (views.clients) views.clients.classList.add('active');
     if (nav.clientsBtn) nav.clientsBtn.classList.add('active');
+    const mob = document.getElementById('mobNavClients');
+    if (mob) mob.classList.add('active');
     renderClients();
   }
 
@@ -2814,6 +2841,8 @@
     hideAllViews();
     if (views.expenses) views.expenses.classList.add('active');
     if (nav.expensesBtn) nav.expensesBtn.classList.add('active');
+    const mob = document.getElementById('mobNavExpenses');
+    if (mob) mob.classList.add('active');
     renderExpenses();
   }
 
@@ -2821,12 +2850,16 @@
     hideAllViews();
     if (views.reports) views.reports.classList.add('active');
     if (nav.reportsBtn) nav.reportsBtn.classList.add('active');
+    const mob = document.getElementById('mobNavReports');
+    if (mob) mob.classList.add('active');
     renderReports();
   }
 
   function showEditor() {
     hideAllViews();
+    document.body.classList.add('in-editor');
     if (views.editor) views.editor.classList.add('active');
+    setMobileEditorMode('form');
     setTimeout(() => {
       if (typeof applyZoom === 'function') applyZoom('fit');
     }, 50);
@@ -4593,16 +4626,37 @@
       }
     });
 
-    // Mobile Bottom Bar Actions
+    // Mobile Bottom Action Bar (Editor Only)
     const mobSave = document.getElementById('mobBtnSave');
     const mobPdf = document.getElementById('mobBtnPdf');
     const mobPrint = document.getElementById('mobBtnPrint');
+    const mobClose = document.getElementById('mobBtnClose');
     const mobNew = document.getElementById('mobBtnNew');
 
     if (mobSave) mobSave.addEventListener('click', saveCurrentInvoice);
     if (mobPdf) mobPdf.addEventListener('click', downloadPdf);
     if (mobPrint) mobPrint.addEventListener('click', printInvoice);
+    if (mobClose) mobClose.addEventListener('click', showInvoices);
     if (mobNew) mobNew.addEventListener('click', () => createNewInvoice());
+
+    // Mobile Bottom App Navigation Bar (General Navigation)
+    const mobNavDashboard = document.getElementById('mobNavDashboard');
+    const mobNavInvoices = document.getElementById('mobNavInvoices');
+    const mobNavClients = document.getElementById('mobNavClients');
+    const mobNavExpenses = document.getElementById('mobNavExpenses');
+    const mobNavReports = document.getElementById('mobNavReports');
+
+    if (mobNavDashboard) mobNavDashboard.addEventListener('click', showDashboard);
+    if (mobNavInvoices) mobNavInvoices.addEventListener('click', showInvoices);
+    if (mobNavClients) mobNavClients.addEventListener('click', showClients);
+    if (mobNavExpenses) mobNavExpenses.addEventListener('click', showExpenses);
+    if (mobNavReports) mobNavReports.addEventListener('click', showReports);
+
+    // Mobile Editor Segment Bar (Edit Form vs View A4 Sheet)
+    const btnSegmentForm = document.getElementById('btnSegmentForm');
+    const btnSegmentPreview = document.getElementById('btnSegmentPreview');
+    if (btnSegmentForm) btnSegmentForm.addEventListener('click', () => setMobileEditorMode('form'));
+    if (btnSegmentPreview) btnSegmentPreview.addEventListener('click', () => setMobileEditorMode('preview'));
 
     // Collapsible form cards
     document.querySelectorAll('.form-card.collapsible .form-card-header').forEach(header => {

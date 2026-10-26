@@ -2347,6 +2347,85 @@ a {
 }
 
 /* ==========================================================================
+   MOBILE APP BOTTOM NAVIGATION BAR (Fixed on Mobile Viewports)
+   ========================================================================== */
+.mobile-nav-bar {
+  display: none;
+}
+
+.mob-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 100%;
+  min-height: 48px;
+  background: transparent;
+  border: none;
+  color: var(--slate-500);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  transition: all 0.18s ease;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 2px;
+}
+
+.mob-nav-btn i {
+  font-size: 1.15rem;
+  transition: transform 0.18s ease;
+}
+
+.mob-nav-btn.active {
+  color: var(--brand-maroon);
+}
+
+.mob-nav-btn.active i {
+  transform: scale(1.14);
+  color: var(--brand-maroon);
+}
+
+/* ==========================================================================
+   MOBILE EDITOR SEGMENT CONTROL (Form vs A4 Sheet)
+   ========================================================================== */
+.mobile-editor-segment-bar {
+  display: none;
+}
+
+.segment-btn {
+  flex: 1;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--slate-200);
+  background: var(--slate-50);
+  color: var(--slate-600);
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.segment-btn.active {
+  background: var(--brand-maroon);
+  color: #fff;
+  border-color: var(--brand-maroon);
+  box-shadow: 0 2px 8px var(--brand-maroon-glow);
+}
+
+/* Base state for editor bottom bar: hidden by default unless in editor */
+body:not(.in-editor) .mobile-bottom-bar {
+  display: none !important;
+}
+
+/* ==========================================================================
    MOBILE BOTTOM ACTION BAR (Fixed on Mobile Viewports)
    ========================================================================== */
 .mobile-bottom-bar {
@@ -2659,9 +2738,82 @@ a {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Mobile Bottom Action Bar displayed */
-  .mobile-bottom-bar {
+  /* Bottom Navigation Bar visible on general pages */
+  body:not(.in-editor) .mobile-nav-bar {
     display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--slate-200);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    z-index: 1400;
+    align-items: center;
+    justify-content: space-around;
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.in-editor .mobile-nav-bar {
+    display: none !important;
+  }
+
+  /* Mobile Bottom Action Bar displayed ONLY inside editor */
+  body.in-editor .mobile-bottom-bar {
+    display: flex !important;
+  }
+
+  body:not(.in-editor) .mobile-bottom-bar {
+    display: none !important;
+  }
+
+  /* Mobile Editor Segment Bar */
+  .mobile-editor-segment-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fff;
+    border-bottom: 1px solid var(--slate-200);
+    position: sticky;
+    top: 54px;
+    z-index: 90;
+  }
+
+  /* Mobile Split Container Pane Toggle */
+  .editor-split-container:not(.show-preview) .editor-preview-pane {
+    display: none !important;
+  }
+
+  .editor-split-container.show-preview .editor-form-pane {
+    display: none !important;
+  }
+
+  .editor-split-container.show-preview .editor-preview-pane {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Hide main navigation buttons from top header on mobile because bottom nav handles them */
+  .header-nav #navDashboardBtn,
+  .header-nav #navInvoicesBtn,
+  .header-nav #navClientsBtn,
+  .header-nav #navExpensesBtn,
+  .header-nav #navReportsBtn {
+    display: none !important;
+  }
+
+  /* Body bottom padding on mobile so content isn't covered by bottom bar */
+  body, .view-section {
+    padding-bottom: 74px !important;
+  }
+
+  /* Netlify badge position */
+  [class*="netlify"], div[id*="netlify"], iframe[src*="netlify"] {
+    bottom: 66px !important;
   }
 }
 
