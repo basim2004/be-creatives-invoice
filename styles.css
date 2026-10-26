@@ -687,9 +687,11 @@ a {
 }
 .status-badge.paid { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
 .status-badge.pending { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.status-badge.unpaid { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; }
 .status-badge.paid .status-dot { background: #10b981; }
 .status-badge.pending .status-dot { background: #f59e0b; }
+.status-badge.unpaid .status-dot { background: #ef4444; }
 
 .table-actions { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
 
@@ -763,6 +765,11 @@ a {
   background: #ecfdf5;
   color: #065f46;
   border-color: #a7f3d0;
+}
+.editor-status-indicator.unpaid {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
 }
 
 .editor-split-container {
@@ -1517,7 +1524,8 @@ a {
   position: relative;
 }
 
-.master-middle-grid.no-links {
+.master-middle-grid.single-col,
+.master-middle-grid.no-links-no-pay {
   grid-template-columns: 1fr;
 }
 
@@ -1526,13 +1534,169 @@ a {
   border-right: 1.5px solid #d1d5db;
 }
 
-.master-middle-grid.no-links .middle-col-deliverables {
+.master-middle-grid.single-col .middle-col-deliverables,
+.master-middle-grid.no-links-no-pay .middle-col-deliverables {
   padding-right: 0;
   border-right: none;
 }
 
-.middle-col-links {
+.middle-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding-left: 20px;
+}
+
+.middle-col-links {
+  padding-left: 0;
+}
+
+/* Master Invoice Live Payment Status Box */
+.sheet-payment-status-card {
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: all 0.2s ease;
+  font-family: var(--font-data, 'Inter', sans-serif);
+  box-sizing: border-box;
+}
+
+/* PAID THEME (GREEN) */
+.sheet-payment-status-card.paid {
+  background: #edfbf2;
+  border: 1.5px solid #84d4a4;
+}
+.sheet-payment-status-card.paid .pay-card-label {
+  color: #3b6d4b;
+}
+.sheet-payment-status-card.paid .pay-status-name,
+.sheet-payment-status-card.paid .pay-status-icon,
+.sheet-payment-status-card.paid .pay-card-val {
+  color: #127236;
+}
+.sheet-payment-status-card.paid .pay-card-bottom-row {
+  border-top: 1px solid rgba(18, 114, 54, 0.16);
+}
+.sheet-payment-status-card.paid .pay-card-due-label {
+  color: #245b37;
+}
+.sheet-payment-status-card.paid .pay-card-due-val {
+  color: #127236;
+}
+
+/* PENDING THEME (ORANGE) */
+.sheet-payment-status-card.pending {
+  background: #fff8ee;
+  border: 1.5px solid #f6c075;
+}
+.sheet-payment-status-card.pending .pay-card-label {
+  color: #8c4c15;
+}
+.sheet-payment-status-card.pending .pay-status-name,
+.sheet-payment-status-card.pending .pay-status-icon,
+.sheet-payment-status-card.pending .pay-card-val {
+  color: #c25e00;
+}
+.sheet-payment-status-card.pending .pay-card-bottom-row {
+  border-top: 1px solid rgba(194, 94, 0, 0.16);
+}
+.sheet-payment-status-card.pending .pay-card-due-label {
+  color: #7c3a07;
+}
+.sheet-payment-status-card.pending .pay-card-due-val {
+  color: #c25e00;
+}
+
+/* UNPAID THEME (RED) */
+.sheet-payment-status-card.unpaid {
+  background: #fdf2f2;
+  border: 1.5px solid #f8a5a5;
+}
+.sheet-payment-status-card.unpaid .pay-card-label {
+  color: #991b1b;
+}
+.sheet-payment-status-card.unpaid .pay-status-name,
+.sheet-payment-status-card.unpaid .pay-status-icon,
+.sheet-payment-status-card.unpaid .pay-card-val {
+  color: #c53030;
+}
+.sheet-payment-status-card.unpaid .pay-card-bottom-row {
+  border-top: 1px solid rgba(197, 48, 48, 0.16);
+}
+.sheet-payment-status-card.unpaid .pay-card-due-label {
+  color: #7f1d1d;
+}
+.sheet-payment-status-card.unpaid .pay-card-due-val {
+  color: #c53030;
+}
+
+/* Common Card Typography & Layout */
+.pay-card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.pay-card-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pay-card-col-received {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.pay-card-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pay-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pay-status-name {
+  font-family: var(--font-brand, 'Outfit', sans-serif);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  line-height: 1.1;
+}
+
+.pay-status-icon {
+  font-size: 15px;
+}
+
+.pay-card-val {
+  font-family: var(--font-brand, 'Outfit', sans-serif);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.pay-card-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  margin-top: 6px;
+}
+
+.pay-card-due-label {
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.pay-card-due-val {
+  font-family: var(--font-brand, 'Outfit', sans-serif);
+  font-size: 14.5px;
+  font-weight: 900;
 }
 
 .pill-section-badge {

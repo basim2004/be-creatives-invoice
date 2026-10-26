@@ -406,6 +406,7 @@
               <button type="button" class="filter-pill active" data-filter="ALL">All</button>
               <button type="button" class="filter-pill" data-filter="PAID">Paid</button>
               <button type="button" class="filter-pill" data-filter="PENDING">Pending</button>
+              <button type="button" class="filter-pill" data-filter="UNPAID">Unpaid</button>
             </div>
           </div>
         </div>
@@ -896,11 +897,33 @@
                   <select id="selectInvoiceStatus">
                     <option value="PAID">PAID</option>
                     <option value="PENDING">PENDING</option>
+                    <option value="UNPAID">UNPAID</option>
                   </select>
                 </div>
               </div>
 
               <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label for="inputAmountReceived">Amount Received (₹)</label>
+                  <input type="number" id="inputAmountReceived" min="0" placeholder="e.g. 3500">
+                </div>
+
+                <div class="form-group">
+                  <label>Balance Due</label>
+                  <div id="editorBalanceDueDisplay" style="font-family: var(--font-brand); font-size: 1.15rem; font-weight: 800; color: #127236; padding: 7px 0;">
+                    ₹0
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-grid-2" style="margin-top: 10px;">
+                <div class="form-group">
+                  <label class="toggle-switch-label">
+                    <input type="checkbox" id="toggleShowPaymentStatusBox" checked>
+                    <span>Show Payment Status Box on Invoice</span>
+                  </label>
+                </div>
+
                 <div class="form-group">
                   <label class="toggle-switch-label">
                     <input type="checkbox" id="toggleDueDate">
@@ -908,11 +931,11 @@
                   </label>
                   <input type="text" id="inputInvoiceDueDate" placeholder="e.g. 26-09-2026" style="margin-top:4px; display:none;">
                 </div>
+              </div>
 
-                <div class="form-group">
-                  <label for="inputCurrencySymbol">Currency</label>
-                  <input type="text" id="inputCurrencySymbol" value="₹" placeholder="₹">
-                </div>
+              <div class="form-group" style="margin-top: 10px;">
+                <label for="inputCurrencySymbol">Currency</label>
+                <input type="text" id="inputCurrencySymbol" value="₹" placeholder="₹">
               </div>
             </div>
           </div>
@@ -1357,7 +1380,7 @@
                 </div>
               </div>
 
-              <!-- 4. DELIVERABLES & WEBSITE LINKS (TWO COLUMNS) -->
+              <!-- 4. DELIVERABLES & PAYMENT STATUS / WEBSITE LINKS (TWO COLUMNS) -->
               <div class="master-middle-grid" id="sheetMiddleGrid">
                 <!-- Left: Deliverables -->
                 <div class="middle-col-deliverables" id="sheetDeliverablesCol">
@@ -1367,11 +1390,35 @@
                   </div>
                 </div>
 
-                <!-- Right: Website Links -->
-                <div class="middle-col-links" id="sheetWebsitesBlock">
-                  <div class="pill-section-badge">WEBSITE LINKS</div>
-                  <div class="website-links-sheet-list" id="sheetWebsiteLinksList">
-                    <!-- Dynamic clickable website cards -->
+                <!-- Right: Payment Status & Website Links -->
+                <div class="middle-col-right" id="sheetMiddleRightCol">
+                  <!-- Dynamic Payment Status Box (Paid / Pending / Unpaid) -->
+                  <div class="sheet-payment-status-card paid" id="sheetPaymentStatusCard">
+                    <div class="pay-card-top-row">
+                      <div class="pay-card-col">
+                        <span class="pay-card-label">Payment Status</span>
+                        <div class="pay-card-status" id="sheetPayStatusBadge">
+                          <span class="pay-status-name" id="sheetPayStatusName">PAID</span>
+                          <i class="fa-solid fa-circle-check pay-status-icon" id="sheetPayStatusIcon"></i>
+                        </div>
+                      </div>
+                      <div class="pay-card-col pay-card-col-received">
+                        <span class="pay-card-label">Amount Received</span>
+                        <div class="pay-card-val" id="sheetAmountReceivedVal">₹3,500</div>
+                      </div>
+                    </div>
+                    <div class="pay-card-bottom-row">
+                      <span class="pay-card-due-label">Balance Due</span>
+                      <span class="pay-card-due-val" id="sheetBalanceDueVal">₹0</span>
+                    </div>
+                  </div>
+
+                  <!-- Website Links -->
+                  <div class="middle-col-links" id="sheetWebsitesBlock">
+                    <div class="pill-section-badge">WEBSITE LINKS</div>
+                    <div class="website-links-sheet-list" id="sheetWebsiteLinksList">
+                      <!-- Dynamic clickable website cards -->
+                    </div>
                   </div>
                 </div>
               </div>

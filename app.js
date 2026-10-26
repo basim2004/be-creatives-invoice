@@ -50,6 +50,9 @@
     dueDate: '',
     showDueDate: false,
     status: 'PAID',
+    amountReceived: 3500,
+    balanceDue: 0,
+    showPaymentStatusBox: true,
     currency: '₹',
     client: {
       name: 'ALAM ENGAZ',
@@ -382,6 +385,9 @@
     inputInvoiceNumber: document.getElementById('inputInvoiceNumber'),
     inputInvoiceDate: document.getElementById('inputInvoiceDate'),
     selectInvoiceStatus: document.getElementById('selectInvoiceStatus'),
+    inputAmountReceived: document.getElementById('inputAmountReceived'),
+    editorBalanceDueDisplay: document.getElementById('editorBalanceDueDisplay'),
+    toggleShowPaymentStatusBox: document.getElementById('toggleShowPaymentStatusBox'),
     toggleDueDate: document.getElementById('toggleDueDate'),
     inputInvoiceDueDate: document.getElementById('inputInvoiceDueDate'),
     inputCurrencySymbol: document.getElementById('inputCurrencySymbol'),
@@ -442,6 +448,13 @@
     deliverablesCol: document.getElementById('sheetDeliverablesCol'),
     deliverablesList: document.getElementById('sheetDeliverablesList'),
     middleGrid: document.getElementById('sheetMiddleGrid') || document.querySelector('.master-middle-grid'),
+    middleRightCol: document.getElementById('sheetMiddleRightCol'),
+    paymentStatusCard: document.getElementById('sheetPaymentStatusCard'),
+    payStatusBadge: document.getElementById('sheetPayStatusBadge'),
+    payStatusName: document.getElementById('sheetPayStatusName'),
+    payStatusIcon: document.getElementById('sheetPayStatusIcon'),
+    amountReceivedVal: document.getElementById('sheetAmountReceivedVal'),
+    balanceDueVal: document.getElementById('sheetBalanceDueVal'),
     websitesBlock: document.getElementById('sheetWebsitesBlock') || document.querySelector('.middle-col-links'),
     websitesList: document.getElementById('sheetWebsiteLinksList') || document.getElementById('sheetWebsitesList'),
     subtotal: document.getElementById('sheetSubtotal'),
@@ -1453,7 +1466,7 @@
           <td><span style="font-size:0.84rem; color:var(--slate-600); white-space:nowrap;">${inv.date || ''}</span></td>
           <td style="text-align:right;"><span class="table-amount">${formattedTotal}</span></td>
           <td style="text-align:center;">
-            <button type="button" class="status-badge ${isPaid ? 'paid' : 'pending'}" data-action="toggle-status" data-id="${inv.id}">
+            <button type="button" class="status-badge ${isPaid ? 'paid' : (inv.status === 'UNPAID' ? 'unpaid' : 'pending')}" data-action="toggle-status" data-id="${inv.id}">
               <span class="status-dot"></span>
               <span>${inv.status}</span>
             </button>
@@ -1475,7 +1488,7 @@
         <div class="mobile-inv-card" data-id="${inv.id}">
           <div class="mobile-card-top">
             <span class="mobile-card-number">${inv.invoiceNumber}</span>
-            <button type="button" class="status-badge ${isPaid ? 'paid' : 'pending'}" data-action="toggle-status" data-id="${inv.id}">
+            <button type="button" class="status-badge ${isPaid ? 'paid' : (inv.status === 'UNPAID' ? 'unpaid' : 'pending')}" data-action="toggle-status" data-id="${inv.id}">
               <span class="status-dot"></span>
               <span>${inv.status}</span>
             </button>
@@ -1668,7 +1681,7 @@
             <td>${inv.date || ''}</td>
             <td>${escapeHtml(inv.items?.[0]?.title || '')}</td>
             <td style="text-align:right; font-weight:700;">${formatCurrency(inv.total || inv.amount || 0)}</td>
-            <td style="text-align:center;"><span class="status-badge ${inv.status === 'PAID' ? 'paid' : 'pending'}">${inv.status}</span></td>
+            <td style="text-align:center;"><span class="status-badge ${inv.status === 'PAID' ? 'paid' : (inv.status === 'UNPAID' ? 'unpaid' : 'pending')}">${inv.status}</span></td>
             <td style="text-align:center;">
               <button type="button" class="btn btn-outline btn-sm" data-action="view" data-id="${inv.id}"><i class="fa-solid fa-eye"></i> View</button>
             </td>
@@ -2758,6 +2771,9 @@
       dueDate: '',
       showDueDate: false,
       status: 'PAID',
+      amountReceived: 2500,
+      balanceDue: 0,
+      showPaymentStatusBox: true,
       currency: '₹',
       client: { ...clientData },
       items: [
@@ -2922,6 +2938,58 @@
       `).join('');
     }
 
+    // Payment Status Card on Live A4 Sheet
+    const showPayBox = ed.toggleShowPaymentStatusBox ? ed.toggleShowPaymentStatusBox.checked : true;
+    let amtReceivedRaw = ed.inputAmountReceived ? ed.inputAmountReceived.value : '';
+    let amtReceived = 0;
+    if (amtReceivedRaw !== '') {
+      amtReceived = Math.max(0, Number(amtReceivedRaw) || 0);
+    } else {
+      if (status === 'PAID') amtReceived = grandTotal;
+      else if (status === 'UNPAID') amtReceived = 0;
+      else amtReceived = Math.round(grandTotal / 2);
+    }
+
+    const balanceDue = Math.max(0, grandTotal - amtReceived);
+
+    if (ed.editorBalanceDueDisplay) {
+      ed.editorBalanceDueDisplay.textContent = formatCurrency(balanceDue, curr);
+      if (status === 'PAID' || balanceDue === 0) {
+        ed.editorBalanceDueDisplay.style.color = '#127236';
+      } else if (status === 'PENDING') {
+        ed.editorBalanceDueDisplay.style.color = '#c25e00';
+      } else {
+        ed.editorBalanceDueDisplay.style.color = '#c53030';
+      }
+    }
+
+    const payCardEl = document.getElementById('sheetPaymentStatusCard') || sheet.paymentStatusCard;
+    const payStatusNameEl = document.getElementById('sheetPayStatusName') || sheet.payStatusName;
+    const payStatusIconEl = document.getElementById('sheetPayStatusIcon') || sheet.payStatusIcon;
+    const amtReceivedEl = document.getElementById('sheetAmountReceivedVal') || sheet.amountReceivedVal;
+    const balanceDueEl = document.getElementById('sheetBalanceDueVal') || sheet.balanceDueVal;
+
+    if (payCardEl) {
+      if (showPayBox) {
+        payCardEl.style.display = 'block';
+        payCardEl.className = 'sheet-payment-status-card ' + status.toLowerCase();
+        if (payStatusNameEl) payStatusNameEl.textContent = status;
+        if (payStatusIconEl) {
+          if (status === 'PAID') {
+            payStatusIconEl.className = 'fa-solid fa-circle-check pay-status-icon';
+          } else if (status === 'PENDING') {
+            payStatusIconEl.className = 'fa-solid fa-clock pay-status-icon';
+          } else {
+            payStatusIconEl.className = 'fa-solid fa-circle-xmark pay-status-icon';
+          }
+        }
+        if (amtReceivedEl) amtReceivedEl.textContent = formatCurrency(amtReceived, curr);
+        if (balanceDueEl) balanceDueEl.textContent = formatCurrency(balanceDue, curr);
+      } else {
+        payCardEl.style.display = 'none';
+      }
+    }
+
     // Website Links & Middle Grid
     const linksEl = document.getElementById('sheetWebsiteLinksList') || sheet.websitesList;
     const linksCol = document.getElementById('sheetWebsitesBlock') || document.querySelector('.middle-col-links');
@@ -2929,7 +2997,6 @@
     if (linksEl && linksCol) {
       if (websiteLinks.length > 0) {
         linksCol.style.display = 'block';
-        if (midGrid) midGrid.classList.remove('no-links');
         linksEl.innerHTML = websiteLinks.map(l => `
           <a href="${escapeHtml(l.url)}" target="_blank" class="master-website-card" rel="noopener noreferrer">
             <span class="site-card-title">${escapeHtml(l.title)}</span>
@@ -2938,8 +3005,16 @@
         `).join('');
       } else {
         linksCol.style.display = 'none';
-        if (midGrid) midGrid.classList.add('no-links');
         linksEl.innerHTML = '';
+      }
+    }
+
+    if (midGrid) {
+      const hasRightContent = showPayBox || websiteLinks.length > 0;
+      if (hasRightContent) {
+        midGrid.classList.remove('no-links-no-pay', 'single-col');
+      } else {
+        midGrid.classList.add('no-links-no-pay', 'single-col');
       }
     }
 
@@ -3099,6 +3174,21 @@
     ed.inputInvoiceNumber.value = inv.invoiceNumber || '';
     ed.inputInvoiceDate.value = inv.date || '';
     ed.selectInvoiceStatus.value = inv.status || 'PAID';
+    if (ed.toggleShowPaymentStatusBox) {
+      ed.toggleShowPaymentStatusBox.checked = inv.showPaymentStatusBox !== false;
+    }
+    const invTot = inv.total || 0;
+    let rec = inv.amountReceived;
+    if (rec === undefined || rec === null) {
+      rec = (inv.status === 'PAID') ? invTot : ((inv.status === 'UNPAID') ? 0 : Math.round(invTot / 2));
+    }
+    if (ed.inputAmountReceived) {
+      ed.inputAmountReceived.value = rec;
+    }
+    const initBal = Math.max(0, invTot - rec);
+    if (ed.editorBalanceDueDisplay) {
+      ed.editorBalanceDueDisplay.textContent = formatCurrency(initBal, inv.currency || '₹');
+    }
     ed.toggleDueDate.checked = Boolean(inv.showDueDate);
     ed.inputInvoiceDueDate.value = inv.dueDate || '';
     ed.inputInvoiceDueDate.style.display = inv.showDueDate ? 'block' : 'none';
@@ -3297,6 +3387,9 @@
       monthHeader: invMonth,
       year: invYr,
       status: ed.selectInvoiceStatus.value,
+      amountReceived: Math.max(0, Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0)),
+      balanceDue: Math.max(0, total - Math.max(0, Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0))),
+      showPaymentStatusBox: ed.toggleShowPaymentStatusBox ? ed.toggleShowPaymentStatusBox.checked : true,
       showDueDate: ed.toggleDueDate.checked,
       dueDate: ed.inputInvoiceDueDate.value.trim(),
       currency: ed.inputCurrencySymbol.value.trim() || '₹',
@@ -3672,7 +3765,19 @@
       } else if (action === 'delete') {
         handleDeleteInvoice(id);
       } else if (action === 'toggle-status') {
-        targetInv.status = targetInv.status === 'PAID' ? 'PENDING' : 'PAID';
+        const nextStatus = targetInv.status === 'PAID' ? 'PENDING' : (targetInv.status === 'PENDING' ? 'UNPAID' : 'PAID');
+        targetInv.status = nextStatus;
+        const tot = Number(targetInv.total || targetInv.amount || 0);
+        if (nextStatus === 'PAID') {
+          targetInv.amountReceived = tot;
+          targetInv.balanceDue = 0;
+        } else if (nextStatus === 'UNPAID') {
+          targetInv.amountReceived = 0;
+          targetInv.balanceDue = tot;
+        } else {
+          targetInv.amountReceived = Math.round(tot / 2);
+          targetInv.balanceDue = Math.max(0, tot - targetInv.amountReceived);
+        }
         saveInvoices();
         renderInvoices();
         updateDashboard();
@@ -4114,7 +4219,43 @@
 
     if (ed.inputInvoiceNumber) ed.inputInvoiceNumber.addEventListener('input', syncLivePreview);
     if (ed.inputInvoiceDate) ed.inputInvoiceDate.addEventListener('input', syncLivePreview);
-    if (ed.selectInvoiceStatus) ed.selectInvoiceStatus.addEventListener('change', syncLivePreview);
+    if (ed.selectInvoiceStatus) {
+      ed.selectInvoiceStatus.addEventListener('change', () => {
+        const st = ed.selectInvoiceStatus.value;
+        const items = collectItems();
+        let sub = 0; items.forEach(i => sub += (Number(i.amount) || 0));
+        const disc = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
+        const tot = Math.max(0, sub - disc);
+        if (st === 'PAID') {
+          if (ed.inputAmountReceived) ed.inputAmountReceived.value = tot;
+        } else if (st === 'UNPAID') {
+          if (ed.inputAmountReceived) ed.inputAmountReceived.value = 0;
+        }
+        syncLivePreview();
+      });
+    }
+
+    if (ed.inputAmountReceived) {
+      ed.inputAmountReceived.addEventListener('input', () => {
+        const items = collectItems();
+        let sub = 0; items.forEach(i => sub += (Number(i.amount) || 0));
+        const disc = Math.max(0, Number(ed.inputDiscountAmount.value) || 0);
+        const tot = Math.max(0, sub - disc);
+        const val = Number(ed.inputAmountReceived.value) || 0;
+        if (val >= tot && tot > 0) {
+          ed.selectInvoiceStatus.value = 'PAID';
+        } else if (val === 0) {
+          if (ed.selectInvoiceStatus.value === 'PAID') ed.selectInvoiceStatus.value = 'UNPAID';
+        } else {
+          ed.selectInvoiceStatus.value = 'PENDING';
+        }
+        syncLivePreview();
+      });
+    }
+
+    if (ed.toggleShowPaymentStatusBox) {
+      ed.toggleShowPaymentStatusBox.addEventListener('change', syncLivePreview);
+    }
     if (ed.toggleDueDate) {
       ed.toggleDueDate.addEventListener('change', () => {
         ed.inputInvoiceDueDate.style.display = ed.toggleDueDate.checked ? 'block' : 'none';
