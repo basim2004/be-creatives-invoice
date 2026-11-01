@@ -3019,6 +3019,13 @@
     document.body.classList.add('in-editor');
     if (views.editor) views.editor.classList.add('active');
     setMobileEditorMode('form');
+
+    // Ensure core section cards are expanded so items and forms are immediately visible
+    const itemsCard = document.querySelector('.form-card[data-section="items-table"]');
+    if (itemsCard) itemsCard.classList.remove('collapsed');
+    const projCard = document.querySelector('.form-card[data-section="project-details"]');
+    if (projCard) projCard.classList.remove('collapsed');
+
     setTimeout(() => {
       if (typeof applyZoom === 'function') applyZoom('fit');
     }, 50);
@@ -3717,10 +3724,11 @@
     });
 
     ed.itemsList.appendChild(row);
+    return row;
   }
 
   function addDeliverableRow(text = '') {
-    if (!ed.deliverablesList) return;
+    if (!ed.deliverablesList) return null;
     const row = document.createElement('div');
     row.className = 'deliverable-editor-row';
     row.style.display = 'flex';
@@ -3737,10 +3745,11 @@
       syncLivePreview();
     });
     ed.deliverablesList.appendChild(row);
+    return row;
   }
 
   function addWebsiteLinkRow(link = {}) {
-    if (!ed.websiteLinksList) return;
+    if (!ed.websiteLinksList) return null;
     const row = document.createElement('div');
     row.className = 'website-link-row';
     row.dataset.id = link.id || ('link_' + Math.random());
@@ -3761,6 +3770,7 @@
       syncLivePreview();
     });
     ed.websiteLinksList.appendChild(row);
+    return row;
   }
 
   // Save Current Invoice
@@ -4739,10 +4749,76 @@
     if (ed.inputCurrencySymbol) ed.inputCurrencySymbol.addEventListener('input', syncLivePreview);
     if (ed.inputDiscountAmount) ed.inputDiscountAmount.addEventListener('input', syncLivePreview);
 
-    if (ed.btnAddItem) ed.btnAddItem.addEventListener('click', () => { addItemRow(); syncLivePreview(); });
-    if (ed.btnAddItemSecondary) ed.btnAddItemSecondary.addEventListener('click', () => { addItemRow(); syncLivePreview(); });
-    if (ed.btnAddDeliverable) ed.btnAddDeliverable.addEventListener('click', () => { addDeliverableRow(); syncLivePreview(); });
-    if (ed.btnAddWebsiteLink) ed.btnAddWebsiteLink.addEventListener('click', () => { addWebsiteLinkRow(); syncLivePreview(); });
+    if (ed.btnAddItem) {
+      ed.btnAddItem.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const card = ed.btnAddItem.closest('.form-card');
+        if (card) card.classList.remove('collapsed');
+        const row = addItemRow();
+        syncLivePreview();
+        if (row) {
+          setTimeout(() => {
+            const inp = row.querySelector('.item-title-input');
+            if (inp) {
+              inp.focus();
+              inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 40);
+        }
+      });
+    }
+
+    if (ed.btnAddItemSecondary) {
+      ed.btnAddItemSecondary.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const card = ed.btnAddItemSecondary.closest('.form-card');
+        if (card) card.classList.remove('collapsed');
+        const row = addItemRow();
+        syncLivePreview();
+        if (row) {
+          setTimeout(() => {
+            const inp = row.querySelector('.item-title-input');
+            if (inp) {
+              inp.focus();
+              inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 40);
+        }
+      });
+    }
+
+    if (ed.btnAddDeliverable) {
+      ed.btnAddDeliverable.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const card = ed.btnAddDeliverable.closest('.form-card');
+        if (card) card.classList.remove('collapsed');
+        const row = addDeliverableRow();
+        syncLivePreview();
+        if (row) {
+          setTimeout(() => {
+            const inp = row.querySelector('.deliverable-input');
+            if (inp) {
+              inp.focus();
+              inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 40);
+        }
+      });
+    }
+
+    if (ed.btnAddWebsiteLink) {
+      ed.btnAddWebsiteLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const card = ed.btnAddWebsiteLink.closest('.form-card');
+        if (card) card.classList.remove('collapsed');
+        const row = addWebsiteLinkRow();
+        syncLivePreview();
+      });
+    }
 
     // Payment fields live sync
     [

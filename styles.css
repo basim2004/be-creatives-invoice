@@ -824,6 +824,13 @@ a {
   background: var(--slate-50);
 }
 
+.header-action-btn {
+  position: relative;
+  z-index: 5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .collapse-icon {
   font-size: 0.86rem;
   color: var(--slate-400);
