@@ -592,6 +592,8 @@
     inputClientPhone: document.getElementById('inputClientPhone'),
     inputClientAddress: document.getElementById('inputClientAddress'),
     inputClientEmail: document.getElementById('inputClientEmail'),
+    inputProjectName: document.getElementById('inputProjectName'),
+    inputProjectSubtitle: document.getElementById('inputProjectSubtitle'),
     itemsList: document.getElementById('itemsEditorList'),
     btnAddItem: document.getElementById('btnAddItemBtn'),
     btnAddItemSecondary: document.getElementById('btnAddItemBtnSecondary'),
@@ -638,6 +640,8 @@
     invoiceDueDate: document.getElementById('sheetInvoiceDueDate'),
     clientName: document.getElementById('sheetClientName'),
     clientSubdetails: document.getElementById('sheetClientSubdetails'),
+    projectTitle: document.getElementById('sheetProjectTitle'),
+    projectSubtitle: document.getElementById('sheetProjectSubtitle'),
     itemsTableBody: document.getElementById('sheetItemsTableBody'),
     totalPayable: document.getElementById('sheetTotalPayable'),
     grandTotal: document.getElementById('sheetTotalPayable') || document.getElementById('sheetGrandTotal'),
@@ -1611,7 +1615,7 @@
         const q = invSearchQuery.toLowerCase().trim();
         const nMatch = (inv.invoiceNumber || '').toLowerCase().includes(q);
         const cMatch = (inv.client?.name || '').toLowerCase().includes(q);
-        const dMatch = (inv.items?.[0]?.title || '').toLowerCase().includes(q);
+        const dMatch = (inv.projectName || inv.items?.[0]?.title || '').toLowerCase().includes(q);
         if (!nMatch && !cMatch && !dMatch) return false;
       }
 
@@ -1689,7 +1693,7 @@
     pageItems.forEach(inv => {
       const isPaid = inv.status === 'PAID';
       const formattedTotal = formatCurrency(inv.total || inv.amount || 0, inv.currency || '₹');
-      const serviceDesc = inv.items?.[0]?.title || 'Agency Service';
+      const serviceDesc = inv.projectName || inv.items?.[0]?.title || 'Agency Service';
       const clientName = inv.client?.name || 'Untitled Client';
 
       tableHtml += `
@@ -1915,7 +1919,7 @@
           <tr>
             <td><strong>${inv.invoiceNumber}</strong></td>
             <td>${inv.date || ''}</td>
-            <td>${escapeHtml(inv.items?.[0]?.title || '')}</td>
+            <td>${escapeHtml(inv.projectName || inv.items?.[0]?.title || '')}</td>
             <td style="text-align:right; font-weight:700;">${formatCurrency(inv.total || inv.amount || 0)}</td>
             <td style="text-align:center;"><span class="status-badge ${inv.status === 'PAID' ? 'paid' : (inv.status === 'UNPAID' ? 'unpaid' : 'pending')}">${inv.status}</span></td>
             <td style="text-align:center;">
@@ -3037,6 +3041,8 @@
       isoDate: today.toISOString().slice(0, 10),
       monthHeader: monthName,
       year: today.getFullYear(),
+      projectName: 'AI PROMOTIONAL VIDEO',
+      projectSubtitle: 'Monthly Social Media Marketing Support',
       dueDate: '',
       showDueDate: false,
       status: 'PAID',
@@ -3180,12 +3186,21 @@
     const projTitleEl = document.getElementById('sheetProjectTitle');
     const projSubEl = document.getElementById('sheetProjectSubtitle');
     if (projTitleEl) {
-      const pTitle = (currentInvoice && currentInvoice.details) ? currentInvoice.details : (items[0] && items[0].title ? items[0].title : 'AI PROMOTIONAL VIDEO');
+      const pTitle = (ed.inputProjectName && ed.inputProjectName.value.trim())
+        ? ed.inputProjectName.value.trim()
+        : ((currentInvoice && (currentInvoice.projectName || currentInvoice.details))
+            ? (currentInvoice.projectName || currentInvoice.details)
+            : 'AI PROMOTIONAL VIDEO');
       projTitleEl.textContent = pTitle;
     }
     if (projSubEl) {
-      const pSub = (items[0] && items[0].subtitle) ? items[0].subtitle : (deliverables[0] || 'Monthly Social Media Marketing Support');
+      const pSub = (ed.inputProjectSubtitle && ed.inputProjectSubtitle.value.trim() !== '')
+        ? ed.inputProjectSubtitle.value.trim()
+        : ((currentInvoice && currentInvoice.projectSubtitle !== undefined)
+            ? currentInvoice.projectSubtitle
+            : (deliverables[0] || 'Monthly Social Media Marketing Support'));
       projSubEl.textContent = pSub;
+      projSubEl.style.display = pSub ? 'block' : 'none';
     }
 
     // Dynamic Delivery Details Card
@@ -3564,6 +3579,13 @@
     ed.inputClientAddress.value = inv.client?.address || '';
     ed.inputClientEmail.value = inv.client?.email || '';
 
+    if (ed.inputProjectName) {
+      ed.inputProjectName.value = inv.projectName || (inv.details && !inv.items ? inv.details : 'AI PROMOTIONAL VIDEO');
+    }
+    if (ed.inputProjectSubtitle) {
+      ed.inputProjectSubtitle.value = inv.projectSubtitle !== undefined ? inv.projectSubtitle : 'Monthly Social Media Marketing Support';
+    }
+
     // Render item rows
     if (ed.itemsList) {
       ed.itemsList.innerHTML = '';
@@ -3764,6 +3786,8 @@
       date: dateStr,
       monthHeader: invMonth,
       year: invYr,
+      projectName: ed.inputProjectName ? ed.inputProjectName.value.trim() : (currentInvoice.projectName || 'AI PROMOTIONAL VIDEO'),
+      projectSubtitle: ed.inputProjectSubtitle ? ed.inputProjectSubtitle.value.trim() : (currentInvoice.projectSubtitle || ''),
       status: ed.selectInvoiceStatus.value,
       amountReceived: Math.max(0, Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0)),
       balanceDue: Math.max(0, total - Math.max(0, Number(ed.inputAmountReceived ? ed.inputAmountReceived.value : 0))),
@@ -4184,7 +4208,7 @@
           `"${i.date || ''}"`,
           i.total || i.amount || 0,
           `"${i.status}"`,
-          `"${(i.items?.[0]?.title || '').replace(/"/g, '""')}"`
+          `"${(i.projectName || i.items?.[0]?.title || '').replace(/"/g, '""')}"`
         ]);
         const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -4602,6 +4626,8 @@
     if (ed.inputClientPhone) ed.inputClientPhone.addEventListener('input', syncLivePreview);
     if (ed.inputClientAddress) ed.inputClientAddress.addEventListener('input', syncLivePreview);
     if (ed.inputClientEmail) ed.inputClientEmail.addEventListener('input', syncLivePreview);
+    if (ed.inputProjectName) ed.inputProjectName.addEventListener('input', syncLivePreview);
+    if (ed.inputProjectSubtitle) ed.inputProjectSubtitle.addEventListener('input', syncLivePreview);
 
     if (ed.inputInvoiceNumber) ed.inputInvoiceNumber.addEventListener('input', syncLivePreview);
     if (ed.inputInvoiceDate) ed.inputInvoiceDate.addEventListener('input', syncLivePreview);

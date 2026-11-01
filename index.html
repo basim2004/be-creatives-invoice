@@ -28,11 +28,11 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Master Stylesheet with Fresh Version Hash -->
-  <link rel="stylesheet" href="style.css?v=20261026_11">
+  <link rel="stylesheet" href="style.css?v=20261101_01">
   
   <script>
     // Force clear any legacy PWA service worker and Cache Storage
-    const APP_BUILD_REV = '20261026_11';
+    const APP_BUILD_REV = '20261101_01';
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
@@ -1028,6 +1028,39 @@
                   <label for="inputClientEmail">Email (Optional)</label>
                   <input type="email" id="inputClientEmail" placeholder="e.g. contact@alamengaz.com">
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2B: Project Details (PROJECT) -->
+          <div class="form-card collapsible" data-section="project-details">
+            <div class="form-card-header" role="button" tabindex="0" title="Click to collapse / expand">
+              <div class="header-left">
+                <i class="fa-solid fa-briefcase card-icon"></i>
+                <h3>Project Details (PROJECT)</h3>
+              </div>
+              <i class="fa-solid fa-chevron-down collapse-icon"></i>
+            </div>
+
+            <div class="form-card-body">
+              <div class="form-group">
+                <label for="inputProjectName">Project Name / Title <span class="required">*</span></label>
+                <input type="text" id="inputProjectName" list="projectNamePresets" value="AI PROMOTIONAL VIDEO" placeholder="e.g. AI PROMOTIONAL VIDEO, BRAND IDENTITY..." required autocomplete="off">
+                <datalist id="projectNamePresets">
+                  <option value="AI PROMOTIONAL VIDEO">
+                  <option value="Brand Identity & Creative Design">
+                  <option value="Social Media Marketing Support">
+                  <option value="Website Design & Development">
+                  <option value="Corporate Portal & Automation">
+                  <option value="Video Production & Motion Graphics">
+                  <option value="Packaging & Graphic Design">
+                  <option value="Digital Advertising Campaign">
+                </datalist>
+              </div>
+
+              <div class="form-group" style="margin-top: 10px;">
+                <label for="inputProjectSubtitle">Project Subtitle / Scope (Optional)</label>
+                <input type="text" id="inputProjectSubtitle" value="Monthly Social Media Marketing Support" placeholder="e.g. Monthly Social Media Marketing Support, Brand Guidelines...">
               </div>
             </div>
           </div>
@@ -2316,6 +2349,6 @@
   </script>
 
   <!-- Master Application Logic with Cache-Busting Version Hash -->
-  <script src="script.js?v=20261026_11"></script>
+  <script src="script.js?v=20261101_01"></script>
 </body>
 </html>
