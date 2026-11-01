@@ -28,11 +28,11 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Master Stylesheet with Fresh Version Hash -->
-  <link rel="stylesheet" href="style.css?v=20261101_01">
+  <link rel="stylesheet" href="style.css?v=20261101_02">
   
   <script>
     // Force clear any legacy PWA service worker and Cache Storage
-    const APP_BUILD_REV = '20261101_01';
+    const APP_BUILD_REV = '20261101_02';
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
@@ -1597,6 +1597,7 @@
 
                 <div class="ref-qr-box-wrap" id="sheetQrCol">
                   <div class="ref-qr-frame">
+                    <img id="sheetCustomQrImg" class="sheet-custom-qr-img" src="" alt="Payment QR" style="display: none;">
                     <div class="master-qr-box" id="sheetDynamicQrBox"></div>
                     <div class="qr-center-gpay-badge" id="sheetQrCenterBadge">
                       <img src="assets/gpay-logo.svg" alt="GPay">
@@ -2349,6 +2350,6 @@
   </script>
 
   <!-- Master Application Logic with Cache-Busting Version Hash -->
-  <script src="script.js?v=20261101_01"></script>
+  <script src="script.js?v=20261101_02"></script>
 </body>
 </html>

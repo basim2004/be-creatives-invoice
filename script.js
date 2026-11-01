@@ -673,6 +673,7 @@
     qrCodeWrap: document.getElementById('sheetQrCol') || document.getElementById('sheetQrCodeWrap'),
     dynamicQrBox: document.getElementById('sheetDynamicQrBox'),
     customQrImg: document.getElementById('sheetCustomQrImg'),
+    qrCenterBadge: document.getElementById('sheetQrCenterBadge'),
     qrCaption: document.getElementById('sheetQrCaption'),
     payeeName: document.getElementById('sheetAccountName') || document.getElementById('sheetPayeeName'),
     bankName: document.getElementById('sheetBankName'),
@@ -3442,19 +3443,27 @@
     if (qrCol) qrCol.style.display = showQr ? 'flex' : 'none';
 
     if (showQr) {
-      if (ed.qrModeUpload.checked && ed.uploadedQrPreviewImg && ed.uploadedQrPreviewImg.src) {
-        if (sheet.customQrImg) {
-          sheet.customQrImg.src = ed.uploadedQrPreviewImg.src;
-          sheet.customQrImg.style.display = 'block';
+      const customImgEl = document.getElementById('sheetCustomQrImg') || sheet.customQrImg;
+      const dynBoxEl = document.getElementById('sheetDynamicQrBox') || sheet.dynamicQrBox;
+      const qrCenterBadge = document.getElementById('sheetQrCenterBadge') || sheet.qrCenterBadge;
+
+      const hasCustomUpload = ed.qrModeUpload && ed.qrModeUpload.checked && ed.uploadedQrPreviewImg && ed.uploadedQrPreviewImg.src && !ed.uploadedQrPreviewImg.src.endsWith('/') && ed.uploadedQrPreviewImg.style.display !== 'none';
+
+      if (hasCustomUpload) {
+        if (customImgEl) {
+          customImgEl.src = ed.uploadedQrPreviewImg.src;
+          customImgEl.style.display = 'block';
         }
-        if (sheet.dynamicQrBox) sheet.dynamicQrBox.style.display = 'none';
+        if (dynBoxEl) dynBoxEl.style.display = 'none';
+        if (qrCenterBadge) qrCenterBadge.style.display = 'none';
       } else {
-        if (sheet.customQrImg) sheet.customQrImg.style.display = 'none';
-        if (sheet.dynamicQrBox) {
-          sheet.dynamicQrBox.style.display = 'flex';
-          const payeeForQr = ed.inputQrPayeeName.value.trim() || payee || 'BASIM ASLAM P';
+        if (customImgEl) customImgEl.style.display = 'none';
+        if (dynBoxEl) {
+          dynBoxEl.style.display = 'flex';
+          const payeeForQr = ed.inputQrPayeeName ? (ed.inputQrPayeeName.value.trim() || payee || 'BASIM ASLAM P') : (payee || 'BASIM ASLAM P');
           renderDynamicUpiQr(grandTotal, upiForQr, payeeForQr);
         }
+        if (qrCenterBadge) qrCenterBadge.style.display = 'flex';
       }
     }
   }
@@ -3629,6 +3638,7 @@
       if (p.customQrUrl && ed.uploadedQrPreviewImg) {
         ed.uploadedQrPreviewImg.src = p.customQrUrl;
         ed.uploadedQrPreviewImg.style.display = 'block';
+        if (ed.btnRemoveUploadedQr) ed.btnRemoveUploadedQr.style.display = 'inline-flex';
       }
     } else {
       ed.qrModeGenerate.checked = true;
@@ -4772,12 +4782,44 @@
         if (!file) return;
         const reader = new FileReader();
         reader.onload = ev => {
-          if (ed.uploadedQrPreviewImg) {
-            ed.uploadedQrPreviewImg.src = ev.target.result;
-            ed.uploadedQrPreviewImg.style.display = 'block';
-          }
-          if (ed.btnRemoveUploadedQr) ed.btnRemoveUploadedQr.style.display = 'inline-flex';
-          syncLivePreview();
+          const rawDataUrl = ev.target.result;
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 500;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const optimizedUrl = canvas.toDataURL('image/png');
+
+            if (ed.uploadedQrPreviewImg) {
+              ed.uploadedQrPreviewImg.src = optimizedUrl;
+              ed.uploadedQrPreviewImg.style.display = 'block';
+            }
+            if (ed.btnRemoveUploadedQr) ed.btnRemoveUploadedQr.style.display = 'inline-flex';
+            syncLivePreview();
+          };
+          img.onerror = () => {
+            if (ed.uploadedQrPreviewImg) {
+              ed.uploadedQrPreviewImg.src = rawDataUrl;
+              ed.uploadedQrPreviewImg.style.display = 'block';
+            }
+            if (ed.btnRemoveUploadedQr) ed.btnRemoveUploadedQr.style.display = 'inline-flex';
+            syncLivePreview();
+          };
+          img.src = rawDataUrl;
         };
         reader.readAsDataURL(file);
       });
@@ -4791,6 +4833,11 @@
         }
         if (ed.inputUploadQrFile) ed.inputUploadQrFile.value = '';
         ed.btnRemoveUploadedQr.style.display = 'none';
+        const customImgEl = document.getElementById('sheetCustomQrImg') || sheet.customQrImg;
+        if (customImgEl) {
+          customImgEl.src = '';
+          customImgEl.style.display = 'none';
+        }
         syncLivePreview();
       });
     }
